@@ -8,7 +8,7 @@ the reasoning survives the conversation it came from.
 | Concern | Choice | Main alternative(s) rejected |
 |---|---|---|
 | Build / framework | Vite + React + TypeScript (strict), single-page app | Next.js / Remix (server rendering not needed) |
-| Routing | React Router v7, data mode (`createBrowserRouter`) | TanStack Router |
+| Routing | React Router v8, data mode (`createBrowserRouter`) | TanStack Router |
 | API client | `openapi-typescript` + `openapi-fetch`, generated from the back's `openapi.yaml` | Hand-written types; Orval / generated hooks |
 | Server state | TanStack Query | `useEffect` + `useState` by hand; router loaders alone |
 | Forms | React Hook Form + Zod | TanStack Form, Formik, React 19 form actions, hand-rolled state |
@@ -19,6 +19,89 @@ the reasoning survives the conversation it came from.
 | Token storage | `sessionStorage` | `localStorage`, memory only, `HttpOnly` cookie |
 | Tests | Vitest, Testing Library, MSW, Playwright | — |
 | Lint / format | ESLint + Prettier | — |
+
+## Versions
+
+The rule is the user's: **always the latest stable version**, checked when the dependency is added (`npm view <pkg>
+version`), with a tree that resolves without `--force` or `--legacy-peer-deps`. State of play when this was written
+(October 2026, from public sources, to be re-checked at install time):
+
+The compatibility of the **whole set** was verified on 2026-10-21 in a throw-away project (Node 26.12.1, npm 11.20): the full
+tree resolves and installs, the contract's types generate, the strict type-check passes (with `skipLibCheck: true`, and
+apart from the `vitest-axe` matcher types that are replaced as described below), `vite build` succeeds, a Vitest run
+using React, Router, TanStack Query, React Hook Form + Zod, openapi-fetch, MSW, DOMPurify, Radix, dnd-kit, Lexical and an
+axe accessibility check passes, and ESLint rejects a deliberately bad file. Not exercised: Playwright against a browser
+(its version was only checked to install), Prettier, and the Lexical extension-based API. The versions below are what that project
+resolved; **re-run `npm view` when scaffolding**, since newer releases may exist by then.
+
+| Package | Version | Note |
+|---|---|---|
+| Node / npm | 26.x / 11.x | |
+| `react`, `react-dom` | 19.3.1 | Latest 19.x line; no React 20 |
+| **`typescript`** | **~6.0.3** | **7.0.2 is the latest but cannot be used yet, see below** |
+| `vite` · `@vitejs/plugin-react` | 8.3.5 · 6.1.2 | Rolldown-based Vite; plugin 6 requires Vite 8 |
+| `react-router` | 8.5.0 | v8, not v7; `createBrowserRouter` and `RouterProvider` unchanged |
+| `@tanstack/react-query` | 5.104.x | |
+| `openapi-typescript` · `openapi-fetch` | 7.13.0 · 0.17.0 | Peer range is `typescript ^5.x`, see overrides |
+| `react-hook-form` · `@hookform/resolvers` · `zod` | 7.90.0 · 6.0.0 · 4.6.7 | |
+| `lexical`, `@lexical/*` | 0.52.0 | Pre-1.0: pin the exact version |
+| `dompurify` | 3.4.x | |
+| `radix-ui` | 1.8.x | Unified package |
+| `@dnd-kit/core` · `@dnd-kit/sortable` | 6.3.1 · 10.0.0 | See note on types |
+| `tailwindcss` · `@tailwindcss/vite` | 4.3.3 | |
+| `vitest` · `@vitest/coverage-v8` | 5.0.5 | Needs Node 22.12+ / 24+ / 26+ |
+| `@testing-library/react` · `/dom` · `/user-event` · `/jest-dom` | 16.3.x · 10.x · latest · latest | |
+| `msw` | 3.0.3 | Major 3: see note |
+| `axe-core` | 4.14.x | Used directly, see note |
+| `@playwright/test` | 1.64.1 | |
+| `eslint` · `typescript-eslint` | 10.13.0 · 8.72.0 | |
+| `eslint-plugin-react-hooks` · `-jsx-a11y` · `-boundaries` | 7.1.1 · 6.10.2 · 7.2.1 | |
+| `prettier` · `prettier-plugin-tailwindcss` | 3.9.x · 0.8.x | |
+
+### Why TypeScript 6.0.3 and not 7.0.2
+
+TypeScript 7.0.2 is the latest release and, used alone, it type-checks the project fine. But two tools of the chain cannot
+use it yet: `typescript-eslint` 8.72 declares `typescript <6.1.0` as its peer range, and `openapi-typescript` crashes when
+run on TypeScript 7 (it depends on the JavaScript compiler API, which the native compiler does not provide). TypeScript
+6.0 is the last JavaScript-based release, so it is the highest version the whole chain accepts. **Revisit when
+`typescript-eslint` and `openapi-typescript` both support 7.**
+
+### `package.json` overrides (declared, not forced)
+
+Two peer ranges are stricter than reality. Both are lifted with npm's `overrides`, which keeps the install free of
+`--force` and `--legacy-peer-deps`, and each was exercised for real:
+
+```json
+"overrides": {
+  "openapi-typescript": { "typescript": "$typescript" },
+  "eslint-plugin-jsx-a11y": { "eslint": "$eslint" }
+}
+```
+
+- `openapi-typescript` declares `typescript ^5.x`; with TypeScript 6.0.3 it generates exactly the same 63 KB schema from
+  the real `openapi.yaml` as with 5.9.3.
+- `eslint-plugin-jsx-a11y` 6.10.2 (last published October 2024) declares `eslint ^9`; with ESLint 10 its rules do run
+  (a missing `alt` is reported). ESLint 9.39 is already marked unsupported, so staying on it was not an option. This is an
+  unsupported combination: if jsx-a11y ever breaks on a newer ESLint, replace it rather than pin ESLint back.
+
+### Compatibility notes found by the check
+
+- **`openapi-fetch` binds `fetch` when the client is created**, so MSW (which patches `fetch` later) is bypassed and
+  requests hit the network. Create the client with `fetch: (request) => globalThis.fetch(request)`.
+- **MSW 3 renamed `onUnhandledRequest` to `onUnhandledFrame`** in `server.listen(...)`.
+- **`@dnd-kit/core` 6.3.1 uses the global `JSX` namespace** that React 19's types removed, and
+  `@testing-library/jest-dom` types clash with Vitest 5's `Assertion` type. Both only show up with `skipLibCheck: false`;
+  keep **`skipLibCheck: true`** (Vite's default). `@dnd-kit/react` (0.5.x) is the pre-1.0 successor if the classic package
+  becomes a problem.
+- **`vitest-axe` 0.1.0 was last published in January 2025** and its matcher types do not extend Vitest 5. Use
+  **`axe-core` directly** through a small test helper (`expectNoAccessibilityViolations(container)`) instead of that wrapper.
+  Color contrast cannot be computed by jsdom (a harmless « getContext not implemented » message appears); contrast is
+  guaranteed by the design tokens.
+- **`LexicalComposer` is deprecated in Lexical 0.52** in favor of the extension-based `LexicalExtensionComposer`
+  (`@lexical/react`). Build the editor on the extension API from the start; confirm the exact import against the Lexical
+  documentation at implementation time.
+- A first `vite build` of the smoke project produced a single 777 KB chunk: plan route-level code splitting (React Router
+  lazy routes) rather than discovering it later.
 
 ## Why a single-page app
 

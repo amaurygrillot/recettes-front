@@ -69,11 +69,18 @@ Proposed routes (the reset path is fixed by the back's configuration):
 
 Each milestone ends with `npm run lint`, `npm run build` and `npm run test` green, and a commit proposal to the user.
 
-**M1 · Skeleton.** Vite + React + TypeScript (strict) generated with npm; ESLint, Prettier, Tailwind, Vitest + Testing
-Library; `.nvmrc`, `engines`, scripts (`dev`, `build`, `lint`, `test`, `api:generate`), `.gitignore` (including `.idea/`);
-the folder layout above with empty folders omitted; a `.claude/launch.json` for the dev server and a
-`.claude/settings.json` allowing the safe repetitive commands (`npm run lint|test|build`, `git status|diff|log`).
-*Done when:* `npm run dev` serves a page on 5173 and the three checks pass. Update the « Status » section of `CLAUDE.md`.
+**M1 · Skeleton and guardrails.** Vite + React + TypeScript generated with npm (versions: see
+[frontend-stack.md](frontend-stack.md#versions)); ESLint, Prettier, Tailwind, Vitest + Testing Library + an `axe-core` test helper; the two `overrides` and
+`skipLibCheck: true` documented in `frontend-stack.md`;
+`.nvmrc`, `engines`, scripts (`dev`, `build`, `lint`, `test`, `api:generate`), `.gitignore` (including `.idea/`); the
+folder layout above with empty folders omitted; a `.claude/launch.json` for the dev server and a `.claude/settings.json`
+allowing the safe repetitive commands (`npm run lint|test|build`, `git status|diff|log`).
+The **architecture is enforced by tooling from day one**, per [engineering-standards.md](engineering-standards.md):
+the strict TypeScript flags listed there; ESLint with `react-hooks`, `jsx-a11y`, `typescript-eslint` strict-type-checked,
+the import-boundary rules (screens → components → lib, `api` only used by screens), a ban on `console.*`, on `any`, and on
+`dangerouslySetInnerHTML` outside `RichTextView`. Prove the boundary rules work with a throw-away violation that fails lint.
+*Done when:* `npm run dev` serves a page on 5173, the three checks pass, and a deliberate boundary violation is rejected by
+lint. Update the « Status » section of `CLAUDE.md` and the installed versions in `frontend-stack.md`.
 
 **M2 · Theme and base components.** Tailwind theme from [design-tokens.md](design-tokens.md), self-hosted fonts, the
 `Icon` set, `Logo`, then `Button`, `Tag`, `FilterChip`, `TextField` (all states), `Skeleton`, `EmptyState`, `ErrorState`,
@@ -102,9 +109,15 @@ the `RichTextEditor` (Lexical) and `RichTextView` components first.
 
 ## Working with agents
 
-- One milestone or one screen per session. Start every session from [kickoff-prompt.md](kickoff-prompt.md).
+- **Agents are autonomous.** They decide on their own everything a competent engineer would decide (names, small structure,
+  library details within the chosen stack, how to test), write down the non-obvious ones in `docs/`, and ask the user only
+  when blocked by something they cannot resolve (back end down, a contradiction between the design and the API that changes
+  what the user sees).
+- One milestone or one screen per session. Start every session from [kickoff-prompt.md](kickoff-prompt.md); every prompt
+  makes [engineering-standards.md](engineering-standards.md) binding, including its definition of done.
 - Sessions may touch only the files of their milestone or screen, plus shared components they genuinely need. Two sessions
   never edit the same files at once.
-- A session ends with the checks green and a commit *proposed*, not made.
+- A session ends with the checks green, a self-review of its diff done, and a commit *proposed*, not made (the user's
+  standing rule is to approve commits). Nothing is ever pushed.
 - Anything learned that is not obvious from the code (hand-off behaviour, a canvas ambiguity, an API quirk) is written into
   `docs/` or `CLAUDE.md` before the session ends.

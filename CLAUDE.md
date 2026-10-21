@@ -40,11 +40,19 @@ change with it.
 
 ## Stack (decided, see [docs/frontend-stack.md](docs/frontend-stack.md))
 
-Vite · React · TypeScript (strict) · React Router v7 (data mode, `createBrowserRouter`) · TanStack Query ·
+Vite · React · TypeScript (strict) · React Router v8 (data mode, `createBrowserRouter`) · TanStack Query ·
 `openapi-typescript` + `openapi-fetch` · React Hook Form + Zod · Lexical (rich text) + DOMPurify · Tailwind CSS ·
 Radix UI primitives (unstyled, accessible) · dnd-kit · Vitest + Testing Library + MSW · Playwright · ESLint + Prettier.
 
-Do not add a library that overlaps one of these without writing the decision down in `docs/`.
+Versions: always the latest stable of each, **verified together** (see the table in
+[docs/frontend-stack.md](docs/frontend-stack.md#versions)). Notably **TypeScript is `~6.0.3`, not 7**, until
+`typescript-eslint` and `openapi-typescript` support 7, and two declared npm `overrides` lift stale peer ranges. Create the
+`openapi-fetch` client with `fetch: (request) => globalThis.fetch(request)` so MSW can intercept it. Do not add a library
+that overlaps one of these without writing the decision down in `docs/`.
+
+**Code quality is the priority of this project.** Read [docs/engineering-standards.md](docs/engineering-standards.md)
+before writing code: SRP/DRY/KISS applied to React and TypeScript, import-boundary rules enforced by lint, strict
+TypeScript with no `any` or casts, hooks for logic, tests through the accessible interface, and a definition of done.
 
 ## Code organisation
 
