@@ -1,0 +1,123 @@
+# Setup plan
+
+How the project gets from an empty repository to a first complete screen. Written so that a session with no memory of
+the discussions can execute it: every milestone has a « done when » that can be checked, and the decisions are already
+made. Update this file as milestones land.
+
+## Decisions already made
+
+- Stack: see [frontend-stack.md](frontend-stack.md). Package manager: **npm**. Node: **26**, chosen because it is about to become the LTS line (October 2026),
+  pinned in `.nvmrc` and in `engines` of `package.json`.
+- Code organisation: **by component and by screen** (below).
+- Design source of truth: the Claude Design canvas; extracted values are in [design-tokens.md](design-tokens.md).
+- Everything runs locally for now; deployment is out of scope. Back end on `http://localhost:8080` (started from the
+  user's IDE), front on `http://localhost:5173`.
+
+## Code organisation
+
+```
+src/
+  main.tsx
+  app/                      router, providers (QueryClient, auth), layouts (AppShell, tab bar, top bar)
+  screens/                  one folder per screen, named for the screen
+    HomeScreen/             HomeScreen.tsx · HomeScreen.test.tsx · strings.ts · components/ (used by this screen only)
+    SearchScreen/  RecipeScreen/  CookingScreen/  RecipeEditorScreen/ (create + edit)
+    LoginScreen/  RegisterScreen/  ForgotPasswordScreen/  ResetPasswordScreen/  AccountScreen/  NotFoundScreen/
+  components/               reusable components, one folder each (Component.tsx, test, strings.ts if it has text)
+    Button/ Tag/ FilterChip/ TextField/ RecipeCard/ PhotoSlider/ BottomSheet/ Dialog/ Toast/ Skeleton/
+    EmptyState/ ErrorState/ Avatar/ Logo/ Icon/ RichTextEditor/ RichTextView/ ...
+  api/                      generated schema, typed client, error mapping, token module, query hooks per resource
+  lib/                      logger and other small helpers with no UI
+  styles/                   index.css: Tailwind theme from design-tokens.md, fonts
+```
+
+Rules:
+
+- **A component used by one screen lives inside that screen** (`screens/X/components/`). It moves to `src/components/`
+  when a second screen needs it, not before.
+- Screens compose components and own data loading (TanStack Query hooks from `src/api`). Components in `src/components`
+  are presentational: props in, events out, no API calls.
+- `RichTextView` is the **only** place allowed to render stored HTML (it sanitises with DOMPurify first).
+- Each folder has its own tests next to the code. French text lives in the folder's `strings.ts`, tutoiement.
+- The generated `src/api/schema.d.ts` is **committed**, so the repository builds without the back-end repository next to
+  it and contract changes show up in diffs.
+
+Proposed routes (the reset path is fixed by the back's configuration):
+
+| Route | Screen | Access |
+|---|---|---|
+| `/` | HomeScreen | public |
+| `/rechercher` | SearchScreen | public |
+| `/mes-recettes` | SearchScreen, author locked to the caller | logged in |
+| `/recettes/:id` | RecipeScreen | public |
+| `/recettes/:id/pas-a-pas` | CookingScreen | public |
+| `/recettes/nouvelle` | RecipeEditorScreen (create) | logged in |
+| `/recettes/:id/modifier` | RecipeEditorScreen (edit) | author or admin |
+| `/connexion` · `/inscription` · `/mot-de-passe-oublie` | auth screens | public |
+| `/reset-password` | ResetPasswordScreen (`?token=…&email=…`) | public, **fixed path** |
+| `/compte` | AccountScreen | logged in |
+
+## Before starting
+
+1. The back end's CORS change is merged and running (allowed origin `http://localhost:5173`, `Location` and `Retry-After`
+   exposed). Without it every call from the browser fails. Check with a request from the front, not by assumption.
+2. The e-mail length alignment and the password-reset URL (`http://localhost:5173/reset-password`) are in as well.
+3. Try Claude Design's hand-off to Claude Code on **one** screen (the home page) and note in this file what it actually
+   delivers, because it decides how every later screen is implemented.
+
+## Milestones
+
+Each milestone ends with `npm run lint`, `npm run build` and `npm run test` green, and a commit proposal to the user.
+
+**M1 · Skeleton and guardrails.** Vite + React + TypeScript generated with npm (versions: see
+[frontend-stack.md](frontend-stack.md#versions)); ESLint, Prettier, Tailwind, Vitest + Testing Library + an `axe-core` test helper; the two `overrides` and
+`skipLibCheck: true` documented in `frontend-stack.md`;
+`.nvmrc`, `engines`, scripts (`dev`, `build`, `lint`, `test`, `api:generate`), `.gitignore` (including `.idea/`); the
+folder layout above with empty folders omitted; a `.claude/launch.json` for the dev server and a `.claude/settings.json`
+allowing the safe repetitive commands (`npm run lint|test|build`, `git status|diff|log`).
+The **architecture is enforced by tooling from day one**, per [engineering-standards.md](engineering-standards.md):
+the strict TypeScript flags listed there; ESLint with `react-hooks`, `jsx-a11y`, `typescript-eslint` strict-type-checked,
+the import-boundary rules (screens → components → lib, `api` only used by screens), a ban on `console.*`, on `any`, and on
+`dangerouslySetInnerHTML` outside `RichTextView`. Prove the boundary rules work with a throw-away violation that fails lint.
+*Done when:* `npm run dev` serves a page on 5173, the three checks pass, and a deliberate boundary violation is rejected by
+lint. Update the « Status » section of `CLAUDE.md` and the installed versions in `frontend-stack.md`.
+
+**M2 · Theme and base components.** Tailwind theme from [design-tokens.md](design-tokens.md), self-hosted fonts, the
+`Icon` set, `Logo`, then `Button`, `Tag`, `FilterChip`, `TextField` (all states), `Skeleton`, `EmptyState`, `ErrorState`,
+`Avatar`. A development-only `/styleguide` route displays them. *Done when:* the styleguide visibly matches the design
+system boards on a 390 px viewport (check in the browser pane) and every component has a test for its states.
+
+**M3 · API client and authentication.** `api:generate` (path to the back's `openapi.yaml`, overridable by an environment
+variable); typed `openapi-fetch` client; `problem+json` error mapping; the `text/plain` login; the token module in
+`sessionStorage`; stale-token handling on public routes; the session-expired dialog; the logger wrapper; MSW handlers for
+tests. *Done when:* a test with MSW covers login success, 401, 403, 404, 409, 429 with `Retry-After`; and a manual call to
+`GET /recipes` against the running back end returns data in the browser.
+
+**M4 · Router and shell.** `createBrowserRouter` with the routes above (placeholders for screens), protected-route
+handling, the bottom tab bar (visitor and member variants) and the top bar from 1024 px, the floating « + ».
+*Done when:* navigation works for a visitor and a logged-in user on phone and desktop widths, and a protected route
+redirects a visitor to the login screen then back.
+
+**M5 · HomeScreen end to end.** Implemented from the canvas boards listed in
+[kickoff-prompt.md](kickoff-prompt.md), against the real API: category shortcuts, recipe feed, « Voir plus »
+(infinite query), skeletons, error, empty, visitor and member variants. *Done when:* it matches the boards at 390, 768 and
+1280 px and every state is tested. **This screen is the quality template for all the others.**
+
+After M5, screens can be built independently, in separate sessions, in this order of value: SearchScreen, RecipeScreen,
+auth screens, AccountScreen, RecipeEditorScreen, CookingScreen, then admin (not yet designed). RecipeEditorScreen needs
+the `RichTextEditor` (Lexical) and `RichTextView` components first.
+
+## Working with agents
+
+- **Agents are autonomous.** They decide on their own everything a competent engineer would decide (names, small structure,
+  library details within the chosen stack, how to test), write down the non-obvious ones in `docs/`, and ask the user only
+  when blocked by something they cannot resolve (back end down, a contradiction between the design and the API that changes
+  what the user sees).
+- One milestone or one screen per session. Start every session from [kickoff-prompt.md](kickoff-prompt.md); every prompt
+  makes [engineering-standards.md](engineering-standards.md) binding, including its definition of done.
+- Sessions may touch only the files of their milestone or screen, plus shared components they genuinely need. Two sessions
+  never edit the same files at once.
+- A session ends with the checks green, a self-review of its diff done, and a commit *proposed*, not made (the user's
+  standing rule is to approve commits). Nothing is ever pushed.
+- Anything learned that is not obvious from the code (hand-off behaviour, a canvas ambiguity, an API quirk) is written into
+  `docs/` or `CLAUDE.md` before the session ends.
