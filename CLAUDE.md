@@ -10,7 +10,7 @@ built solo, for personal / friends-and-family use, with no revenue goal: favor c
 over speed.
 
 - **Mobile first.** It is used in a kitchen, phone propped on the counter, hands often dirty. Large touch targets
-  (44 px minimum, 64 px in cooking mode), text readable at arm's length.
+  (56 px minimum, 64 px for primary actions and in cooking mode), text readable at arm's length.
 - **The interface is in French and always addresses the user informally** (« Ajoute ta première recette », never
   « vous »). All user-facing text goes through one place (see Conventions), never scattered string literals.
 - **Visual identity**: warm and handcrafted, yellow dominant, text on yellow always dark (WCAG AA).
@@ -20,8 +20,11 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 
 ## Status
 
-The project has **not been scaffolded yet** (only a README). The commands below are the intended ones and become real
-once the Vite project exists; update this section in the same change that creates them.
+The project has **not been scaffolded yet** (only documentation). Start from [docs/setup-plan.md](docs/setup-plan.md)
+(milestones with checkable « done when ») and the ready-to-paste prompts in
+[docs/kickoff-prompt.md](docs/kickoff-prompt.md). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
+`.nvmrc` and `engines`. The commands below are the intended ones and become real once the Vite project exists; update
+this section in the same change that creates them.
 
 ```bash
 npm run dev            # Vite dev server, http://localhost:5173
@@ -42,6 +45,20 @@ Vite · React · TypeScript (strict) · React Router v7 (data mode, `createBrows
 Radix UI primitives (unstyled, accessible) · dnd-kit · Vitest + Testing Library + MSW · Playwright · ESLint + Prettier.
 
 Do not add a library that overlaps one of these without writing the decision down in `docs/`.
+
+## Code organisation
+
+**By screen and by component** (full layout and routes in [docs/setup-plan.md](docs/setup-plan.md)):
+
+- `src/screens/<Name>Screen/` — one folder per screen, with its test and its `strings.ts`. A component used by only one
+  screen lives in that screen's `components/` folder and is promoted to `src/components/` when a second screen needs it.
+- `src/components/<Name>/` — reusable, presentational components (props in, events out, no API calls), one folder each,
+  with tests.
+- `src/api/` — generated schema, typed client, error mapping, token module, TanStack Query hooks.
+- `src/app/` (router, providers, layouts), `src/lib/` (logger, helpers), `src/styles/` (Tailwind theme).
+
+Design values (colors, type scale, spacing, grid, icons) are extracted in
+[docs/design-tokens.md](docs/design-tokens.md); the canvas stays the source of truth.
 
 ## The API contract
 
@@ -95,8 +112,8 @@ Step instructions, the introduction and the recommendations are rich text, store
   Invalidate the relevant queries after a mutation.
 - **Forms**: React Hook Form + Zod. The server is the final authority on validation; the Zod schemas mirror the contract's
   limits for early feedback, and a server `400` is always displayed, never swallowed.
-- **User-facing text** lives in dedicated modules per feature, in French, tutoiement. No inline French literals in
-  components.
+- **User-facing text** lives in a `strings.ts` next to each screen or component, in French, tutoiement. No inline
+  French literals in components.
 - **Logging**: never `console.log`. Use the project's small logger wrapper (levels debug/info/warn/error, quiet in
   production) for the key steps of a flow: navigation to a protected route, login/logout, calls that fail, session
   expiry, uploads. Never log tokens, passwords or e-mail addresses.
