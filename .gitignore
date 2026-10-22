@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+*.tsbuildinfo
+*.local
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Claude Code personal settings
+.claude/settings.local.json

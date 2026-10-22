@@ -13,6 +13,20 @@ made. Update this file as milestones land.
 - Everything runs locally for now; deployment is out of scope. Back end on `http://localhost:8080` (started from the
   user's IDE), front on `http://localhost:5173`.
 
+## Status
+
+- **M1 · Skeleton and guardrails — done (2026-10-22).** One thing from the list was refused by the harness and is left to the
+  user: `.claude/settings.json` (the allowlist for `npm run lint|test|build`, `git status|diff|log`), because it edits the agent's
+  own permissions. `.claude/launch.json` exists.
+- **M2 · Theme and base components — done (2026-10-22).** Components built: `Icon` (49 icons), `Logo`, `Button`, `Tag`, `FilterChip`,
+  `TextField`, `Skeleton` with `LoadingRegion` (status region and 300 ms delay), `BowlIllustration` with `EmptyState`,
+  `ErrorState` with `ErrorBanner`, `Avatar`. `IconButton`, `Toast`, `Dialog`, `BottomSheet`, the password toggle, textarea, select
+  and checkbox are deliberately not built: they come with the first screen that needs them. Decisions left open on purpose, to
+  take when the first screen needs them (all additive, none breaks an existing call site): `Button` rendered as a link
+  (`asChild` with Radix `Slot`), a `headingLevel` on `EmptyState` / `ErrorState` for page-level use, a shared field frame once
+  the password, textarea and select fields exist. The development-only
+  `/styleguide` route (`src/screens/StyleguideScreen`) shows them and is absent from the production bundle.
+
 ## Code organisation
 
 ```
@@ -29,7 +43,10 @@ src/
   api/                      generated schema, typed client, error mapping, token module, query hooks per resource
   lib/                      logger and other small helpers with no UI
   styles/                   index.css: Tailwind theme from design-tokens.md, fonts
+  test/                     setup.ts (Testing Library cleanup, jest-dom) and expectNoAccessibilityViolations (axe-core)
 ```
+
+`scripts/` holds `generateApi.mjs` (`npm run api:generate`) and the test of the lint guardrails.
 
 Rules:
 

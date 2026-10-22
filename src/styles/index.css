@@ -1,0 +1,173 @@
+@import 'tailwindcss';
+
+/* Self-hosted fonts: no third-party request at runtime (docs/design-tokens.md#typography). */
+@import '@fontsource-variable/fraunces/opsz.css';
+@import '@fontsource/atkinson-hyperlegible/latin-400.css';
+@import '@fontsource/atkinson-hyperlegible/latin-700.css';
+@import '@fontsource/atkinson-hyperlegible/latin-ext-400.css';
+@import '@fontsource/atkinson-hyperlegible/latin-ext-700.css';
+@import '@fontsource/kalam/latin-400.css';
+@import '@fontsource/kalam/latin-ext-400.css';
+
+/*
+ * Design tokens, extracted from the « Il en reste un peu - Design system » canvas
+ * (docs/design-tokens.md). The default Tailwind scales are cleared so that only the design's own
+ * values can be used: `bg-red-500` or `text-sm` simply do not exist.
+ *
+ * Sizes are in rem so that the browser's font-size setting scales them; at the default 16 px they
+ * are exactly the canvas' pixel values.
+ */
+@theme static {
+  --color-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --breakpoint-*: initial;
+  --container-*: initial;
+  --animate-*: initial;
+
+  /* Butter and mustard: the yellows. Never alone on paper (1.3:1): always outlined in ink. */
+  --color-butter-100: #fff3c4;
+  --color-butter-200: #fbe594;
+  --color-butter-300: #f6d45a;
+  --color-butter-400: #edbe2f;
+  --color-mustard-500: #d9a316;
+  --color-mustard-600: #8c6409;
+  --color-mustard-700: #6b4a06;
+
+  /* Paper and ink: the warm neutrals. ink-500 is for borders and icons, never for text. */
+  --color-paper-50: #fffdf7;
+  --color-paper-100: #fbf5e6;
+  --color-paper-200: #f3e9d0;
+  --color-paper-300: #e6d8b8;
+  --color-ink-500: #8f7660;
+  --color-ink-700: #6b4f3a;
+  --color-ink-800: #432e1e;
+  --color-ink-900: #2b1d12;
+
+  --color-brick: #a8321f;
+  --color-brick-bg: #fbe3dc;
+  --color-brick-wash: #fff8f6;
+  --color-herb: #2f6b3a;
+  --color-herb-bg: #e4efd8;
+  --color-disabled-bg: #eadfc8;
+  --color-disabled-text: #7d6d58;
+  --color-disabled-border: #b8a98f;
+  --color-skeleton: #efe3c6;
+
+  --font-title: 'Fraunces Variable', Georgia, serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-hand: 'Kalam', cursive;
+  --default-font-family: var(--font-body);
+
+  /* Fraunces is for titles of 24 px and up; Kalam for annotations of 24 px and up. */
+  --text-poster: 3.25rem;
+  --text-poster--line-height: 3.5rem;
+  --text-poster--font-weight: 800;
+  --text-poster--letter-spacing: -0.01em;
+  --text-title-1: 2.5rem;
+  --text-title-1--line-height: 2.875rem;
+  --text-title-1--font-weight: 700;
+  --text-title-2: 1.875rem;
+  --text-title-2--line-height: 2.25rem;
+  --text-title-2--font-weight: 700;
+  --text-title-3: 1.5rem;
+  --text-title-3--line-height: 1.875rem;
+  --text-title-3--font-weight: 700;
+  /* Title of an empty state (28/34) and of an error or dialog block (26/32): drawn that way on the
+     « Retours et chargement » board, between the title-2 and title-3 steps. */
+  --text-state-title: 1.75rem;
+  --text-state-title--line-height: 2.125rem;
+  --text-state-title--font-weight: 700;
+  --text-dialog-title: 1.625rem;
+  --text-dialog-title--line-height: 2rem;
+  --text-dialog-title--font-weight: 700;
+  --text-step: 1.375rem;
+  --text-step--line-height: 2.125rem;
+  --text-body: 1.125rem;
+  --text-body--line-height: 1.75rem;
+  --text-label: 1.25rem;
+  --text-label--line-height: 1.5rem;
+  --text-detail: 1rem;
+  --text-detail--line-height: 1.375rem;
+  /* The floor: navigation labels and captions only. */
+  --text-caption: 0.9375rem;
+  --text-caption--line-height: 1.25rem;
+  --text-annotation: 1.625rem;
+  --text-annotation--line-height: 1.75rem;
+
+  /* Radii: the bigger the object, the rounder its corners. */
+  --radius-s: 0.5rem;
+  --radius-m: 0.75rem;
+  --radius-l: 1rem;
+  --radius-frame: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+
+  /* Shadows are tinted brown, like paper laid on a table. `stamp` is pressed away on :active. */
+  --shadow-paper: 0 1px 0 rgb(43 29 18 / 0.12), 0 2px 6px rgb(43 29 18 / 0.1);
+  --shadow-card: 0 2px 0 rgb(43 29 18 / 0.12), 0 8px 20px rgb(43 29 18 / 0.16);
+  --shadow-stamp: 4px 4px 0 var(--color-ink-900);
+  --shadow-stamp-sm: 3px 3px 0 var(--color-ink-900);
+  --shadow-sheet: 0 16px 36px rgb(43 29 18 / 0.26);
+
+  /* Layout grid: phone up to 599 px, tablet from 600, desktop from 1024 (docs/design-tokens.md). */
+  --breakpoint-tablet: 600px;
+  --breakpoint-desktop: 1024px;
+  --container-content: 72rem;
+  --container-reading: 42.5rem;
+
+  --animate-skeleton: skeleton 1.4s ease-in-out infinite;
+
+  @keyframes skeleton {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+/* Thin outline of tags (1.5 px), between Tailwind's 1 px and 2 px. */
+@utility border-thin {
+  border-width: 1.5px;
+}
+
+/* A disabled control is recognisable without colour: dashed border, dimmed text, no shadow. */
+@utility disabled-look {
+  &:disabled {
+    cursor: not-allowed;
+    border-width: 2px;
+    border-style: dashed;
+    border-color: var(--color-disabled-border);
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    box-shadow: none;
+  }
+}
+
+/* Underlined, hand-set look of quiet buttons and links. */
+@utility link-underline {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-paper-100 text-body text-ink-900;
+  }
+
+  /* Focus ring: 3 px of ink, visible on cream and on yellow. `:where` keeps its specificity at
+     zero so that a component can still adjust the offset. */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    @apply outline-3 outline-offset-3 outline-ink-900;
+  }
+}

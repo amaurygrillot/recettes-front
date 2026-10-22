@@ -58,6 +58,58 @@ resolved; **re-run `npm view` when scaffolding**, since newer releases may exist
 | `eslint-plugin-react-hooks` · `-jsx-a11y` · `-boundaries` | 7.1.1 · 6.10.2 · 7.2.1 | |
 | `prettier` · `prettier-plugin-tailwindcss` | 3.9.x · 0.8.x | |
 
+### Installed in M1 and M2 (2026-10-22)
+
+`npm view` was re-run before installing: every version in the table above is still the latest (TypeScript 7.0.2 is still not
+usable, `typescript@6` still resolves to 6.0.3), so nothing changed. `npm install` resolves with no `--force` and no
+`--legacy-peer-deps`, with the two `overrides` above. Added to the table's set, each for one reason:
+
+| Package | Version | Why |
+|---|---|---|
+| `react-router` | 8.5.0 | The dev-only `/styleguide` route (M2); the shell in M4 builds on it. `RouterProvider` comes from `react-router/dom`. |
+| `@fontsource-variable/fraunces`, `@fontsource/atkinson-hyperlegible`, `@fontsource/kalam` | 5.3.0 | Self-hosted fonts, no third-party request. Fraunces uses `opsz.css` (weight and optical-size axes, as the canvas' Google Fonts request does); the other two load the `latin` and `latin-ext` subsets. |
+| `jsdom` | 30.1.3 | Vitest's DOM environment. |
+| `eslint-plugin-react-refresh` | 0.5.7 | Keeps Fast Refresh working (a component file must not also export non-components). |
+| `@eslint/js`, `globals`, `@types/react`, `@types/react-dom`, `@types/node` | 10.0.1, 17.13.0, 19.3.0, 19.3.0, 26.6.5 | Lint and type support. |
+| `openapi-typescript` | 7.13.0 | `npm run api:generate` (the override above applies to it), through its Node API: the output is byte for byte the CLI's. The schema itself is committed in M3. |
+
+Not installed yet, on purpose: TanStack Query, `openapi-fetch`, MSW, React Hook Form, Zod, Radix, dnd-kit, Lexical, DOMPurify,
+Playwright. A dependency is added by the milestone that uses it.
+
+**`npm audit` reports 4 high-severity findings**, all one chain: `eslint-plugin-boundaries` → `@boundaries/elements` →
+`micromatch` → `braces` (stack exhaustion on deeply nested glob patterns). It is development tooling that only ever matches
+the patterns of our own ESLint configuration, never input from a user or from the network, so it is not exploitable. The
+suggested fix, `npm audit fix --force`, would downgrade the plugin to 1.1.1 and break the configuration: do not apply it.
+Re-check when a new version of `@boundaries/elements` is out.
+
+### Things the tooling does that are not obvious
+
+- **`eslint-plugin-boundaries` 7.** Rules are `boundaries/dependencies` with `policies` and `boundaries/no-unknown-files`;
+  `mode` in element descriptors is deprecated. Element patterns match **folders** (`src/components` is one element per
+  sub-folder), so the entry file `src/main.tsx` is listed in `boundaries/ignore` instead of being an element. The plugin
+  **silently skips imports it cannot resolve**: without `'import/resolver': { node: { extensions: ['.ts', '.tsx', '.js'] } }`
+  every boundary rule goes quiet. `scripts/eslintGuardrails.test.ts` lints snippets with the real configuration and fails if
+  a boundary or a ban stops firing (it was checked by removing the resolver setting).
+- **Lint choices.** `strictTypeChecked` + `stylisticTypeChecked`; `@typescript-eslint/consistent-type-assertions` set to
+  `never` (only `as const`); numbers allowed in template literals; props are `interface`s (the stylistic default). Inline
+  French text is rejected in `components`, `screens` and `app`, so text really lives in `strings.ts`: JSX text, `{'text'}`
+  children and the props that carry text (`aria-label`, `alt`, `title`, `placeholder`, `label`, `hint`, `error`, `success`,
+  `message`, `description`) when the literal contains a letter (`alt=""` stays legal). Stored HTML sinks (`dangerouslySetInnerHTML`
+  in any spelling, `innerHTML` / `outerHTML`, `insertAdjacentHTML`, `setHTMLUnsafe`, `document.write`, `srcDoc`) are banned
+  everywhere; `RichTextView` is exempt from the `dangerouslySetInnerHTML` attribute only. `--max-warnings 0`: a warning fails
+  the build. A French literal in a plain `.ts` file cannot be detected: keep text in `strings.ts` by convention.
+- **Tailwind 4.** `@theme static` so every token exists as a CSS variable (the logo reads `var(--color-ink-900)` from arbitrary
+  values). `hover:` only applies on devices that can hover (`@media (hover: hover)`), so a phone never shows a stuck hover; a
+  hover is only visible in the browser pane at desktop size. **When many new files are added at once, restart the dev server**:
+  Tailwind's incremental scan can miss them and leave classes ungenerated until then.
+- **Fonts and weights.** Fraunces Variable is loaded as `'Fraunces Variable'`, so SVG text in the logo uses the `font-title`
+  class rather than a font attribute. The `opsz` file costs 67 kB for the latin subset on the first load (the `wght`-only file
+  is 37 kB) but is what keeps the large titles drawn like the canvas; switch to `wght.css` only if first-load weight ever
+  matters more than that. Kalam is declared and loaded but not used yet (`font-hand` has no consumer); fontsource also ships a
+  `.woff` next to each `.woff2`, which Vite copies into `dist` and no supported browser requests.
+- **Prettier** ignores `*.md`: the documentation is hand-wrapped. Its Tailwind plugin sorts classes, including inside
+  `classNames(...)`.
+
 ### Why TypeScript 6.0.3 and not 7.0.2
 
 TypeScript 7.0.2 is the latest release and, used alone, it type-checks the project fine. But two tools of the chain cannot

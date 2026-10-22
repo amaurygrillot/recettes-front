@@ -31,13 +31,19 @@ Dependencies point one way: **`screens` → `components` → `lib`**, and `api` 
 | `src/components/*` | `lib`, other `components` | `screens`, `api`, `app` |
 | `src/api` | `lib`, generated schema | `screens`, `components`, React UI |
 | `src/lib` | nothing of the app | everything else |
+| `src/test` | nothing of the app | imported by test files only |
 
-- Components are presentational: data and callbacks come in as props. Only screens (and the `app` shell) talk to the API.
+- Components are presentational: data and callbacks come in as props. Only screens (and the `app` shell) talk to the API
+  (importing `@tanstack/react-query`, `openapi-fetch` or `api/` from anywhere but `src/api`, `src/screens` and `src/app` is a
+  lint error).
 - A screen never imports from another screen. Shared code moves to `components` or `lib` instead.
 - `dangerouslySetInnerHTML` appears only inside `RichTextView`, after DOMPurify.
 - `console.*` is forbidden; use the logger from `lib`.
-- These rules are encoded in the ESLint configuration (an import-boundaries plugin or `no-restricted-imports` patterns),
-  so a violation fails `npm run lint` instead of waiting for a reviewer.
+- These rules are encoded in the ESLint configuration (`eslint-plugin-boundaries` and `no-restricted-imports` patterns),
+  so a violation fails `npm run lint` instead of waiting for a reviewer. `scripts/eslintGuardrails.test.ts` proves it: it lints
+  forbidden and allowed snippets with the real configuration, so a rule that silently stops firing fails `npm run test`. When
+  you add a ban or a boundary, add its case there.
+- A new folder directly under `src/` must be classified in `eslint.config.js` (`boundaries/no-unknown-files`).
 
 ## TypeScript
 
@@ -69,6 +75,24 @@ Dependencies point one way: **`screens` → `components` → `lib`**, and `api` 
 - Lists have stable `key`s that are ids, never indexes of reorderable data.
 - Each route has an error boundary (`errorElement`) so one failing screen cannot blank the app.
 - Forms use React Hook Form; every field has a visible label and an accessible error message.
+
+## Styling
+
+- **Tokens only.** Tailwind's default colors, text sizes, radii, shadows and breakpoints are cleared; the theme in
+  `src/styles/index.css` is the only source (`bg-butter-300`, `text-title-2`, `rounded-l`). A value that is not a token is a
+  design question, answered in [design-tokens.md](design-tokens.md) first. No arbitrary values (`w-[137px]`) for design
+  values; a recurring need becomes a token or an `@utility` in the theme.
+- **Components own their look.** A component does not accept a `className`: variants are props with a closed set of values
+  mapped to class strings in one `Record`, so every look is reviewable in one place. The exception is `Skeleton`, whose
+  size and radius are its whole point. Spacing *between* components belongs to the parent, through layout classes on a
+  wrapper element.
+- Each interactive state the design draws (hover, pressed, focus, disabled) is a Tailwind variant on the element; hover and
+  pressed use `enabled:` so a disabled control never reacts. Disabled is never color alone: the `disabled-look` utility (dashed
+  border, dimmed text, no shadow) is the one definition.
+- **Announcements belong to the screen.** A leaf component stays semantically neutral: `TextField` ties its message to the
+  input with `aria-describedby` but is not a live region (a form with five errors must not shout five alerts; focus goes to the
+  first invalid field). `ErrorState` and `ErrorBanner` are `role="alert"` because the Retours board specifies it.
+- Props are `interface`s (the stylistic default of `typescript-eslint`); unions and mapped types are `type`s.
 
 ## Size and shape (guidelines)
 
@@ -103,6 +127,10 @@ the design tokens. Component tests include an automated accessibility assertion 
   details, never snapshots of markup.
 - MSW stands in for the API. Test the failure statuses a screen can receive, not only success.
 - Every component test covers each state the design defines (loading, empty, error, disabled, focus where relevant).
+  jsdom has no layout and no `:hover` / `:active`, so those two are checked in the browser pane (at desktop size for hover);
+  the test covers what is observable through the accessible interface (disabled, `aria-pressed`, `aria-invalid`, focus).
+- Never find an element by its CSS class. Query by role, label or accessible name; `container.querySelector` is only for an
+  element that has no role by design (a decorative `svg`).
 - A bug fix starts with a failing test.
 - Pure functions (`lib`, mappers) get table-driven unit tests.
 
