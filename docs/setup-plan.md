@@ -99,7 +99,7 @@ handling, the bottom tab bar (visitor and member variants) and the top bar from 
 redirects a visitor to the login screen then back.
 
 **M5 · HomeScreen end to end.** Implemented from the canvas boards listed in
-[kickoff-prompt.md](kickoff-prompt.md), against the real API: category shortcuts, recipe feed, « Voir plus »
+[design-boards.md](design-boards.md), against the real API: category shortcuts, recipe feed, « Voir plus »
 (infinite query), skeletons, error, empty, visitor and member variants. *Done when:* it matches the boards at 390, 768 and
 1280 px and every state is tested. **This screen is the quality template for all the others.**
 
@@ -113,8 +113,9 @@ the `RichTextEditor` (Lexical) and `RichTextView` components first.
   library details within the chosen stack, how to test), write down the non-obvious ones in `docs/`, and ask the user only
   when blocked by something they cannot resolve (back end down, a contradiction between the design and the API that changes
   what the user sees).
-- One milestone or one screen per session. Start every session from [kickoff-prompt.md](kickoff-prompt.md); every prompt
-  makes [engineering-standards.md](engineering-standards.md) binding, including its definition of done.
+- One milestone or one screen per session. Start every session from a prompt in [kickoff-prompt.md](kickoff-prompt.md); every
+  prompt makes [agent-operating-rules.md](agent-operating-rules.md) and
+  [engineering-standards.md](engineering-standards.md) binding, including the definition of done.
 - Sessions may touch only the files of their milestone or screen, plus shared components they genuinely need. Two sessions
   never edit the same files at once.
 - A session ends with the checks green, a self-review of its diff done, and a commit *proposed*, not made (the user's

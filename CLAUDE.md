@@ -22,7 +22,8 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 
 The project has **not been scaffolded yet** (only documentation). Start from [docs/setup-plan.md](docs/setup-plan.md)
 (milestones with checkable « done when ») and the ready-to-paste prompts in
-[docs/kickoff-prompt.md](docs/kickoff-prompt.md). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
+[docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow [docs/agent-operating-rules.md](docs/agent-operating-rules.md);
+canvas boards per screen are in [docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
 `.nvmrc` and `engines`. The commands below are the intended ones and become real once the Vite project exists; update
 this section in the same change that creates them.
 
