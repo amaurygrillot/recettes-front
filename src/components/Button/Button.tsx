@@ -1,4 +1,4 @@
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { classNames } from '../../lib/classNames'
 import { Icon } from '../Icon/Icon'
 import type { IconName } from '../Icon/iconShapes'
@@ -6,12 +6,14 @@ import type { IconName } from '../Icon/iconShapes'
 export type ButtonVariant = 'primary' | 'secondary' | 'quiet' | 'danger'
 type ButtonSize = 'large' | 'medium'
 
-export type ButtonProps = Omit<ComponentProps<'button'>, 'className'> & {
+export type ButtonProps = Omit<ComponentProps<'button'>, 'className' | 'children'> & {
+  /** The label, always: it is the accessible name. An icon-only button needs its own component with a required label. */
+  children: ReactNode
   /** `primary`: one per screen. `secondary`: side actions. `quiet`: cancel, back. `danger`: only inside a confirmation dialog. */
   variant?: ButtonVariant
   /** `large` (64 px) by default; `medium` (56 px) is the floor, for toolbars and dialogs. */
   size?: ButtonSize
-  icon?: IconName
+  icon?: IconName | undefined
   fullWidth?: boolean
 }
 

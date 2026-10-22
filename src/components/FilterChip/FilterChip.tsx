@@ -1,8 +1,13 @@
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { classNames } from '../../lib/classNames'
 import { Icon } from '../Icon/Icon'
 
-export type FilterChipProps = Omit<ComponentProps<'button'>, 'className' | 'aria-pressed'> & {
+export type FilterChipProps = Omit<
+  ComponentProps<'button'>,
+  'className' | 'aria-pressed' | 'children'
+> & {
+  /** The label: it is the accessible name. */
+  children: ReactNode
   selected: boolean
 }
 

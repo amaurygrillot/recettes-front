@@ -5,8 +5,10 @@ import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import openapiTS, { astToString } from 'openapi-typescript'
 
-const DEFAULT_CONTRACT = '../recettes-back/src/main/resources/openapi/openapi.yaml'
-const OUTPUT = 'src/api/schema.d.ts'
+// Anchored to the repository root, so the script works from any working directory.
+const ROOT = resolve(import.meta.dirname, '..')
+const DEFAULT_CONTRACT = resolve(ROOT, '../recettes-back/src/main/resources/openapi/openapi.yaml')
+const OUTPUT = resolve(ROOT, 'src/api/schema.d.ts')
 
 const contract = resolve(process.env.OPENAPI_PATH ?? DEFAULT_CONTRACT)
 

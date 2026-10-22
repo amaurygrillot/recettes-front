@@ -132,7 +132,7 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   when invalid, 3 px herb + tick when valid, dashed `disabled-border` on `disabled-bg` when disabled), one message under it
   (16, ink-700; bold brick with an alert icon for an error; bold herb for a success). The password toggle, the textarea with
   counter, the select, the checkbox row and the search pill live on the `Champs-avances` board and come with their screens.
-- **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (still under `prefers-reduced-motion`), announced as
+- **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (no animation under `prefers-reduced-motion`), announced as
   « Chargement… » by one status region, shown only after 300 ms, at most 6 per list.
 - **Empty state**: dashed ink-500 frame, radius 24, 176 px ink-line bowl, state title, 18 px text, one 64 px button.
   **Error block**: ink outline, `card` shadow, 80 px brick circle with the warning icon, dialog title, 18 px text, a primary

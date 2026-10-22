@@ -9,15 +9,15 @@ export type TextFieldProps = Omit<
   /** Always visible, above the field: a placeholder is never a label. */
   label: string
   /** Help shown under the field while there is no error and no success message. */
-  hint?: string
+  hint?: string | undefined
   /**
    * Replaces the hint and marks the field as invalid. The message is tied to the field with
    * `aria-describedby`; how a failed submission is announced (focus on the first invalid field)
    * is for the form to decide, so the message is not a live region.
    */
-  error?: string
+  error?: string | undefined
   /** Replaces the hint and puts a tick in the field. */
-  success?: string
+  success?: string | undefined
 }
 
 type FieldStatus = 'idle' | 'error' | 'success'

@@ -6,7 +6,7 @@ import { strings } from './strings'
 
 export interface AvatarProps {
   /** Full name. Gives the initials and the accessible name; without it the avatar is anonymous. */
-  name?: string
+  name?: string | undefined
   /** 40 in lists, 56 as a button, 72 for a profile, 96 on the account page. */
   size?: number
 }

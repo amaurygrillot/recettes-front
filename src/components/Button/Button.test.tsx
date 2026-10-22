@@ -52,6 +52,13 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'Cuisiner' })).toHaveFocus()
   })
 
+  it('cannot be written without a label, which is its accessible name', () => {
+    // @ts-expect-error an icon-only button would have no accessible name
+    const unlabeled = <Button icon="close" />
+
+    expect(unlabeled).toBeDefined()
+  })
+
   it('does nothing when disabled', async () => {
     const onClick = vi.fn()
     render(

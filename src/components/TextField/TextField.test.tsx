@@ -38,6 +38,15 @@ describe('TextField', () => {
     })
   })
 
+  it('takes messages that may be undefined, like the ones of a form library', () => {
+    const noMessage = (): string | undefined => undefined
+    render(<TextField label="Titre" hint={noMessage()} error={noMessage()} success={noMessage()} />)
+
+    const field = screen.getByLabelText('Titre')
+    expect(field).toBeValid()
+    expect(field).toHaveAccessibleDescription('')
+  })
+
   describe('with an error', () => {
     it('marks the field as invalid and describes it with the message', () => {
       render(<TextField label="Titre" error="Il manque un titre." />)

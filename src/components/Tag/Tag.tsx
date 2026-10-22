@@ -7,7 +7,7 @@ export type TagTone = 'butter' | 'herb' | 'brick' | 'paper'
 
 export interface TagProps {
   tone?: TagTone
-  icon?: IconName
+  icon?: IconName | undefined
   children: ReactNode
 }
 
