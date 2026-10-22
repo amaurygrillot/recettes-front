@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The bowl mark on a butter tile (« Logo-bol » board, favicon). Colours are the design tokens
+       butter-300, paper-50 and ink-900, written out because a favicon cannot read the stylesheet. -->
+  <rect x="1.5" y="1.5" width="61" height="61" rx="16" fill="#F6D45A" stroke="#2B1D12" stroke-width="3" />
+  <g transform="translate(8 8) scale(0.75)" stroke="#2B1D12" stroke-linejoin="round">
+    <path d="M12 36 C12 22 22 14 32 14 C42 14 52 22 52 36 Z" fill="#FFFDF7" stroke-width="4" />
+    <path d="M7 36 H57 C57 50 47 59 32 59 C17 59 7 50 7 36 Z" fill="#FFFDF7" stroke-width="4" />
+    <path d="M13 45 C23 50 41 50 51 45" fill="none" stroke-width="3" stroke-linecap="round" />
+  </g>
+</svg>

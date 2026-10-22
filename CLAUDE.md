@@ -20,19 +20,26 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 
 ## Status
 
-The project has **not been scaffolded yet** (only documentation). Start from [docs/setup-plan.md](docs/setup-plan.md)
-(milestones with checkable « done when ») and the ready-to-paste prompts in
-[docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow [docs/agent-operating-rules.md](docs/agent-operating-rules.md);
-canvas boards per screen are in [docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
-`.nvmrc` and `engines`. The commands below are the intended ones and become real once the Vite project exists; update
-this section in the same change that creates them.
+**Milestones M1 (skeleton and guardrails) and M2 (theme and base components) are done**; next is M3 (API client and
+authentication). The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
+prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
+[docs/agent-operating-rules.md](docs/agent-operating-rules.md); canvas boards per screen are in
+[docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
+`.nvmrc` and `engines`.
+
+What exists: the Vite + React + TypeScript project, the strict TypeScript flags, ESLint with the import boundaries and the bans
+(tested by `scripts/eslintGuardrails.test.ts`), the Tailwind theme from the design tokens, self-hosted fonts, the base
+components in `src/components/` (Icon, Logo, Button, Tag, FilterChip, TextField, Skeleton, LoadingRegion, EmptyState,
+BowlIllustration, ErrorState, ErrorBanner, Avatar), and a development-only **`/styleguide`** route that displays them. Not there
+yet: the API client and `src/api`, the logger, the real router and shell, every product screen.
 
 ```bash
-npm run dev            # Vite dev server, http://localhost:5173
-npm run build          # type-check + production build
-npm run test           # Vitest
-npm run lint           # ESLint
-npm run api:generate   # regenerate API types from ../recettes-back openapi.yaml
+npm run dev            # Vite dev server, http://localhost:5173 (port is fixed: strictPort); /styleguide shows the components
+npm run build          # type-check (tsc -b) + production build
+npm run test           # Vitest (components, lib, and the lint guardrails)
+npm run lint           # ESLint, no warning allowed
+npm run format:check   # Prettier (npm run format to fix); Markdown is left as written
+npm run api:generate   # regenerate src/api/schema.d.ts from ../recettes-back openapi.yaml (OPENAPI_PATH overrides the path)
 ```
 
 The back end runs on port 8080 (started from the user's IDE). The back's CORS allowed origin and the password-reset
