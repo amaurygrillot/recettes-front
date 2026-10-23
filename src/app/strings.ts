@@ -45,9 +45,11 @@ export const strings = {
     cooking: 'Pas à pas',
     newRecipe: 'Nouvelle recette',
     editRecipe: 'Modifier la recette',
-    account: 'Compte',
-    logout: 'Se déconnecter',
   },
+
+  // The stack of notifications.
+  notifications: 'Notifications',
+  retry: 'Réessayer',
 
   // What the entry screens (sign-in, registration, forgotten and new password) say the same way.
   auth: {
@@ -55,6 +57,15 @@ export const strings = {
     backToLogin: 'Retour à la connexion',
     forgotPassword: 'Mot de passe oublié ?',
     usernameLabel: "Nom d'utilisateur",
+    usernameHint: '3 à 50 caractères',
+    usernameRequired: "Indique ton nom d'utilisateur.",
+    usernameTooShort: 'Au moins 3 caractères.',
+    usernameTooLong: 'Au plus 50 caractères.',
+    // What a 409 says, on the field it is about (registration and account changes).
+    conflict: {
+      username: "Ce nom d'utilisateur est déjà pris.",
+      email: 'Cette adresse e-mail est déjà utilisée.',
+    },
     emailLabel: 'Adresse e-mail',
     emailPlaceholder: 'prenom@exemple.fr',
     emailRequired: 'Indique ton adresse e-mail.',

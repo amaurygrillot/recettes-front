@@ -5,9 +5,10 @@ import { useLogin } from '../../api/auth'
 import type { ApiFailure } from '../../api/failure'
 import { useCreateUser } from '../../api/users'
 import { failureMessage } from '../../app/failureMessage'
+import { strings as appStrings } from '../../app/strings'
 import { keepsPasswordRule } from '../../app/authValidation'
 import { logger } from '../../lib/logger'
-import { conflictedField } from './conflictedField'
+import { conflictedField } from '../../app/conflictedField'
 import { registerSchema, type RegisterForm } from './registerSchema'
 import { strings } from './strings'
 
@@ -38,7 +39,7 @@ function welcomeStateOf({
 /** What to say on top of the form: nothing for a conflict a field already says, the cause otherwise. */
 function bannerText(failure: ApiFailure | undefined): string | undefined {
   if (failure === undefined || conflictedField(failure) !== undefined) return undefined
-  return failure.kind === 'conflict' ? strings.conflict.unknown : failureMessage(failure)
+  return failure.kind === 'conflict' ? strings.conflictUnknown : failureMessage(failure)
 }
 
 /**
@@ -69,7 +70,7 @@ export function useRegistration() {
         logger.info('Registration refused: that field is already taken', { field })
         form.setError(
           field,
-          { type: 'server', message: strings.conflict[field] },
+          { type: 'server', message: appStrings.auth.conflict[field] },
           { shouldFocus: true },
         )
       },

@@ -46,6 +46,11 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   [design-boards.md](design-boards.md#searchscreen-rechercher-and-mes-recettes). Shared pieces promoted or added: `RecipeCard`,
   `FeedGrid`, `LoadMore`, `BottomSheet`, `Combobox`, `IconButton`, `CountBadge`, `RemovableChip`, `LockedChip`, `RadioRow`, `CheckboxRow`.
 
+- **AccountScreen — done (2026-10-24).** `/compte`; decisions, and what the back end cannot do (no way to read the profile), in
+  [design-boards.md](design-boards.md#accountscreen-compte). Shared pieces added: `Toast` and `ToastsProvider` / `useToasts` (in `RootLayout`),
+  `SectionIndex` with `useActiveSection`, `useMember`, `sessionStore.rename`, `useKnownAccount`, `app/conflictedField` (promoted from the
+  registration), `SubmitButton` options. Checked at 390, 768 and 1280 px with a mocked back end in the browser pane.
+
 - **Auth screens — done (2026-10-23).** Sign-in (finished), registration with its welcome, forgotten password, new password; decisions in
   [design-boards.md](design-boards.md#auth-screens-sign-in-registration-forgotten-and-new-password). Shared pieces added: `AuthFrame`,
   `PasswordField`, `StateBadge`, `TextField` options (`note`, `hintMet`, `invalid`, `trailing`), `useCountdown`, `useFocusOnMount`, `maskEmail`,
@@ -161,6 +166,9 @@ the `RichTextEditor` (Lexical) first (`RichTextView` exists since RecipeScreen).
   until then the placeholders have none. SearchScreen also reads `?categorie=` and `?q=` ([design-boards.md](design-boards.md#the-shell-m4)),
   promotes `RecipeCard` from `screens/HomeScreen/components` to `src/components` (its second user), and may keep the bar's
   search field in step with the page's text.
+- **The account page cannot read the account** (no `GET` for the signed-in profile): ask the back end for a `GET /users/me`. Until then the address and
+  the names show only after a change in the same visit, and a renamed member keeps the old username in the token until the next sign-in.
+- **The « Administration » row of the account page** is left out until the first admin screen exists.
 - **The sign-in asks for a username**, as the API does, where the board says « Adresse e-mail »: reconcile them if the back end ever logs in by address.
 - **Deleting a recipe that answers `404`** (already gone) leaves the cached search feeds as they were, since only a successful delete
   invalidates them (`useDeleteRecipe`): a card may linger until the feeds expire, and opening it shows the 404 page.

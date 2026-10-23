@@ -28,6 +28,11 @@ export interface SessionStore {
   signIn: (token: string) => boolean
   signOut: () => void
   /**
+   * The member changed their username: the app shows the new one from now on. The token keeps the
+   * old name (a token is not reissued), so a page reload shows the old one until the next sign-in.
+   */
+  rename: (username: string) => void
+  /**
    * The back end refused `refusedToken`: drops it and tells the app, once. No effect unless that
    * token is still the member's, so a late answer to an old request cannot end a newer session.
    */
@@ -119,6 +124,11 @@ export function createSessionStore(
       if (token === null && session.status === 'visitor') return
       commit(null, VISITOR)
       logger.info('Signed out')
+    },
+    rename: (username) => {
+      if (session.status !== 'member' || session.username === username) return
+      commit(token, { ...session, username })
+      logger.info('The member changed their username')
     },
     expire: (refusedToken) => {
       if (session.status !== 'member' || token !== refusedToken) return

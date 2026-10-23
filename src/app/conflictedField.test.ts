@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { ApiFailure } from '../../api/failure'
+import type { ApiFailure } from '../api/failure'
 import { conflictedField } from './conflictedField'
 
 const conflict = (detail: string | undefined): ApiFailure => ({

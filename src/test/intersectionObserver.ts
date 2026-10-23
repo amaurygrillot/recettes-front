@@ -2,8 +2,11 @@ import { act } from '@testing-library/react'
 import { vi } from 'vitest'
 
 export interface FakeIntersection {
-  /** Tells every observer where its element is now. `bottom` is the element's bottom edge in the screen. */
-  report: (position: { visible: boolean; bottom: number }) => void
+  /**
+   * Tells every observer where its element is now. `bottom` is the element's bottom edge in the
+   * screen. With `only`, just the observed element with that id is reported.
+   */
+  report: (position: { visible: boolean; bottom: number; only?: string }) => void
   observedCount: () => number
 }
 
@@ -49,15 +52,17 @@ export function installIntersectionObserver(): FakeIntersection {
   vi.stubGlobal('IntersectionObserver', FakeObserver)
 
   return {
-    report({ visible, bottom }) {
+    report({ visible, bottom, only }) {
       act(() => {
         registrations.forEach(({ callback, elements }) => {
           callback(
-            [...elements].map((target) => ({
-              target,
-              isIntersecting: visible,
-              boundingClientRect: { bottom },
-            })),
+            [...elements]
+              .filter((target) => only === undefined || target.id === only)
+              .map((target) => ({
+                target,
+                isIntersecting: visible,
+                boundingClientRect: { bottom },
+              })),
           )
         })
       })

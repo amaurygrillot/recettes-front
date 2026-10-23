@@ -242,6 +242,8 @@ describe('a page that needs a login', () => {
     const user = userEvent.setup()
     renderRoutes(routes, '/compte')
     await user.click(await screen.findByRole('button', { name: 'Se déconnecter' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Te déconnecter ?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Se déconnecter' }))
 
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Il en reste un peu' }),
