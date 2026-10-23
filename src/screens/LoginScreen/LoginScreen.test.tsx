@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { API_BASE_URL } from '../../api/apiConfig'
 import { sessionStore } from '../../api/sessionStore'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
@@ -31,11 +31,6 @@ async function fillAndSubmit(username: string, password: string) {
   await user.click(screen.getByRole('button', { name: 'Se connecter' }))
   return user
 }
-
-afterEach(() => {
-  sessionStore.signOut()
-  window.sessionStorage.clear()
-})
 
 describe('LoginScreen', () => {
   it('asks for a username and a password, and has a way to reset or register', () => {

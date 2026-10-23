@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { API_BASE_URL } from '../api/apiConfig'
 import { sessionStore } from '../api/sessionStore'
 import { expectNoAccessibilityViolations } from '../test/expectNoAccessibilityViolations'
@@ -23,11 +23,6 @@ function labelsOf(bar: HTMLElement): (string | null)[] {
     .getAllByRole('link')
     .map((link) => link.textContent)
 }
-
-afterEach(() => {
-  sessionStore.signOut()
-  window.sessionStorage.clear()
-})
 
 describe('the pages with navigation', () => {
   it.each([

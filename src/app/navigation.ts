@@ -5,7 +5,7 @@ import { strings } from './strings'
 
 const { navigation } = strings
 
-const HOME: NavigationItem = { to: paths.home, label: navigation.home, icon: 'home' }
+const HOME: NavigationItem = { to: paths.home, label: navigation.home, icon: 'home', end: true }
 const SEARCH: NavigationItem = { to: paths.search, label: navigation.search, icon: 'search' }
 const MY_RECIPES: NavigationItem = {
   to: paths.myRecipes,

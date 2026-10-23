@@ -1,3 +1,6 @@
+// French writes the singular for 0 and 1.
+const inSeconds = (seconds: number) => `${seconds} ${seconds < 2 ? 'seconde' : 'secondes'}`
+
 export const strings = {
   appName: 'Il en reste un peu',
   loading: 'Chargement…',
@@ -58,11 +61,11 @@ export const strings = {
     rateLimited: (seconds: number | undefined) =>
       seconds === undefined
         ? 'Tu vas un peu vite. Réessaie dans un instant.'
-        : `Tu vas un peu vite. Réessaie dans ${seconds} ${seconds === 1 ? 'seconde' : 'secondes'}.`,
+        : `Tu vas un peu vite. Réessaie dans ${inSeconds(seconds)}.`,
     unavailable: (seconds: number | undefined) =>
       seconds === undefined
         ? 'Le serveur est très sollicité. Réessaie dans un instant.'
-        : `Le serveur est très sollicité. Réessaie dans ${seconds} ${seconds === 1 ? 'seconde' : 'secondes'}.`,
+        : `Le serveur est très sollicité. Réessaie dans ${inSeconds(seconds)}.`,
     serverError: 'Le serveur a rencontré un problème. Réessaie dans un moment.',
     unexpected: "Quelque chose s'est mal passé. Réessaie.",
   },

@@ -84,19 +84,19 @@ describe('signing in', () => {
     expect(storage.items.get(KEY)).toBe(token)
   })
 
-  it.each([
-    ['unreadable', 'garbage'],
-    ['already expired', fakeToken({ expiresInSeconds: -1 })],
-  ])('refuses a token that is %s and changes nothing', (_name, token) => {
-    const store = createSessionStore(fakeStorage())
-    const listener = vi.fn()
-    store.subscribe(listener)
+  it.each([['unreadable', 'garbage']])(
+    'refuses a token that is %s and changes nothing',
+    (_name, token) => {
+      const store = createSessionStore(fakeStorage())
+      const listener = vi.fn()
+      store.subscribe(listener)
 
-    expect(store.signIn(token)).toBe(false)
+      expect(store.signIn(token)).toBe(false)
 
-    expect(store.getSnapshot()).toEqual({ status: 'visitor' })
-    expect(listener).not.toHaveBeenCalled()
-  })
+      expect(store.getSnapshot()).toEqual({ status: 'visitor' })
+      expect(listener).not.toHaveBeenCalled()
+    },
+  )
 
   it('replaces an expired session', () => {
     const store = createSessionStore(fakeStorage())

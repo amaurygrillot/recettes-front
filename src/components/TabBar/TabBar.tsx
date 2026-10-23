@@ -7,6 +7,8 @@ export interface NavigationItem {
   to: string
   label: string
   icon: IconName
+  /** Active only on exactly this path (the home page), not on the pages beneath it. */
+  end?: boolean | undefined
 }
 
 /** The one action that creates something; it is never a tab. */
@@ -55,13 +57,13 @@ export function TabBar({ label, items, createAction }: TabBarProps) {
       )}
       <nav
         aria-label={label}
-        className="flex gap-0.5 border-t-2 border-ink-900 bg-paper-50 px-1.5 pt-2 pb-safe-bar"
+        className="flex gap-0.5 border-t-2 border-ink-900 bg-paper-50 pt-2 pb-safe-bar"
       >
         {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            end={item.to === '/'}
+            end={item.end ?? false}
             className={({ isActive }) => classNames(TAB, isActive ? TAB_ACTIVE : TAB_IDLE)}
           >
             {({ isActive }) => (

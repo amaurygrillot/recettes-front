@@ -45,7 +45,9 @@ export function returnPathFrom(search: URLSearchParams): string {
   if (!raw?.startsWith('/')) return paths.home
 
   const url = new URL(raw, PLACEHOLDER_ORIGIN)
-  if (url.origin !== PLACEHOLDER_ORIGIN || url.pathname === paths.login) return paths.home
+  // The router ignores case and a trailing slash, so the login screen has to be recognised the same way.
+  const isLogin = url.pathname.replace(/\/+$/, '').toLowerCase() === paths.login
+  if (url.origin !== PLACEHOLDER_ORIGIN || isLogin) return paths.home
   const target = `${url.pathname}${url.search}${url.hash}`
   // Dot segments can leave `//host` behind, which a browser reads as another site.
   return target.startsWith('//') ? paths.home : target

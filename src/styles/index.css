@@ -173,9 +173,11 @@
 }
 
 /* The phone's tab bar keeps its 20 px of air under the tabs, more where the device draws a home
-   indicator (the viewport is `viewport-fit=cover`). */
+   indicator, and 6 px at the sides, more beside a notch (the viewport is `viewport-fit=cover`). */
 @utility pb-safe-bar {
   padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  padding-left: max(0.375rem, env(safe-area-inset-left));
+  padding-right: max(0.375rem, env(safe-area-inset-right));
 }
 
 /* The layout grid: side margins of 16 / 32 / 64 px (phone, tablet, desktop), the content centered
@@ -184,13 +186,16 @@
   margin-inline: auto;
   box-sizing: content-box;
   max-width: var(--container-content);
-  padding-inline: 1rem;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
 
   @media (width >= theme(--breakpoint-tablet)) {
-    padding-inline: 2rem;
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
   }
 
   @media (width >= theme(--breakpoint-desktop)) {
-    padding-inline: 4rem;
+    padding-left: max(4rem, env(safe-area-inset-left));
+    padding-right: max(4rem, env(safe-area-inset-right));
   }
 }

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { fakeToken } from '../test/fakeToken'
 import { problemResponse, rejectionOf } from '../test/problem'
 import { createQueryWrapper } from '../test/queryWrapper'
@@ -16,11 +16,6 @@ const reset = {
   token: 'one-time-token',
   newPassword: 'a-new-password',
 }
-
-afterEach(() => {
-  sessionStore.signOut()
-  window.sessionStorage.clear()
-})
 
 describe('useCreateUser', () => {
   it('registers the account and answers the stored one', async () => {

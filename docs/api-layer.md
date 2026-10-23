@@ -12,7 +12,7 @@ its hooks and read `error.failure`; they never see a status code, a header or a 
 | `apiConfig.ts` | The base URL (`http://localhost:8080`). No environment variable until the deployment layout is decided. |
 | `client.ts` | The typed `openapi-fetch` client (`api`) and its two middlewares: auth and logging. |
 | `unwrap.ts` | `unwrap(call)` / `unwrapEmpty(call)`: the only code that reads `error` from openapi-fetch. Turns every outcome that is not a success into a thrown `ApiRequestError`. |
-| `failure.ts` | The `ApiFailure` union, `failureFromResponse` (the one status → kind mapper, pure), `ApiRequestError`, `toApiFailure`, `isTransient`. |
+| `failure.ts` | The `ApiFailure` union, `failureFromResponse` (the one status → kind mapper, pure), `ApiRequestError`, `isTransient`. |
 | `tokenClaims.ts` | Reads the claims of the JWT (Zod): `sub` = username, `userId`, `roles` (`USER` / `ADMIN`, no `ROLE_` prefix), `exp`. The signature is **not** checked: the server stays the authority. |
 | `sessionStore.ts` | The session: an external store kept in `sessionStorage` (key `recettes.token`). The only reader of the token. |
 | `session.ts` | `useSession()`, `getSession()` (route loaders) and `signOut()`: the part of the store screens may use. |
@@ -47,7 +47,7 @@ Every failed call is an `ApiRequestError` whose `failure` is an `ApiFailure` (`f
 The French sentence for each kind is `failureMessage()` in `src/app` (the api layer holds no text). A screen that knows
 better overrides one kind (the login form says « identifiants incorrects » for a 401) and leaves the rest to it.
 
-TanStack Query: queries retry transient failures twice (`network`, `unavailable`, `server-error`; `isTransient`) and never a
+TanStack Query: queries retry transient failures twice (`network`, `unavailable`, `server-error`, `rate-limited`; `isTransient`, with TanStack's own backoff: `Retry-After` is not consulted) and never a
 4xx; mutations never retry, since the user decides whether to try again. `ApiRequestError` is registered as the default
 error type, so `query.error?.failure` is typed with no cast.
 

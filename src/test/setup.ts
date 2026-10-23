@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll } from 'vitest'
+import { sessionStore } from '../api/sessionStore'
 import { server } from './server'
 
 beforeAll(() => {
@@ -12,6 +13,9 @@ beforeAll(() => {
 afterEach(() => {
   cleanup()
   server.resetHandlers()
+  // The session is a module singleton backed by the tab's storage: no test may leak a member.
+  sessionStore.signOut()
+  if (typeof window !== 'undefined') window.sessionStorage.clear()
 })
 
 afterAll(() => {

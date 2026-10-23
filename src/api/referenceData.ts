@@ -16,7 +16,7 @@ export const referenceDataKeys = {
 export function useCategories() {
   return useQuery({
     queryKey: referenceDataKeys.categories,
-    queryFn: () => unwrap(api.GET('/categories')),
+    queryFn: ({ signal }) => unwrap(api.GET('/categories', { signal })),
   })
 }
 
@@ -24,20 +24,20 @@ export function useCategories() {
 export function useCategoryHierarchy() {
   return useQuery({
     queryKey: referenceDataKeys.categoryHierarchy,
-    queryFn: () => unwrap(api.GET('/categories/hierarchy')),
+    queryFn: ({ signal }) => unwrap(api.GET('/categories/hierarchy', { signal })),
   })
 }
 
 export function useTags() {
   return useQuery({
     queryKey: referenceDataKeys.tags,
-    queryFn: () => unwrap(api.GET('/tags')),
+    queryFn: ({ signal }) => unwrap(api.GET('/tags', { signal })),
   })
 }
 
 export function useUnits() {
   return useQuery({
     queryKey: referenceDataKeys.units,
-    queryFn: () => unwrap(api.GET('/units')),
+    queryFn: ({ signal }) => unwrap(api.GET('/units', { signal })),
   })
 }

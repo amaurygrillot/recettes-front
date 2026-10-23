@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { fakeToken } from '../test/fakeToken'
 import { problemResponse, rejectionOf } from '../test/problem'
 import { createQueryWrapper } from '../test/queryWrapper'
@@ -10,11 +10,6 @@ import { useLogin, useRequestPasswordReset } from './auth'
 import { sessionStore } from './sessionStore'
 
 const credentials = { username: 'camille', password: 'a-long-password' }
-
-afterEach(() => {
-  sessionStore.signOut()
-  window.sessionStorage.clear()
-})
 
 describe('useLogin', () => {
   it('starts the session from the token the back end answers as plain text', async () => {

@@ -75,9 +75,11 @@ export function createSessionStore(
     })
   }
 
-  function memberFrom(candidate: string): Member | null {
+  // `mustBeLive`: a resumed token is checked against the clock; a fresh one was just vouched for by
+  // the server, and a skewed device clock must not be able to refuse it.
+  function memberFrom(candidate: string, mustBeLive: boolean): Member | null {
     const claims = readTokenClaims(candidate)
-    if (claims === null || claims.expiresAt <= now()) return null
+    if (claims === null || (mustBeLive && claims.expiresAt <= now())) return null
     const { username, userId, roles } = claims
     return { status: 'member', username, userId, roles }
   }
@@ -85,7 +87,7 @@ export function createSessionStore(
   // A token left by a previous page load is resumed only while it can still be used.
   const stored = safely(() => storage.getItem(STORAGE_KEY), null)
   if (stored !== null) {
-    const resumed = memberFrom(stored)
+    const resumed = memberFrom(stored, true)
     if (resumed === null) {
       persist(null)
     } else {
@@ -104,8 +106,11 @@ export function createSessionStore(
     },
     getToken: () => token,
     signIn: (candidate) => {
-      const member = memberFrom(candidate)
-      if (member === null) return false
+      const member = memberFrom(candidate, false)
+      if (member === null) {
+        logger.warn('Sign-in refused: the token is not one the app can read')
+        return false
+      }
       commit(candidate, member)
       logger.info('Signed in', { roles: member.roles })
       return true

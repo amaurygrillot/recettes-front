@@ -14,7 +14,7 @@ const ingredientKeys = {
 export function useIngredientSearch(search: IngredientSearch) {
   return useQuery({
     queryKey: ingredientKeys.search(search),
-    queryFn: () => unwrap(api.GET('/ingredients', { params: { query: search } })),
+    queryFn: ({ signal }) => unwrap(api.GET('/ingredients', { params: { query: search }, signal })),
     placeholderData: keepPreviousData,
   })
 }

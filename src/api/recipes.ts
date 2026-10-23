@@ -24,15 +24,15 @@ export const recipeKeys = {
   detail: (id: string) => ['recipes', 'detail', id] as const,
 }
 
-function searchRecipes(filters: RecipeSearchFilters, page: number) {
-  return unwrap(api.GET('/recipes', { params: { query: { ...filters, page } } }))
+function searchRecipes(filters: RecipeSearchFilters, page: number, signal: AbortSignal) {
+  return unwrap(api.GET('/recipes', { params: { query: { ...filters, page } }, signal }))
 }
 
 /** The feed and the search results, a page at a time (« Voir plus » calls `fetchNextPage`). */
 export function useRecipeSearch(filters: RecipeSearchFilters) {
   return useInfiniteQuery({
     queryKey: recipeKeys.search(filters),
-    queryFn: ({ pageParam }) => searchRecipes(filters, pageParam),
+    queryFn: ({ pageParam, signal }) => searchRecipes(filters, pageParam, signal),
     initialPageParam: 0,
     // `last` is Spring's own flag; anything but an explicit `false` ends the list.
     getNextPageParam: (lastPage) =>
@@ -43,7 +43,7 @@ export function useRecipeSearch(filters: RecipeSearchFilters) {
 export function useRecipe(id: string) {
   return useQuery({
     queryKey: recipeKeys.detail(id),
-    queryFn: () => unwrap(api.GET('/recipes/{id}', { params: { path: { id } } })),
+    queryFn: ({ signal }) => unwrap(api.GET('/recipes/{id}', { params: { path: { id } }, signal })),
   })
 }
 

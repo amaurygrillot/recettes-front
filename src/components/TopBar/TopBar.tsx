@@ -16,7 +16,7 @@ export interface TopBarProps {
 }
 
 const TAB =
-  'inline-flex h-13 items-center gap-2.5 rounded-pill border-2 pr-4 pl-3 text-body whitespace-nowrap'
+  'inline-flex h-14 items-center gap-2.5 rounded-pill border-2 pr-4 pl-3 text-body whitespace-nowrap'
 const TAB_ACTIVE = 'border-ink-900 bg-butter-300 font-bold text-ink-900'
 const TAB_IDLE =
   'border-transparent text-ink-700 hover:bg-butter-100 hover:text-ink-900 active:border-dashed active:border-ink-900 active:bg-butter-200 active:text-ink-900'
@@ -25,7 +25,7 @@ function BarLink({ item }: { item: NavigationItem }) {
   return (
     <NavLink
       to={item.to}
-      end={item.to === '/'}
+      end={item.end ?? false}
       className={({ isActive }) => classNames(TAB, isActive ? TAB_ACTIVE : TAB_IDLE)}
     >
       {({ isActive }) => (
@@ -62,7 +62,7 @@ export function TopBar({ label, homeLabel, items, createAction }: TopBarProps) {
         {createAction && (
           <Link
             to={createAction.to}
-            className="mr-1 inline-flex h-13 items-center gap-2 rounded-l border-2 border-ink-900 bg-butter-300 pr-5 pl-3.5 text-body font-bold whitespace-nowrap text-ink-900 shadow-stamp-sm hover:bg-butter-400 focus-visible:outline-offset-4 active:translate-0.5 active:bg-mustard-500 active:shadow-none"
+            className="mr-1 inline-flex h-16 items-center gap-2 rounded-l border-2 border-ink-900 bg-butter-300 pr-5 pl-3.5 text-body font-bold whitespace-nowrap text-ink-900 shadow-stamp-sm hover:bg-butter-400 focus-visible:outline-offset-4 active:translate-0.5 active:bg-mustard-500 active:shadow-none"
           >
             <Icon name="plus" strokeWidth={3} />
             {createAction.label}

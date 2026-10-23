@@ -1,13 +1,8 @@
 import { act, renderHook } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { fakeToken } from '../test/fakeToken'
 import { getSession, signOut, useSession } from './session'
 import { sessionStore } from './sessionStore'
-
-afterEach(() => {
-  sessionStore.signOut()
-  window.sessionStorage.clear()
-})
 
 describe('useSession', () => {
   it('follows the session as it changes', () => {

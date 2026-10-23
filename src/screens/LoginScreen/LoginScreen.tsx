@@ -15,7 +15,7 @@ export function LoginScreen() {
   const { register, errors, isPending, failureText, submit } = useLoginForm()
 
   return (
-    <main className="max-w-md mx-auto flex min-h-dvh flex-col justify-center gap-6 px-4 py-10">
+    <main className="mx-auto flex min-h-dvh max-w-reading flex-col justify-center gap-6 px-4 py-10">
       <div className="flex flex-col items-center gap-4">
         <Logo variant="seal" size={160} decorative />
         <h1 className="font-title text-title-1">{strings.title}</h1>

@@ -81,6 +81,8 @@ const BOUNDARY_POLICIES = [
   allowImports('screen', 'component', 'api', 'lib', 'app'),
   allowImports('component', 'component', 'lib'),
   allowImports('api', 'lib'),
+  // The test setup resets the session between tests.
+  allowImports('test-support', 'api'),
   {
     from: { file: { categories: 'test' } },
     allow: { to: { element: { type: 'test-support' } } },

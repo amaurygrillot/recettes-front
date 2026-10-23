@@ -43,10 +43,14 @@ export function createLogger(sink: LogSink, threshold: LogThreshold): Logger {
 }
 
 // Quiet in production (problems only) and in tests (they assert on behaviour, not on the console).
-const THRESHOLD_BY_MODE: Record<string, LogThreshold> = { production: 'warn', test: 'silent' }
+const THRESHOLD_BY_MODE: Record<string, LogThreshold> = {
+  development: 'debug',
+  production: 'warn',
+  test: 'silent',
+}
 
 /** The application's logger: the one place allowed to write to the console. */
 export const logger: Logger = createLogger(
   console,
-  THRESHOLD_BY_MODE[import.meta.env.MODE] ?? 'debug',
+  THRESHOLD_BY_MODE[import.meta.env.MODE] ?? 'warn',
 )

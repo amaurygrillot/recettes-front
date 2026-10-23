@@ -6,12 +6,12 @@ import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilit
 import { TabBar, type CreateAction, type NavigationItem } from './TabBar'
 
 const VISITOR_TABS: readonly NavigationItem[] = [
-  { to: '/', label: 'Accueil', icon: 'home' },
+  { to: '/', label: 'Accueil', icon: 'home', end: true },
   { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/connexion', label: 'Se connecter', icon: 'log-in' },
 ]
 const MEMBER_TABS: readonly NavigationItem[] = [
-  { to: '/', label: 'Accueil', icon: 'home' },
+  { to: '/', label: 'Accueil', icon: 'home', end: true },
   { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/mes-recettes', label: 'Mes recettes', icon: 'book' },
   { to: '/compte', label: 'Compte', icon: 'user' },

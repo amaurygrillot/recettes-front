@@ -7,12 +7,12 @@ import type { CreateAction, NavigationItem } from '../TabBar/TabBar'
 import { TopBar } from './TopBar'
 
 const VISITOR_TABS: readonly NavigationItem[] = [
-  { to: '/', label: 'Accueil', icon: 'home' },
+  { to: '/', label: 'Accueil', icon: 'home', end: true },
   { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/connexion', label: 'Se connecter', icon: 'log-in' },
 ]
 const MEMBER_TABS: readonly NavigationItem[] = [
-  { to: '/', label: 'Accueil', icon: 'home' },
+  { to: '/', label: 'Accueil', icon: 'home', end: true },
   { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/mes-recettes', label: 'Mes recettes', icon: 'book' },
   { to: '/compte', label: 'Compte', icon: 'user' },

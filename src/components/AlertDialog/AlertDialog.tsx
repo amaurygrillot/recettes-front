@@ -35,7 +35,7 @@ export function AlertDialog({ open, icon, title, description, children }: AlertD
                 event.currentTarget.querySelector<HTMLElement>('button, a[href]')?.focus()
               }
             }}
-            className="max-w-md flex w-full flex-col gap-3.5 rounded-xl border-2 border-ink-900 bg-paper-50 px-5 pt-6 pb-5 shadow-sheet"
+            className="flex w-full max-w-reading flex-col gap-3.5 rounded-xl border-2 border-ink-900 bg-paper-50 px-5 pt-6 pb-5 shadow-sheet"
           >
             <div className="grid size-14 shrink-0 place-items-center self-center rounded-full border-3 border-ink-900 bg-butter-200 text-ink-900">
               <Icon name={icon} size={28} strokeWidth={2.4} />
