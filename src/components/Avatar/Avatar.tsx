@@ -9,6 +9,8 @@ export interface AvatarProps {
   name?: string | undefined
   /** 40 in lists, 56 as a button, 72 for a profile, 96 on the account page. */
   size?: number
+  /** Hide it from assistive technology when the name is already given next to it (a link « Compte »). */
+  decorative?: boolean
 }
 
 // Six pairs, each readable (4.5:1 at least). The colour is picked from the name, never at random.
@@ -24,15 +26,18 @@ const PALETTES = [
 const BASE = 'inline-flex shrink-0 items-center justify-center rounded-full'
 const LARGE_FROM = 96
 
-export function Avatar({ name = '', size = 56 }: AvatarProps) {
+function accessibility(label: string, decorative: boolean) {
+  return decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': label }
+}
+
+export function Avatar({ name = '', size = 56, decorative = false }: AvatarProps) {
   const fullName = name.trim()
   const initials = getInitials(fullName)
 
   if (!initials) {
     return (
       <span
-        role="img"
-        aria-label={strings.anonymous}
+        {...accessibility(strings.anonymous, decorative)}
         style={{ width: size, height: size }}
         className={classNames(
           BASE,
@@ -48,8 +53,7 @@ export function Avatar({ name = '', size = 56 }: AvatarProps) {
 
   return (
     <span
-      role="img"
-      aria-label={fullName}
+      {...accessibility(fullName, decorative)}
       style={{ width: size, height: size, fontSize: size * 0.4 }}
       className={classNames(
         BASE,

@@ -16,22 +16,30 @@ const MEMBER_TABS: readonly NavigationItem[] = [
   { to: '/mes-recettes', label: 'Mes recettes', icon: 'book' },
   { to: '/compte', label: 'Compte', icon: 'user' },
 ]
-const CREATE: CreateAction = { to: '/recettes/nouvelle', label: 'Créer une recette' }
+const CREATE: CreateAction = { to: '/recettes/nouvelle', label: 'Nouvelle recette' }
 
 interface BarOptions {
   path?: string
   createAction?: CreateAction
+  createExpanded?: boolean
 }
 
 function renderBar(
   items: readonly NavigationItem[],
-  { path = '/', createAction }: BarOptions = {},
+  { path = '/', createAction, createExpanded }: BarOptions = {},
 ) {
   const router = createMemoryRouter(
     [
       {
         path: '*',
-        element: <TabBar label="Navigation principale" items={items} createAction={createAction} />,
+        element: (
+          <TabBar
+            label="Navigation principale"
+            items={items}
+            createAction={createAction}
+            createExpanded={createExpanded}
+          />
+        ),
       },
     ],
     { initialEntries: [path] },
@@ -94,7 +102,7 @@ describe('TabBar', () => {
     it('is a link that creates a recipe, named for assistive technology', () => {
       renderBar(MEMBER_TABS, { createAction: CREATE })
 
-      expect(screen.getByRole('link', { name: 'Créer une recette' })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: 'Nouvelle recette' })).toHaveAttribute(
         'href',
         '/recettes/nouvelle',
       )
@@ -104,22 +112,40 @@ describe('TabBar', () => {
       renderBar(MEMBER_TABS, { createAction: CREATE })
 
       const navigation = screen.getByRole('navigation')
-      expect(within(navigation).queryByRole('link', { name: 'Créer une recette' })).toBeNull()
+      expect(within(navigation).queryByRole('link', { name: 'Nouvelle recette' })).toBeNull()
+    })
+
+    it('is round by default: only the plus, named by its label', () => {
+      renderBar(MEMBER_TABS, { createAction: CREATE })
+
+      expect(screen.getByRole('link', { name: 'Nouvelle recette' })).toHaveTextContent('')
+    })
+
+    it('can show its label next to the plus, under the same name', () => {
+      renderBar(MEMBER_TABS, { createAction: CREATE, createExpanded: true })
+
+      const create = screen.getByRole('link', { name: 'Nouvelle recette' })
+      expect(create).toHaveTextContent('Nouvelle recette')
+      expect(create).toHaveAttribute('href', '/recettes/nouvelle')
     })
 
     it('is absent when there is nothing to create', () => {
       renderBar(VISITOR_TABS)
 
-      expect(screen.queryByRole('link', { name: 'Créer une recette' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: 'Nouvelle recette' })).not.toBeInTheDocument()
     })
   })
 
   it.each([
-    ['a visitor', VISITOR_TABS, undefined],
-    ['a member', MEMBER_TABS, CREATE],
-  ])('has no accessibility violation for %s', async (_name, items, createAction) => {
-    const { container } = renderBar(items, createAction ? { createAction } : {})
+    ['a visitor', VISITOR_TABS, undefined, false],
+    ['a member', MEMBER_TABS, CREATE, false],
+    ['a member, with the extended « + »', MEMBER_TABS, CREATE, true],
+  ])(
+    'has no accessibility violation for %s',
+    async (_name, items, createAction, createExpanded) => {
+      const { container } = renderBar(items, createAction ? { createAction, createExpanded } : {})
 
-    await expectNoAccessibilityViolations(container)
-  })
+      await expectNoAccessibilityViolations(container)
+    },
+  )
 })

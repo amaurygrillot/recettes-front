@@ -15,9 +15,10 @@ export const strings = {
     myRecipes: 'Mes recettes',
     account: 'Compte',
     login: 'Se connecter',
-    // The round button has no visible text; the desktop button does.
-    createRecipeButton: 'Créer une recette',
+    // One name for the « + » whether it shows its text or only the plus (a visible label has to be
+    // part of the accessible name, and the name should not change as the page scrolls).
     newRecipe: 'Nouvelle recette',
+    searchField: 'Chercher une recette',
   },
 
   sessionExpired: {

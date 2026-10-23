@@ -25,6 +25,23 @@ export const paths = {
   account: '/compte',
 } as const
 
+/** What the search page can be opened with, from the home page or the bar. The search page reads these two parameters. */
+interface SearchPreset {
+  /** Opens with this category already chosen. */
+  categoryId?: string | undefined
+  /** Opens with this text in the title search. */
+  query?: string | undefined
+}
+
+/** The search page, opened on a category or a text when there is one. */
+export function searchPath({ categoryId, query }: SearchPreset = {}): string {
+  const parameters = new URLSearchParams()
+  if (categoryId) parameters.set('categorie', categoryId)
+  if (query) parameters.set('q', query)
+  const queryString = parameters.toString()
+  return queryString === '' ? paths.search : `${paths.search}?${queryString}`
+}
+
 const RETURN_PARAMETER = 'retour'
 // Only used to read a path with the URL parser; no request is ever made to it.
 const PLACEHOLDER_ORIGIN = 'http://app.invalid'

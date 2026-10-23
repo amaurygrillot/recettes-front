@@ -36,6 +36,11 @@ export function ButtonsSection() {
             {buttons.longLabel}
           </Button>
         </StyleguideSpecimen>
+        <StyleguideSpecimen label={buttons.busy}>
+          <Button variant="secondary" fullWidth busy>
+            {buttons.waiting}
+          </Button>
+        </StyleguideSpecimen>
       </div>
     </StyleguideSection>
   )

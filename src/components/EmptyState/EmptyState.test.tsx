@@ -51,6 +51,22 @@ describe('EmptyState', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
+  it.each(['regular', 'compact'] as const)('keeps its content at its %s size', (size) => {
+    render(
+      <EmptyState
+        illustration={<BowlIllustration variant="no-result" size={size} />}
+        title="Rien ne correspond"
+        description="Retire un filtre ou deux."
+        size={size}
+      >
+        <Button variant="secondary">Effacer les filtres</Button>
+      </EmptyState>,
+    )
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Rien ne correspond' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Effacer les filtres' })).toBeVisible()
+  })
+
   it('has no accessibility violation', async () => {
     const { container } = render(
       <EmptyState

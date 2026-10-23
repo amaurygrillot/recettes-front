@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { loginPath, paths, returnPathFrom } from './paths'
+import { loginPath, paths, returnPathFrom, searchPath } from './paths'
 
 describe('paths', () => {
   it('builds the URLs that take an id', () => {
@@ -10,6 +10,31 @@ describe('paths', () => {
 
   it('keeps the password-reset path the back end writes in its e-mails', () => {
     expect(paths.resetPassword).toBe('/reset-password')
+  })
+})
+
+describe('searchPath', () => {
+  it.each([
+    ['nothing to preset', {}, '/rechercher'],
+    ['a category', { categoryId: 'c-1' }, '/rechercher?categorie=c-1'],
+    ['a text', { query: 'gratin' }, '/rechercher?q=gratin'],
+    [
+      'a text and a category',
+      { categoryId: 'c-1', query: 'gratin' },
+      '/rechercher?categorie=c-1&q=gratin',
+    ],
+    ['an empty text', { query: '' }, '/rechercher'],
+    [
+      'a text that needs escaping',
+      { query: 'tarte & crème' },
+      '/rechercher?q=tarte+%26+cr%C3%A8me',
+    ],
+  ])('opens the search page with %s', (_name, preset, expected) => {
+    expect(searchPath(preset)).toBe(expected)
+  })
+
+  it('is the plain search page when called with no argument', () => {
+    expect(searchPath()).toBe(paths.search)
   })
 })
 

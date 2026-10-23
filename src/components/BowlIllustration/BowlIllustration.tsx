@@ -1,17 +1,22 @@
 export interface BowlIllustrationProps {
   /** `first-visit`: a bowl with a few grains and chopsticks. `no-result`: an empty bowl. */
   variant: 'first-visit' | 'no-result'
+  /** `regular` (176 px wide) for a page of its own; `compact` (140 px) for a block among others. */
+  size?: 'regular' | 'compact'
 }
 
+const WIDTHS = { regular: 176, compact: 140 }
+
 /** Ink-line bowl for empty states (« Retours et chargement » board): never a face, never a character. */
-export function BowlIllustration({ variant }: BowlIllustrationProps) {
+export function BowlIllustration({ variant, size = 'regular' }: BowlIllustrationProps) {
   const hasGrains = variant === 'first-visit'
+  const width = WIDTHS[size]
 
   return (
     <svg
       viewBox="0 0 160 120"
-      width={176}
-      height={132}
+      width={width}
+      height={(width * 3) / 4}
       aria-hidden="true"
       className="shrink-0 stroke-ink-900"
     >

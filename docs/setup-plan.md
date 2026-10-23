@@ -36,6 +36,12 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   loader (it runs on entry, so a member whose session expires stays on the page and the dialog takes over). Decisions and divergences
   between boards are in [design-boards.md](design-boards.md#the-shell-m4).
 
+- **M5 · HomeScreen — done (2026-10-23).** `/` shows the feed, the category shortcuts and every state of the boards, against the
+  real API (checked live: categories answered, the feed was empty because the database has no recipe; the cards, the pages and
+  the failures were checked with a mocked back end in the browser pane at 390, 768 and 1280 px). Shared work it needed: the
+  desktop bar of the later boards, the extended « + », `CreateLink`, `Spinner` and `Button busy`, compact `EmptyState` /
+  `ErrorState`, the page-title tokens, a vendor chunk split. Not exercised live: « Voir plus » (no recipes in the database).
+
 ## Code organisation
 
 ```
@@ -124,7 +130,7 @@ handling, the bottom tab bar (visitor and member variants) and the top bar from 
 *Done when:* navigation works for a visitor and a logged-in user on phone and desktop widths, and a protected route
 redirects a visitor to the login screen then back.
 
-**M5 · HomeScreen end to end.** Implemented from the canvas boards listed in
+**M5 · HomeScreen end to end — done (2026-10-23).** See [design-boards.md](design-boards.md#homescreen-m5). Implemented from the canvas boards listed in
 [design-boards.md](design-boards.md), against the real API: category shortcuts, recipe feed, « Voir plus »
 (infinite query), skeletons, error, empty, visitor and member variants. *Done when:* it matches the boards at 390, 768 and
 1280 px and every state is tested. **This screen is the quality template for all the others.**
@@ -142,8 +148,10 @@ the `RichTextEditor` (Lexical) and `RichTextView` components first.
   password show/hide toggle (`Champs-avances` board), the brick outline on the field concerned by a refused login, and the
   registration, forgot-password and reset-password screens that its links lead to (placeholders today). The first field stays
   « Nom d'utilisateur » until the board's « Adresse e-mail » is reconciled with the API, which logs in by username only.
-- **Reconcile the desktop bar and the extended « + »** with the home boards when building M5: see
-  [design-boards.md](design-boards.md#the-shell-m4).
+- **Each screen adds its own desktop « Nouvelle recette »** where its board draws it (the bar no longer has one, since M5);
+  until then the placeholders have none. SearchScreen also reads `?categorie=` and `?q=` ([design-boards.md](design-boards.md#the-shell-m4)),
+  promotes `RecipeCard` from `screens/HomeScreen/components` to `src/components` (its second user), and may keep the bar's
+  search field in step with the page's text.
 - **API hooks not built yet**: admin writes on categories, tags and units, ingredient rename and delete, and the by-id reads of
   reference data. Add them, with their status tests, with the first screen that needs them ([api-layer.md](api-layer.md)).
 

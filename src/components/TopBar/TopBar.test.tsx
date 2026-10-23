@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
-import type { CreateAction, NavigationItem } from '../TabBar/TabBar'
+import type { NavigationItem } from '../TabBar/TabBar'
 import { TopBar } from './TopBar'
 
 const VISITOR_TABS: readonly NavigationItem[] = [
@@ -15,18 +15,17 @@ const MEMBER_TABS: readonly NavigationItem[] = [
   { to: '/', label: 'Accueil', icon: 'home', end: true },
   { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/mes-recettes', label: 'Mes recettes', icon: 'book' },
-  { to: '/compte', label: 'Compte', icon: 'user' },
+  { to: '/compte', label: 'Compte', icon: 'user', avatarName: 'Camille Durand' },
 ]
-const CREATE: CreateAction = { to: '/recettes/nouvelle', label: 'Nouvelle recette' }
 
 interface BarOptions {
   path?: string
-  createAction?: CreateAction
+  withSearch?: boolean
 }
 
 function renderBar(
   items: readonly NavigationItem[],
-  { path = '/', createAction }: BarOptions = {},
+  { path = '/', withSearch = false }: BarOptions = {},
 ) {
   const router = createMemoryRouter(
     [
@@ -37,7 +36,7 @@ function renderBar(
             label="Navigation principale, ordinateur"
             homeLabel="Il en reste un peu, retour à l'accueil"
             items={items}
-            createAction={createAction}
+            search={withSearch ? <input type="search" aria-label="Chercher une recette" /> : null}
           />
         ),
       },
@@ -47,12 +46,13 @@ function renderBar(
   return { router, ...render(<RouterProvider router={router} />) }
 }
 
-/** The links of the bar after the logo, in the order they are laid out. */
-function barLabels(): (string | null)[] {
-  return within(screen.getByRole('navigation'))
-    .getAllByRole('link')
-    .slice(1)
-    .map((link) => link.textContent)
+/** Fails unless the links of the bar after the logo are named like this, in this order. */
+function expectBarLabels(labels: readonly string[]) {
+  const links = within(screen.getByRole('navigation')).getAllByRole('link').slice(1)
+  expect(links).toHaveLength(labels.length)
+  links.forEach((link, position) => {
+    expect(link).toHaveAccessibleName(labels[position])
+  })
 }
 
 describe('TopBar', () => {
@@ -78,7 +78,7 @@ describe('TopBar', () => {
   ])('shows the same tabs as the phone for %s, in the same order', (_name, items) => {
     renderBar(items)
 
-    expect(barLabels()).toEqual(items.map((item) => item.label))
+    expectBarLabels(items.map((item) => item.label))
   })
 
   it('marks the page you are on, and only it, with aria-current', () => {
@@ -88,41 +88,57 @@ describe('TopBar', () => {
     expect(current.map((link) => link.textContent)).toEqual(['Rechercher'])
   })
 
-  it('puts the create button before the account, at the right of the bar', () => {
-    renderBar(MEMBER_TABS, { createAction: CREATE })
+  it('puts the search field between the tabs and the account', () => {
+    renderBar(MEMBER_TABS, { withSearch: true })
 
-    expect(barLabels()).toEqual([
-      'Accueil',
-      'Rechercher',
-      'Mes recettes',
-      'Nouvelle recette',
-      'Compte',
-    ])
+    const bar = within(screen.getByRole('navigation'))
+    const searchField = bar.getByRole('searchbox', { name: 'Chercher une recette' })
+    const myRecipes = bar.getByRole('link', { name: 'Mes recettes' })
+    const account = bar.getByRole('link', { name: 'Compte' })
+
+    expect(myRecipes.compareDocumentPosition(searchField)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(searchField.compareDocumentPosition(account)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
   })
 
-  it('has no create button for a visitor', () => {
+  it("shows the member's avatar on the account tab without adding it to the tab's name", () => {
+    renderBar(MEMBER_TABS)
+
+    const account = screen.getByRole('link', { name: 'Compte' })
+    expect(account).toHaveTextContent('CD')
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it("shows the account's icon instead when there is no avatar to show", () => {
     renderBar(VISITOR_TABS)
+
+    const login = screen.getByRole('link', { name: 'Se connecter' })
+    expect(login.querySelector('svg')).toBeInTheDocument()
+    expect(login).not.toHaveTextContent(/^\p{Lu}{1,2}Se/u)
+  })
+
+  it('has no create button: the page that has a feed brings its own', () => {
+    renderBar(MEMBER_TABS)
 
     expect(screen.queryByRole('link', { name: 'Nouvelle recette' })).not.toBeInTheDocument()
   })
 
   it('follows a link with the mouse and the keyboard', async () => {
     const user = userEvent.setup()
-    const { router } = renderBar(MEMBER_TABS, { createAction: CREATE })
+    const { router } = renderBar(MEMBER_TABS)
 
     await user.click(screen.getByRole('link', { name: 'Compte' }))
     expect(router.state.location.pathname).toBe('/compte')
 
-    screen.getByRole('link', { name: 'Nouvelle recette' }).focus()
+    screen.getByRole('link', { name: 'Rechercher' }).focus()
     await user.keyboard('{Enter}')
-    expect(router.state.location.pathname).toBe('/recettes/nouvelle')
+    expect(router.state.location.pathname).toBe('/rechercher')
   })
 
   it.each([
-    ['a visitor', VISITOR_TABS, undefined],
-    ['a member', MEMBER_TABS, CREATE],
-  ])('has no accessibility violation for %s', async (_name, items, createAction) => {
-    const { container } = renderBar(items, createAction ? { createAction } : {})
+    ['a visitor', VISITOR_TABS],
+    ['a member', MEMBER_TABS],
+  ])('has no accessibility violation for %s', async (_name, items) => {
+    const { container } = renderBar(items, { withSearch: true })
 
     await expectNoAccessibilityViolations(container)
   })

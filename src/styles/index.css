@@ -96,6 +96,18 @@
   --text-caption--line-height: 1.25rem;
   --text-annotation: 1.625rem;
   --text-annotation--line-height: 1.75rem;
+  /* The note under a page title (« les dernières recettes de la famille »): Kalam's 24 px floor. */
+  --text-annotation-sm: 1.5rem;
+  --text-annotation-sm--line-height: 1.8rem;
+  /* Title of a page's main block, as the home boards draw it: 30/36 on phone and tablet, 36/42 on desktop. */
+  --text-page-title: 1.875rem;
+  --text-page-title--line-height: 2.25rem;
+  --text-page-title--font-weight: 800;
+  --text-page-title--letter-spacing: -0.01em;
+  --text-page-title-lg: 2.25rem;
+  --text-page-title-lg--line-height: 2.625rem;
+  --text-page-title-lg--font-weight: 800;
+  --text-page-title-lg--letter-spacing: -0.01em;
 
   /* Radii: the bigger the object, the rounder its corners. */
   --radius-s: 0.5rem;
@@ -119,6 +131,13 @@
   --container-reading: 42.5rem;
 
   --animate-skeleton: skeleton 1.4s ease-in-out infinite;
+  --animate-spinner: spinner 0.9s linear infinite;
+
+  @keyframes spinner {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
   @keyframes skeleton {
     0%,
@@ -146,6 +165,24 @@
     background-color: var(--color-disabled-bg);
     color: var(--color-disabled-text);
     box-shadow: none;
+  }
+}
+
+/* The stand-in of a recipe without a photo: butter stripes, same 4:3 frame as a photo. */
+@utility bg-butter-stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-butter-200) 0 1rem,
+    var(--color-butter-300) 1rem 2rem
+  );
+}
+
+/* A row that scrolls sideways by touch or keyboard, without a scrollbar drawn over its tiles. */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 

@@ -124,6 +124,10 @@ Re-check when a new version of `@boundaries/elements` is out.
   is 37 kB) but is what keeps the large titles drawn like the canvas; switch to `wght.css` only if first-load weight ever
   matters more than that. Kalam is declared and loaded but not used yet (`font-hand` has no consumer); fontsource also ships a
   `.woff` next to each `.woff2`, which Vite copies into `dist` and no supported browser requests.
+- **Bundle split.** `vite.config.ts` puts React and the other libraries in two chunks of their own (`react`, `vendor`):
+  with the home screen the single entry chunk went from 499 kB to 534 kB and Vite warned (500 kB). The split also keeps the
+  libraries cached across releases. Rolldown spells it `build.rolldownOptions.output.codeSplitting.groups`; the first matching
+  group wins.
 - **Prettier** ignores `*.md`: the documentation is hand-wrapped. Its Tailwind plugin sorts classes, including inside
   `classNames(...)`.
 

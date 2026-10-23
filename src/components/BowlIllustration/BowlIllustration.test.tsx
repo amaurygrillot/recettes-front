@@ -13,6 +13,16 @@ describe('BowlIllustration', () => {
     },
   )
 
+  it.each([
+    ['regular', '176', '132'],
+    ['compact', '140', '105'],
+  ] as const)('is %s: %s by %s px', (size, width, height) => {
+    const { container } = render(<BowlIllustration variant="first-visit" size={size} />)
+
+    expect(container.querySelector('svg')).toHaveAttribute('width', width)
+    expect(container.querySelector('svg')).toHaveAttribute('height', height)
+  })
+
   it('has no accessibility violation', async () => {
     const { container } = render(
       <div>
