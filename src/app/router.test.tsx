@@ -157,7 +157,8 @@ describe('the full-screen pages', () => {
   it.each([
     ['/inscription', 'Créer un compte'],
     ['/mot-de-passe-oublie', 'Mot de passe oublié'],
-    ['/reset-password', 'Nouveau mot de passe'],
+    ['/reset-password?token=abc&email=camille%40example.org', 'Nouveau mot de passe'],
+    ['/reset-password', "Ce lien n'est plus valable"],
     ['/recettes/42/pas-a-pas', 'Pas à pas'],
   ])('serves %s with no navigation', async (path, title) => {
     renderRoutes(routes, path)

@@ -35,6 +35,8 @@ export function useLoginForm() {
     register: form.register,
     errors: form.formState.errors,
     isPending: login.isPending,
+    /** The login was refused (401): the password is the field to retype. */
+    rejected: login.error?.failure.kind === 'unauthorized',
     failureText: login.error === null ? null : loginFailureText(login.error.failure),
     submit,
   }

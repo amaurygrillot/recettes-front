@@ -79,6 +79,64 @@ describe('TextField', () => {
     })
   })
 
+  describe('with a note on its label', () => {
+    it('says it next to the label, and the label still names the field', () => {
+      render(<TextField label="Prénom" note="facultatif" />)
+
+      expect(screen.getByLabelText(/Prénom/)).toBeVisible()
+      expect(screen.getByText('facultatif')).toBeVisible()
+    })
+  })
+
+  describe('with a hint that is a rule now kept', () => {
+    it('keeps the hint as the description and the field valid, with a tick before it', () => {
+      const { container } = render(
+        <TextField label="Mot de passe" hint="8 caractères minimum" hintMet />,
+      )
+
+      const field = screen.getByLabelText('Mot de passe')
+      expect(field).toHaveAccessibleDescription('8 caractères minimum')
+      expect(field).toBeValid()
+      expect(container.querySelector('p svg')).toBeInTheDocument()
+    })
+
+    it('shows nothing more than the hint while the rule is not kept', () => {
+      const { container } = render(<TextField label="Mot de passe" hint="8 caractères minimum" />)
+
+      expect(container.querySelector('p svg')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('marked invalid without a message', () => {
+    it('is invalid and has no description: the form says why elsewhere', () => {
+      render(<TextField label="Mot de passe" invalid />)
+
+      const field = screen.getByLabelText('Mot de passe')
+      expect(field).toBeInvalid()
+      expect(field).toHaveAccessibleDescription('')
+    })
+  })
+
+  describe('with a trailing control', () => {
+    it('shows it inside the field and keeps it reachable', async () => {
+      const onClick = vi.fn()
+      render(
+        <TextField
+          label="Mot de passe"
+          trailing={
+            <button type="button" onClick={onClick}>
+              Afficher
+            </button>
+          }
+        />,
+      )
+
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Afficher' }))
+
+      expect(onClick).toHaveBeenCalledOnce()
+    })
+  })
+
   describe('when disabled', () => {
     it('cannot be typed in', async () => {
       render(<TextField label="Auteur" defaultValue="Ajouté par Amaury" disabled />)
@@ -98,6 +156,8 @@ describe('TextField', () => {
         <TextField label="Rempli" defaultValue="Gratin dauphinois" />
         <TextField label="Erreur" error="Il manque un titre." />
         <TextField label="Succès" type="email" success="Adresse valide." />
+        <TextField label="Règle tenue" hint="8 caractères minimum" hintMet note="facultatif" />
+        <TextField label="Refusé" invalid />
         <TextField
           label="Désactivé"
           disabled

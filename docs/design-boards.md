@@ -13,7 +13,8 @@ values are in [design-tokens.md](design-tokens.md); the canvas remains the sourc
 | RecipeScreen | `Fiche-haut` · `Fiche-corps` · `Fiche-audiences` · `Fiche-etats` · `Fiche-grands-ecrans` |
 | CookingScreen | `Pas-a-pas-entree` · `Pas-a-pas-etape` · `Pas-a-pas-fin` · `Pas-a-pas-etats` · `Pas-a-pas-grands-ecrans` |
 | RecipeEditorScreen | `Editeur-cadre` · `Editeur-texte-riche` · `Editeur-categories-tags` · `Editeur-photos` · `Editeur-ingredients` · `Editeur-etapes-conseil` · `Editeur-validation` · `Editeur-session-droits` · `Editeur-grands-ecrans` |
-| Auth and account | Added to the canvas after this table was written: find the registration, forgot-password, reset-password and account boards in `canvas.json`, then list them here. |
+| Auth screens | `Marque-ecrans` (sign-in) · `Compte-inscription` · `Compte-mot-de-passe-oublie` · `Compte-nouveau-mot-de-passe` · `Compte-public-grands-ecrans` |
+| AccountScreen | `Compte-page` · `Compte-etats` · `Compte-grands-ecrans` |
 
 The boards contain sample data (recipe names, « 35 min · 4 personnes · facile ») that the API cannot provide. Treat it as
 illustration, never as a requirement.
@@ -138,3 +139,39 @@ Public: the content is the same for a visitor, a member and the author; only the
   shared link still has a way back.
 - **States**: loading (a skeleton of the page, announced once), `404` (the only `h1` of the page: « Cette recette n'existe pas ou a été
   supprimée », a link to the search), network error and every other failure with the sentence of its cause and « Réessayer ».
+
+## Auth screens: sign-in, registration, forgotten and new password
+
+Built from `Marque-ecrans` (sign-in), `Compte-inscription`, `Compte-mot-de-passe-oublie`, `Compte-nouveau-mot-de-passe` and
+`Compte-public-grands-ecrans` (the tablet and desktop versions of the three last), checked at 390, 768 and 1280 px. They are
+full-screen pages (no tabs, no top bar) built on one `AuthFrame`: a butter band with the seal (232 px high, 160 px seal; the sign-in
+250 / 196; the welcome 280 / 196) and the way back, « Retour », as a 52 px pill in its corner. From 600 px the band disappears into a
+calm striped background (`bg-calm-stripes`, the two palest butters), the seal sits above a centred 520 px card (radius 24, 28 / 32
+padding). **The sign-in is the exception from 1024 px**: a 960 px card with the butter panel (300 px seal) beside the form, on the plain
+page, as `Marque-ecrans` draws it. The routes are lazy: an entry screen costs nothing to the pages everybody opens.
+
+- **Sign-in (`/connexion`)**: the field stays « Nom d'utilisateur » (the API logs in by username; the board says « Adresse e-mail »).
+  A refused login (401) is one banner on top and the **password** field in its brick frame (`TextField invalid`, no message of its own);
+  what was typed stays. The password has the show / hide eye. Two deviations from the boards: on a **tablet** it is the same card as the
+  other entry screens (`Marque-ecrans` has no tablet), and on a **desktop** « Créer un compte » stays under the form (the board's
+  desktop version omits it, which would leave no way to register).
+- **Registration (`/inscription`)**: five fields (username 3–50, address, password 8–50 with the live rule, first name and last name
+  « facultatif », sent only when filled). `autocomplete` values as the board lists them. A `409` is said **by the field it is about**:
+  the back end puts it in the problem's `detail` (« Username already exists » / « Email already exists »; `conflictedField.ts` reads it),
+  the field is framed and focused, the rest is kept, and for an address « Mot de passe oublié ? » is offered right away. A conflict whose
+  detail names neither is one sentence on top. Then the **welcome**: « Bienvenue, odile74 ! ». The creation of the account is followed
+  by the sign-in with what was typed (« On t'installe à table… », a busy « Connexion… » button), then « Te voilà connecté. » and
+  « Découvrir les recettes ». If that automatic sign-in fails, the account is still theirs: a banner and a « Se connecter » link.
+- **Forgotten password (`/mot-de-passe-oublie`)**: only the shape of the address is checked. The confirmation (« Regarde ta boîte mail ») is
+  the same for every address and never repeats it; « Renvoyer un e-mail » waits for a written countdown (`role="timer"`, 60 seconds: the
+  board's « 42 s » has no stated start, 60 is a pause, not a rule of the back end). A network failure has the board's banner with
+  « Réessayer »; the other causes use their own sentence, with « Réessayer » when trying again can work.
+- **New password (`/reset-password?token=…&email=…`, a path fixed by the back end)**: the account is named with its address masked
+  (`o***@exemple.fr`), the first field has the eye and the rule, the confirmation stays hidden and says « Les deux mots de passe ne sont pas
+  identiques. ». **One state** for every link that does not work: unknown, expired or used token (all the same `400`), and an address opened
+  without a token or with something that is not an address (no request is made). Success is « Mot de passe modifié » and a « Se connecter »
+  button: nobody is signed in on their behalf. These two screens have no « Retour »: the member came from an e-mail.
+- **Common**: the screen that replaces a form (welcome, confirmation, result) takes the focus on its title (`useFocusOnMount`), so a
+  keyboard or screen-reader user is not left on a control that is gone. While a request runs the fields are locked (dashed) and the
+  button is `busy` with the board's wording (« Création du compte… », « Envoi… », « Modification… », « Connexion… »). The shared texts
+  and limits are in `app/strings.ts` (`auth`) and `app/authValidation.ts`.

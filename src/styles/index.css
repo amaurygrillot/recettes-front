@@ -117,6 +117,19 @@
   --text-page-title-lg--line-height: 2.625rem;
   --text-page-title-lg--font-weight: 800;
   --text-page-title-lg--letter-spacing: -0.01em;
+  /* The entry screens (sign-in, registration…): a state's title (« Regarde ta boîte mail ») is 32/38, a form's 36/42
+     (page-title-lg), and the sign-in's beside its butter panel on a desktop 40/46. */
+  --text-auth-state-title: 2rem;
+  --text-auth-state-title--line-height: 2.375rem;
+  --text-auth-state-title--font-weight: 800;
+  --text-auth-state-title--letter-spacing: -0.01em;
+  --text-auth-title-lg: 2.5rem;
+  --text-auth-title-lg--line-height: 2.875rem;
+  --text-auth-title-lg--font-weight: 800;
+  --text-auth-title-lg--letter-spacing: -0.01em;
+  /* The handwritten line under the welcome title. */
+  --text-annotation-lg: 1.875rem;
+  --text-annotation-lg--line-height: 2.0625rem;
 
   /* Radii: the bigger the object, the rounder its corners. */
   --radius-s: 0.5rem;
@@ -192,6 +205,15 @@
     135deg,
     var(--color-butter-200) 0 1rem,
     var(--color-butter-300) 1rem 2rem
+  );
+}
+
+/* A calm background for the entry screens on a tablet and a desktop: the same stripes, in the two palest butters, no picture. */
+@utility bg-calm-stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-butter-100) 0 1.375rem,
+    var(--color-butter-200) 1.375rem 2.75rem
   );
 }
 
