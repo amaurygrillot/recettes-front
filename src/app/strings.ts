@@ -45,11 +45,24 @@ export const strings = {
     cooking: 'Pas à pas',
     newRecipe: 'Nouvelle recette',
     editRecipe: 'Modifier la recette',
-    register: 'Créer un compte',
-    forgotPassword: 'Mot de passe oublié',
-    resetPassword: 'Nouveau mot de passe',
     account: 'Compte',
     logout: 'Se déconnecter',
+  },
+
+  // What the entry screens (sign-in, registration, forgotten and new password) say the same way.
+  auth: {
+    back: 'Retour',
+    backToLogin: 'Retour à la connexion',
+    forgotPassword: 'Mot de passe oublié ?',
+    usernameLabel: "Nom d'utilisateur",
+    emailLabel: 'Adresse e-mail',
+    emailPlaceholder: 'prenom@exemple.fr',
+    emailRequired: 'Indique ton adresse e-mail.',
+    emailInvalid: "Cette adresse e-mail n'a pas l'air valide. Exemple : prenom@exemple.fr",
+    passwordLabel: 'Mot de passe',
+    // The rule is also its own error: same words, another state.
+    passwordRule: '8 caractères minimum',
+    passwordTooLong: '50 caractères au plus.',
   },
 
   // What a failed call means for the person, one sentence per cause (api/failure.ts).

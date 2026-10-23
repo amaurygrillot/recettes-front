@@ -46,6 +46,11 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   [design-boards.md](design-boards.md#searchscreen-rechercher-and-mes-recettes). Shared pieces promoted or added: `RecipeCard`,
   `FeedGrid`, `LoadMore`, `BottomSheet`, `Combobox`, `IconButton`, `CountBadge`, `RemovableChip`, `LockedChip`, `RadioRow`, `CheckboxRow`.
 
+- **Auth screens — done (2026-10-23).** Sign-in (finished), registration with its welcome, forgotten password, new password; decisions in
+  [design-boards.md](design-boards.md#auth-screens-sign-in-registration-forgotten-and-new-password). Shared pieces added: `AuthFrame`,
+  `PasswordField`, `StateBadge`, `TextField` options (`note`, `hintMet`, `invalid`, `trailing`), `useCountdown`, `useFocusOnMount`, `maskEmail`,
+  `app/authValidation`. Checked at 390, 768 and 1280 px with a mocked back end in the browser pane.
+
 - **RecipeScreen — done (2026-10-23).** `/recettes/:id`; decisions in
   [design-boards.md](design-boards.md#recipescreen-recettesid). Shared pieces added: `PhotoSlider`, `PhotoViewer`, `RichTextView`
   (the one sanitised rendering of stored HTML, DOMPurify), `CardPill` (promoted from `RecipeCard`), `StepNumber`, `WavyRule`, the `round`
@@ -152,17 +157,11 @@ the `RichTextEditor` (Lexical) first (`RichTextView` exists since RecipeScreen).
 
 ## Known follow-ups
 
-- **Finish the LoginScreen (decided 2026-10-23: a later session, with the other auth screens).** M4 shipped a working stand-in
-  (`src/screens/LoginScreen`: username and password, validation, a banner for a refused login and for the other failure causes,
-  return to the page that asked for the login). Still to build from the « Marque-ecrans » board: the butter band with the large seal on
-  the phone and the butter panel beside the form on desktop (checked at 390, 768 and 1280 px, only 390 px was looked at in M4), the
-  password show/hide toggle (`Champs-avances` board), the brick outline on the field concerned by a refused login, and the
-  registration, forgot-password and reset-password screens that its links lead to (placeholders today). The first field stays
-  « Nom d'utilisateur » until the board's « Adresse e-mail » is reconciled with the API, which logs in by username only.
 - **Each screen adds its own desktop « Nouvelle recette »** where its board draws it (the bar no longer has one, since M5);
   until then the placeholders have none. SearchScreen also reads `?categorie=` and `?q=` ([design-boards.md](design-boards.md#the-shell-m4)),
   promotes `RecipeCard` from `screens/HomeScreen/components` to `src/components` (its second user), and may keep the bar's
   search field in step with the page's text.
+- **The sign-in asks for a username**, as the API does, where the board says « Adresse e-mail »: reconcile them if the back end ever logs in by address.
 - **Deleting a recipe that answers `404`** (already gone) leaves the cached search feeds as they were, since only a successful delete
   invalidates them (`useDeleteRecipe`): a card may linger until the feeds expire, and opening it shows the 404 page.
 - **API hooks not built yet**: admin writes on categories, tags and units, ingredient rename and delete, and the by-id reads of

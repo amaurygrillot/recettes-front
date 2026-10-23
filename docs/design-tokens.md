@@ -84,7 +84,7 @@ Loaded from Google Fonts in the canvas; self-host them in the app (no third-part
 
 The state title and the dialog title are drawn on the « Retours et chargement » board between Title 2 and Title 3; they
 are probably meant to be one size, to unify when the screens that use them are built. Two more sizes appear on boards that
-are not built yet (page-header title 28/34 weight 800, sign-in title 36/42 weight 800): add them with their screen.
+are not built yet (page-header title 28/34 weight 800): add it with its screen. The sign-in and form titles are `text-page-title-lg` (36/42, 800); the entry screens add `text-auth-state-title` (32/38, 800, for « Regarde ta boîte mail » and the other message screens) and `text-auth-title-lg` (40/46, 800, the sign-in beside its butter panel); `text-annotation-lg` (Kalam 30/33) is the handwritten line of the welcome.
 
 Floor: 15 px, only for navigation labels and captions; nothing clickable or decisive below it. Quantities are bold.
 Line length 45–60 characters on mobile, 75 at most on desktop; left-aligned, never justified. No long runs of capitals.
@@ -146,6 +146,7 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   `round` (a cream disc, 2 px ink, `paper` shadow) over the photo; the gallery's arrows are 56 px of the same disc; the counter is an ink
   pill. `Button` `danger-outline` (brick text on paper, 2 px ink) is « Supprimer » beside the title. `.rich-text` (in `index.css`) sets
   the paragraph gap (18), list indents (24) and item gap (8) of what an author wrote.
+- **Entry screens** (`AuthFrame`, `Marque-ecrans`, `Compte-*`): band 232 / 250 / 280 px, seal 160 / 196, back pill 52 px (paper-50, 2 px ink, pill); on a tablet and desktop the `bg-calm-stripes` page (butter-100 / 200, 22 px stripes, 135°) and a 520 px card (paper-50, 2 px ink, radius 24, `shadow-sheet`). `StateBadge`: 80 px circle, 3 px outline, butter-200 / herb-bg / brick-bg for neutral, success, error. `PasswordField`: 48 px eye inside the field (transparent; yellow with an ink outline while the password is shown). The text field gained a **note** on its label (« facultatif », 16, ink-700), a **kept rule** (the hint turns bold herb with a tick-circle, the frame unchanged), an **invalid** frame without a message, and a **trailing** slot. A quiet button keeps 12 px at its sides (24 px for the others), so a long underlined sentence still fits on a phone line.
 - **Create link** (`CreateLink`): the yellow « + », 64 px tall, round alone or extended with « Nouvelle recette ».
 - **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (no animation under `prefers-reduced-motion`), announced as
   « Chargement… » by one status region, shown only after 300 ms, at most 6 per list.

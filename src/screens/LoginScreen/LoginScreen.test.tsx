@@ -49,6 +49,22 @@ describe('LoginScreen', () => {
     )
   })
 
+  it('is a task of its own: the seal, and neither tabs nor a top bar', () => {
+    renderLogin()
+
+    expect(screen.getByRole('img', { name: 'Il en reste un peu' })).toBeVisible()
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
+  })
+
+  it('shows the password on demand', async () => {
+    const user = userEvent.setup()
+    renderLogin()
+
+    await user.click(screen.getByRole('button', { name: 'Afficher le mot de passe' }))
+
+    expect(screen.getByLabelText('Mot de passe')).toHaveAttribute('type', 'text')
+  })
+
   it('has no accessibility violation', async () => {
     const { container } = renderLogin()
 
@@ -131,6 +147,17 @@ describe('LoginScreen', () => {
       expect(sessionStore.getSnapshot()).toEqual({ status: 'visitor' })
     })
 
+    it('frames the password, the field to retype, and not the username', async () => {
+      server.use(http.post(loginUrl, () => problemResponse(401)))
+      renderLogin()
+
+      await fillAndSubmit('camille', 'wrong-password')
+
+      await screen.findByRole('alert')
+      expect(screen.getByLabelText('Mot de passe')).toBeInvalid()
+      expect(screen.getByLabelText("Nom d'utilisateur")).toBeValid()
+    })
+
     it('lets the visitor try again with the right password', async () => {
       server.use(http.post(loginUrl, () => problemResponse(401)))
       const { container } = renderLogin()
@@ -205,7 +232,8 @@ describe('LoginScreen', () => {
     renderLogin()
     const user = await fillAndSubmit('camille', 'a-long-password')
 
-    expect(screen.getByRole('button', { name: 'Se connecter' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Connexion…' })).toHaveAttribute('aria-busy', 'true')
+    expect(screen.getByLabelText("Nom d'utilisateur")).toBeDisabled()
     await user.keyboard('{Enter}')
     await screen.findByText('Page d’accueil')
 

@@ -17,6 +17,15 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'disabled-look border-ink-900 bg-brick text-paper-50 shadow-stamp focus-visible:outline-offset-4 enabled:active:translate-1 enabled:active:shadow-none',
 }
 
+// A quiet button is only its underlined words: it keeps 12 px at its sides, so a long one still fits a phone's line.
+const PADDING: Record<ButtonVariant, string> = {
+  primary: 'px-6',
+  secondary: 'px-6',
+  quiet: 'px-3',
+  danger: 'px-6',
+  'danger-outline': 'px-6',
+}
+
 const SIZES: Record<ButtonSize, string> = {
   large: 'min-h-16 text-label',
   medium: 'min-h-14 text-body',
@@ -37,7 +46,8 @@ interface ButtonLook {
 /** The one definition of how a button looks, shared by the `<button>` and by the link that looks like one. */
 export function buttonClassName({ variant, size, fullWidth, busy = false }: ButtonLook): string {
   return classNames(
-    'inline-flex items-center justify-center gap-2.5 rounded-l border-2 px-6 text-center font-bold',
+    'inline-flex items-center justify-center gap-2.5 rounded-l border-2 text-center font-bold',
+    PADDING[variant],
     !busy && 'cursor-pointer',
     busy ? BUSY : VARIANTS[variant],
     SIZES[size],

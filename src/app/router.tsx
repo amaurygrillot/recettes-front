@@ -54,9 +54,29 @@ const fullScreenPages: RouteObject[] = [
       return { Component: LoginScreen }
     },
   },
-  { path: paths.register, element: <ScreenPlaceholder title={placeholder.register} /> },
-  { path: paths.forgotPassword, element: <ScreenPlaceholder title={placeholder.forgotPassword} /> },
-  { path: paths.resetPassword, element: <ScreenPlaceholder title={placeholder.resetPassword} /> },
+  {
+    path: paths.register,
+    lazy: async () => {
+      const { RegisterScreen } = await import('../screens/RegisterScreen/RegisterScreen')
+      return { Component: RegisterScreen }
+    },
+  },
+  {
+    path: paths.forgotPassword,
+    lazy: async () => {
+      const { ForgotPasswordScreen } =
+        await import('../screens/ForgotPasswordScreen/ForgotPasswordScreen')
+      return { Component: ForgotPasswordScreen }
+    },
+  },
+  {
+    path: paths.resetPassword,
+    lazy: async () => {
+      const { ResetPasswordScreen } =
+        await import('../screens/ResetPasswordScreen/ResetPasswordScreen')
+      return { Component: ResetPasswordScreen }
+    },
+  },
   { path: ROUTE_PATTERNS.cooking, element: <ScreenPlaceholder title={placeholder.cooking} /> },
   {
     loader: requireMember,
