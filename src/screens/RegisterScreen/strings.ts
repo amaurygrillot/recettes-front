@@ -1,10 +1,6 @@
 export const strings = {
   title: 'Créer un compte',
-  usernameHint: '3 à 50 caractères',
   usernamePlaceholder: 'Ex. odile74',
-  usernameRequired: "Indique ton nom d'utilisateur.",
-  usernameTooShort: 'Au moins 3 caractères.',
-  usernameTooLong: 'Au plus 50 caractères.',
   emailPlaceholder: 'prenom@exemple.fr',
   firstname: 'Prénom',
   firstnamePlaceholder: 'Ex. Odile',
@@ -14,13 +10,8 @@ export const strings = {
   submit: 'Créer mon compte',
   submitting: 'Création du compte…',
   hasAccount: 'Tu as déjà un compte ? Se connecter',
-  // Said by the field that is concerned (409): the one place that tells whether a name or an address is taken.
-  conflict: {
-    username: "Ce nom d'utilisateur est déjà pris.",
-    email: 'Cette adresse e-mail est déjà utilisée.',
-    // The back end named neither: a conflict all the same.
-    unknown: "Ce nom d'utilisateur ou cette adresse e-mail est déjà utilisé.",
-  },
+  // The back end named neither the username nor the address (409): a conflict all the same.
+  conflictUnknown: "Ce nom d'utilisateur ou cette adresse e-mail est déjà utilisé.",
   welcome: {
     title: (username: string) => `Bienvenue, ${username}\u00a0!`,
     handwritten: 'ton couvert est mis.',

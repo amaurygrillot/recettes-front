@@ -1,14 +1,8 @@
 import { z } from 'zod'
-import { emailSchema, newPasswordSchema, USERNAME_LENGTH } from '../../app/authValidation'
-import { strings } from './strings'
+import { emailSchema, newPasswordSchema, usernameSchema } from '../../app/authValidation'
 
 export const registerSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(1, strings.usernameRequired)
-    .min(USERNAME_LENGTH.min, strings.usernameTooShort)
-    .max(USERNAME_LENGTH.max, strings.usernameTooLong),
+  username: usernameSchema,
   email: emailSchema,
   password: newPasswordSchema,
   // Both may stay empty: an empty one is simply not sent.

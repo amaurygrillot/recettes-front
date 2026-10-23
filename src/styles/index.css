@@ -127,6 +127,10 @@
   --text-auth-title-lg--line-height: 2.875rem;
   --text-auth-title-lg--font-weight: 800;
   --text-auth-title-lg--letter-spacing: -0.01em;
+  /* The username on the account page, beside its 96 px avatar. */
+  --text-identity-name: 1.75rem;
+  --text-identity-name--line-height: 2.125rem;
+  --text-identity-name--font-weight: 800;
   /* The handwritten line under the welcome title. */
   --text-annotation-lg: 1.875rem;
   --text-annotation-lg--line-height: 2.0625rem;

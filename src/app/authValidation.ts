@@ -6,6 +6,14 @@ export const USERNAME_LENGTH = { min: 3, max: 50 } as const
 export const PASSWORD_LENGTH = { min: 8, max: 50 } as const
 export const EMAIL_MAX_LENGTH = 254
 
+/** 3 to 50 characters, without the stray spaces. */
+export const usernameSchema = z
+  .string()
+  .trim()
+  .min(1, strings.auth.usernameRequired)
+  .min(USERNAME_LENGTH.min, strings.auth.usernameTooShort)
+  .max(USERNAME_LENGTH.max, strings.auth.usernameTooLong)
+
 /** The shape of an address and nothing else: whether an account exists is the server's secret. */
 export const emailSchema = z
   .string()

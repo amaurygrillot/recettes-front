@@ -1,7 +1,7 @@
-import type { ApiFailure } from '../../api/failure'
+import type { ApiFailure } from '../api/failure'
 
 /**
- * Which field a `409` on registration is about. The back end says it in the problem's `detail`
+ * Which field a `409` on registration or on an account change is about. The back end says it in the problem's `detail`
  * (« Username already exists » or « Email already exists »); nothing else in the answer tells
  * the two apart. Another conflict, or a detail in other words, names no field.
  */

@@ -143,6 +143,57 @@ describe('signing out', () => {
   })
 })
 
+describe('renaming', () => {
+  it('shows the new username, tells the subscribers, and keeps the token as it is', () => {
+    const storage = fakeStorage()
+    const store = createSessionStore(storage)
+    const token = fakeToken({ username: 'odile74' })
+    store.signIn(token)
+    const listener = vi.fn()
+    store.subscribe(listener)
+
+    store.rename('odile75')
+
+    expect(store.getSnapshot()).toMatchObject({ status: 'member', username: 'odile75' })
+    expect(store.getToken()).toBe(token)
+    expect(storage.items.get(KEY)).toBe(token)
+    expect(listener).toHaveBeenCalledOnce()
+  })
+
+  it('keeps the roles and the id of the member', () => {
+    const store = createSessionStore(fakeStorage())
+    store.signIn(fakeToken({ username: 'odile74', userId: 'u-1', roles: ['USER', 'ADMIN'] }))
+
+    store.rename('odile75')
+
+    expect(store.getSnapshot()).toEqual({
+      status: 'member',
+      username: 'odile75',
+      userId: 'u-1',
+      roles: ['USER', 'ADMIN'],
+    })
+  })
+
+  it('tells nobody when the name is the same', () => {
+    const store = createSessionStore(fakeStorage())
+    store.signIn(fakeToken({ username: 'odile74' }))
+    const listener = vi.fn()
+    store.subscribe(listener)
+
+    store.rename('odile74')
+
+    expect(listener).not.toHaveBeenCalled()
+  })
+
+  it('does nothing for a visitor', () => {
+    const store = createSessionStore(fakeStorage())
+
+    store.rename('odile75')
+
+    expect(store.getSnapshot()).toEqual({ status: 'visitor' })
+  })
+})
+
 describe('expiring', () => {
   it('drops the token and marks the session as expired', () => {
     const storage = fakeStorage()

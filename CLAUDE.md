@@ -21,7 +21,7 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 ## Status
 
 **Milestones M1 (skeleton and guardrails), M2 (theme and base components), M3 (API client and authentication), M4
-(router and shell) and M5 (the home screen, the quality template for the others) are done**; SearchScreen (`/rechercher`, `/mes-recettes`), RecipeScreen (`/recettes/:id`) and the auth screens (sign-in, registration, forgotten and new password) are done too; next are AccountScreen, RecipeEditorScreen, CookingScreen. The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
+(router and shell) and M5 (the home screen, the quality template for the others) are done**; SearchScreen (`/rechercher`, `/mes-recettes`), RecipeScreen (`/recettes/:id`), the auth screens (sign-in, registration, forgotten and new password) and AccountScreen (`/compte`) are done too; next are RecipeEditorScreen and CookingScreen. The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
 prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
 [docs/agent-operating-rules.md](docs/agent-operating-rules.md); canvas boards per screen are in
 [docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
@@ -35,8 +35,8 @@ displays the base ones. M3: the API layer in `src/api` ([docs/api-layer.md](docs
 one error union, the session and token module, query hooks per resource, MSW in every test, and the logger in `src/lib`. M4:
 the router, the shell (phone tab bar with the « + », desktop top bar from 1024 px with a search field and the member's avatar,
 login-protected routes that come back after the login, the session-expired dialog, a 404 and error boundaries), a first **LoginScreen** (finished later with the other auth screens). M5: the **HomeScreen** (`src/screens/HomeScreen`: feed with « Voir plus », category shortcuts, every state), the
-extended « + » (`useCreateButtonMode`), `CreateLink`, `Spinner`, `Button busy`. Not there yet: every other product screen (their routes
-show a `ScreenPlaceholder`; the account placeholder has the real « Se déconnecter »). `RecipeCard`, the grid and « Voir plus » are shared components; the desktop « Nouvelle recette » lives in each page's header, not in the bar. The auth screens added `AuthFrame`, `PasswordField`, `StateBadge` and the `auth` strings / `authValidation` shared by the entry forms. RecipeScreen added `PhotoSlider`, `PhotoViewer`, `RichTextView` (DOMPurify: the only place stored HTML is rendered), the `TabBar` slot (`BottomSlotContext`) for a page's bottom bar, `useGoBack`, `canManageRecipe` and `cookingProgress`.
+extended « + » (`useCreateButtonMode`), `CreateLink`, `Spinner`, `Button busy`. Not there yet: the recipe editor and the cooking mode (their routes
+show a `ScreenPlaceholder`). `RecipeCard`, the grid and « Voir plus » are shared components; the desktop « Nouvelle recette » lives in each page's header, not in the bar. AccountScreen added `Toast` (with `ToastsProvider` / `useToasts` in `RootLayout`), `SectionIndex` and `useMember`; the back end has no way to read the signed-in account, so the page only knows what a registration or a change in the same visit returned (`useKnownAccount`). The auth screens added `AuthFrame`, `PasswordField`, `StateBadge` and the `auth` strings / `authValidation` shared by the entry forms. RecipeScreen added `PhotoSlider`, `PhotoViewer`, `RichTextView` (DOMPurify: the only place stored HTML is rendered), the `TabBar` slot (`BottomSlotContext`) for a page's bottom bar, `useGoBack`, `canManageRecipe` and `cookingProgress`.
 
 ```bash
 npm run dev            # Vite dev server, http://localhost:5173 (port is fixed: strictPort); /styleguide shows the components

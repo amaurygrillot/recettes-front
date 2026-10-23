@@ -1,10 +1,10 @@
 import type { RouteObject } from 'react-router'
+import { AccountScreen } from '../screens/AccountScreen/AccountScreen'
 import { HomeScreen } from '../screens/HomeScreen/HomeScreen'
 import { RecipeScreen } from '../screens/RecipeScreen/RecipeScreen'
 import { MyRecipesScreen } from '../screens/SearchScreen/MyRecipesScreen'
 import { SearchScreen } from '../screens/SearchScreen/SearchScreen'
 import { NotFoundScreen } from '../screens/NotFoundScreen/NotFoundScreen'
-import { AccountPlaceholder } from './AccountPlaceholder'
 import { AppShell } from './AppShell'
 import { paths, ROUTE_PATTERNS } from './paths'
 import { requireMember } from './requireMember'
@@ -39,7 +39,7 @@ const pagesWithNavigation: RouteObject[] = [
     loader: requireMember,
     children: [
       { path: paths.myRecipes, element: <MyRecipesScreen /> },
-      { path: paths.account, element: <AccountPlaceholder /> },
+      { path: paths.account, element: <AccountScreen /> },
     ],
   },
   { path: '*', element: <NotFoundScreen /> },

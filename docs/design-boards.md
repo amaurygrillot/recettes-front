@@ -175,3 +175,37 @@ page, as `Marque-ecrans` draws it. The routes are lazy: an entry screen costs no
   keyboard or screen-reader user is not left on a control that is gone. While a request runs the fields are locked (dashed) and the
   button is `busy` with the board's wording (« Création du compte… », « Envoi… », « Modification… », « Connexion… »). The shared texts
   and limits are in `app/strings.ts` (`auth`) and `app/authValidation.ts`.
+
+## AccountScreen (`/compte`)
+
+Built from `Compte-page`, `Compte-etats` and `Compte-grands-ecrans`, checked at 390, 768 and 1280 px. A page for members only (the
+`requireMember` loader), with the « Compte » tab active. The shell's « + » is hidden: the page has its own buttons.
+
+- **Layout**: a title, the identity block (96 px avatar, username, address when known, role pill: « Membre » or « Administrateur »),
+  three cards (Profil, Adresse e-mail, Mot de passe), the « Mes recettes » row and « Se déconnecter » at the bottom. **From 600 px** the
+  sections have a 200 px index on the left (`SectionIndex`, sticky: each entry scrolls to its card, the yellow pill follows the card being
+  read, `useActiveSection`), the cards are the rest of the width (800 px at most), and « Se déconnecter » moves into the index after a dashed
+  rule. From 1024 px the first and last names, and the new password and its confirmation, share a row, and the buttons are as wide as their words.
+- **Each card is saved on its own**: a button that is dashed until something changes, then primary; a « Modifications non enregistrées »
+  mark under the title; while it runs the card is locked and the button says « Enregistrement… ». The e-mail card shows the address and
+  « Modifier », and only then opens the new-address and current-password fields, so an address is not changed by accident.
+- **What a failure says, and where**: a `409` goes to the field it is about (username on the profile, address on the e-mail card; same
+  reading of the problem's `detail` as the registration, `app/conflictedField.ts`); a `403` on the e-mail or password card is the current
+  password, said on its field (« Le mot de passe actuel est incorrect. »: wrong and missing answer the same on the back end); a form error is
+  under its field. Anything else is a **notification** (« Enregistrement impossible. » and the sentence of the cause) that stays until closed,
+  with « Réessayer » when trying again can work, which sends exactly what is in the fields. A `401` is the shell's « Ta session a expiré. »
+  dialog: the page stays behind it (`useMember` keeps the member while the session is expired), nothing typed is lost.
+- **Notifications** (`Toast`, `ToastsProvider` in `RootLayout`, `useToasts`): ink, a ticked green dot for success (« Profil mis à jour »,
+  « Adresse e-mail modifiée », « Mot de passe modifié », gone after 4 seconds), a stay-until-closed alert for a failure. Above the tabs on a
+  phone, bottom right on a desktop. Once the password is changed its fields are emptied: no password stays on the screen.
+- **« Se déconnecter »** asks first (`Te déconnecter ?`, a butter badge since nothing is destroyed; « Rester connecté » is the primary
+  button and takes the focus), then signs out and goes to the home page.
+- **What the back end cannot do, and what the page does about it**: there is **no way to read the signed-in account** (no `GET` for the
+  profile; the token holds the username, id and roles only). So the address and the first and last names are known only after a registration
+  or a change in the same visit (`useKnownAccount`, filled by the answers of `POST /users/create` and `PUT /users/update`, by account id).
+  Until then the card says its names are not shown and that an empty field is left as it is (an absent field is left alone by the back end), and
+  the e-mail card says the current address is not shown and still lets it be replaced. **What the back end would need**: a
+  `GET /users/me` returning the `UserResponse` (then only `useKnownAccount` starts fetching, and the page can have its « Chargement de ton compte… » skeleton
+  of the board). A renamed member keeps their old username in the token until the next sign-in, so a reload shows the old one again; the app shows
+  the new one for the life of the tab (`sessionStore.rename`).
+- **Left out**: the « Administration » row (the pages it leads to are not designed yet).

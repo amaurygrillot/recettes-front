@@ -33,7 +33,7 @@ export function RegisterScreen() {
       <TextField
         label={auth.usernameLabel}
         placeholder={strings.usernamePlaceholder}
-        hint={strings.usernameHint}
+        hint={auth.usernameHint}
         autoComplete="username"
         autoCapitalize="none"
         disabled={isPending}

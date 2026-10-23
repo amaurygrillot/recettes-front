@@ -7,15 +7,25 @@ export interface SubmitButtonProps {
   label: string
   /** What it says while it works: « Création du compte… ». */
   pendingLabel: string
+  /** Nothing to send yet (nothing was changed): dashed, and it cannot be pressed. */
+  disabled?: boolean
+  /** The width of its container (a phone), or just its words (a desktop's cards). */
+  fullWidth?: boolean
 }
 
 /**
- * The full-width button that sends a form. While the request runs it keeps its place and its
- * focus (it is busy, not disabled) and changes its words, so a form cannot be sent twice.
+ * The button that sends a form. While the request runs it keeps its place and its focus (it is
+ * busy, not disabled) and changes its words, so a form cannot be sent twice.
  */
-export function SubmitButton({ pending, label, pendingLabel }: SubmitButtonProps) {
+export function SubmitButton({
+  pending,
+  label,
+  pendingLabel,
+  disabled = false,
+  fullWidth = true,
+}: SubmitButtonProps) {
   return (
-    <Button type="submit" fullWidth busy={pending}>
+    <Button type="submit" fullWidth={fullWidth} busy={pending} disabled={disabled && !pending}>
       {pending ? pendingLabel : label}
     </Button>
   )
