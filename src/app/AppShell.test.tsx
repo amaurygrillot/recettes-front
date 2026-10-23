@@ -76,6 +76,19 @@ describe('the phone « + » of the shell', () => {
     )
   })
 
+  it('leaves room for itself at the bottom of the page, and none when it is hidden', async () => {
+    serveFeed([{ id: '1', title: 'Gratin dauphinois' }])
+    const shown = renderRoutes(routes, '/')
+    await screen.findByRole('link', { name: 'Gratin dauphinois' })
+    expect(screen.getByRole('main').parentElement).toHaveClass('pb-26')
+    shown.unmount()
+
+    serveFeed([])
+    renderRoutes(routes, '/')
+    await screen.findByText('Ton carnet attend sa première recette')
+    expect(screen.getByRole('main').parentElement).not.toHaveClass('pb-26')
+  })
+
   it('is the plain round « + » on the other pages, and again after leaving the home page', async () => {
     serveFeed([{ id: '1', title: 'Gratin dauphinois' }])
     const user = userEvent.setup()

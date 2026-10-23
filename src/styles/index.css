@@ -69,6 +69,15 @@
   --text-title-1: 2.5rem;
   --text-title-1--line-height: 2.875rem;
   --text-title-1--font-weight: 700;
+  /* A recipe's title on a phone (40/46: title-1 in the heavier 800); a tablet has title-display, a desktop the poster. */
+  --text-recipe-title: 2.5rem;
+  --text-recipe-title--line-height: 2.875rem;
+  --text-recipe-title--font-weight: 800;
+  --text-recipe-title--letter-spacing: -0.01em;
+  --text-title-display: 3rem;
+  --text-title-display--line-height: 3.25rem;
+  --text-title-display--font-weight: 800;
+  --text-title-display--letter-spacing: -0.01em;
   --text-title-2: 1.875rem;
   --text-title-2--line-height: 2.25rem;
   --text-title-2--font-weight: 700;
@@ -125,6 +134,8 @@
   --shadow-stamp: 4px 4px 0 var(--color-ink-900);
   --shadow-stamp-sm: 3px 3px 0 var(--color-ink-900);
   --shadow-sheet: 0 16px 36px rgb(43 29 18 / 0.26);
+  /* A bar fixed to the bottom of the page, above the tabs: its shadow falls upwards. */
+  --shadow-bar: 0 -2px 6px rgb(43 29 18 / 0.1);
 
   /* Layout grid: phone up to 599 px, tablet from 600, desktop from 1024 (docs/design-tokens.md). */
   --breakpoint-tablet: 600px;
@@ -222,6 +233,35 @@
   padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   padding-left: max(0.375rem, env(safe-area-inset-left));
   padding-right: max(0.375rem, env(safe-area-inset-right));
+}
+
+/* What an author writes in a recipe: paragraphs and lists with the room a reader at arm's length needs. */
+@layer components {
+  .rich-text > * + * {
+    margin-top: 1.125rem;
+  }
+
+  .rich-text ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  .rich-text ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+
+  .rich-text li + li {
+    margin-top: 0.5rem;
+  }
+
+  .rich-text :is(strong, b) {
+    font-weight: 700;
+  }
+
+  .rich-text :is(em, i) {
+    font-style: italic;
+  }
 }
 
 /* The layout grid: side margins of 16 / 32 / 64 px (phone, tablet, desktop), the content centered

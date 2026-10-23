@@ -98,3 +98,43 @@ browser's own list on a desktop. Section pills jump to their section and follow 
 fields are a `Combobox` (start of word, accents and case ignored, five at most, nothing created). While a new answer comes, the
 previous one stays with « Recherche… » in the count line. « Mes recettes »: author fixed to the member by id (an `auteur` in the URL
 is ignored), locked chip not counted among the filters, « + » extended at the top of the list and hidden for a first recipe.
+
+## RecipeScreen (`/recettes/:id`)
+
+Built from `Fiche-haut`, `Fiche-corps`, `Fiche-audiences`, `Fiche-etats` and `Fiche-grands-ecrans`, checked at 390, 768 and 1280 px.
+Public: the content is the same for a visitor, a member and the author; only the actions differ (`Fiche-audiences`).
+
+- **Data**: `GET /recipes/{id}` (`useRecipe`), turned into what the page shows by `recipeView.ts`: it drops what cannot be shown (a
+  response with no id or title, an ingredient line with no name, an ingredient group with no line) and what says nothing (an introduction
+  or tip that is only `<p></p>` or `&nbsp;`; a step with neither words nor a picture). A step that is only pictures stays. Nothing the
+  API lacks is drawn: no time, servings, difficulty, rating, favorite or sharing; the byline is « Par … · ajoutée le … », with
+  « modifiée le … » only when it is another day.
+- **Layout**: a phone has the 4:3 gallery over the whole width (the way back as a cream disc top-left, the author's « ⋯ » menu top-right,
+  arrows, the « 1 / 4 » counter bottom-right, dots and thumbnails under it), then the title block, the ingredients, « Cuisiner pas à pas »,
+  the preparation and the cook's tip. A tablet is the same in a 640 px column. A desktop is a 12-column grid: gallery (7) beside the title
+  block (5, with « Modifier » and « Supprimer » for who may), then the ingredients (5, sticky at 24 px, with the cooking button) beside the
+  steps (7, 653 px of text at most). `PhotoSlider` is the shared gallery: one photo shows no controls, none shows the butter stand-in.
+- **Ingredients**: groups with their title, quantity in bold, `ingredientLine` adds « de » or « d' » between the unit and the name (silent
+  or aspirated h: the short list of aspirated words is in `lib/ingredientLine.ts`) and writes quantities with the French comma.
+- **Steps**: numbered consecutively (`StepNumber`, the brick stamp), text in `RichTextView`; one photo shows large, several as a row of
+  thumbnails; a touch opens `PhotoViewer` (a Radix dialog: arrows, arrow keys, Escape, focus returns to the thumbnail).
+- **Rich text**: every stored HTML goes through `RichTextView`, the only place that uses `dangerouslySetInnerHTML`. DOMPurify keeps `p`,
+  `br`, `strong`, `b`, `em`, `i`, `ul`, `ol`, `li` and no attribute at all (tested with script, event handler, link, image and style cases).
+- **The shell's « + » is hidden** on this page (`useCreateButtonMode('hidden')`): the page has its own actions and the button would cover
+  the tip. The shell then also drops the 104 px it keeps free under a page for the « + ».
+- **Cooking entry**: « Cuisiner pas à pas » (a link to `/recettes/:id/pas-a-pas`; hidden for a recipe with no step) says « Reprendre à
+  l'étape N » when this device remembers a step (`app/cookingProgress`, `localStorage`, 1-based, nothing breaks if storage is blocked). On a
+  phone, once that button has scrolled out of the top, the same link stays in a bar above the tabs: the shell's `TabBar` has an empty
+  slot and `BottomSlotContext` hands it to the page, which renders into it with a portal. Not on a tablet or desktop, where the button
+  of the page is enough (and sticky on desktop).
+- **Who may change it**: `canManageRecipe(session, authorId)` (the author, or an `ADMIN`; the server stays the authority). A « ⋯ »
+  `DropdownMenu` on a phone and tablet, two buttons beside the title on a desktop. « Modifier » links to `/recettes/:id/modifier`
+  (a placeholder until the editor exists).
+- **Deleting**: an `AlertDialog` names the recipe and says it is irreversible; « Annuler » comes first and has the focus. After the
+  confirmation the dialog stays up with a busy button while the request is on its way (it cannot be sent twice), then the page leaves for
+  the search with `replace`. A `404` counts as deleted; any other failure closes the dialog, keeps the page and shows a banner with the
+  cause (`403` included: « Tu n'as pas le droit… ») and « Réessayer ».
+- **The way back**: `useGoBack(paths.search)` goes back in the history when the visit has one inside the app, else to the search, so a
+  shared link still has a way back.
+- **States**: loading (a skeleton of the page, announced once), `404` (the only `h1` of the page: « Cette recette n'existe pas ou a été
+  supprimée », a link to the search), network error and every other failure with the sentence of its cause and « Réessayer ».

@@ -13,6 +13,8 @@ export interface EmptyStateProps {
   children?: ReactNode
   /** `regular` fills a page; `compact` is a block among others (a feed's), with tighter padding and title. */
   size?: StateSize
+  /** `1` when the block is the whole page's message (a recipe that does not exist); `2` otherwise. */
+  headingLevel?: 1 | 2
 }
 
 const TITLES: Record<StateSize, string> = {
@@ -27,7 +29,9 @@ export function EmptyState({
   description,
   children,
   size = 'regular',
+  headingLevel = 2,
 }: EmptyStateProps) {
+  const Heading = headingLevel === 1 ? 'h1' : 'h2'
   return (
     <div
       className={classNames(
@@ -36,7 +40,7 @@ export function EmptyState({
       )}
     >
       {illustration}
-      <h2 className={classNames('font-title text-ink-900', TITLES[size])}>{title}</h2>
+      <Heading className={classNames('font-title text-ink-900', TITLES[size])}>{title}</Heading>
       <p className="text-body text-ink-800">{description}</p>
       {children ? <div className="mt-auto flex w-full flex-col gap-3">{children}</div> : null}
     </div>

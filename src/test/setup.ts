@@ -4,6 +4,16 @@ import { afterAll, afterEach, beforeAll } from 'vitest'
 import { sessionStore } from '../api/sessionStore'
 import { server } from './server'
 
+// jsdom has no layout, so it has no scrolling into view, and nothing to resize or observe: the
+// popovers of Radix measure what they anchor to, and only need these not to be missing.
+if (typeof window !== 'undefined' && typeof window.ResizeObserver === 'undefined') {
+  window.ResizeObserver = class {
+    observe = () => undefined
+    unobserve = () => undefined
+    disconnect = () => undefined
+  }
+}
+
 // jsdom has no layout, so it has no scrolling into view either.
 if (typeof Element !== 'undefined') Element.prototype.scrollIntoView = () => undefined
 

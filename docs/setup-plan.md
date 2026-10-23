@@ -46,6 +46,13 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   [design-boards.md](design-boards.md#searchscreen-rechercher-and-mes-recettes). Shared pieces promoted or added: `RecipeCard`,
   `FeedGrid`, `LoadMore`, `BottomSheet`, `Combobox`, `IconButton`, `CountBadge`, `RemovableChip`, `LockedChip`, `RadioRow`, `CheckboxRow`.
 
+- **RecipeScreen — done (2026-10-23).** `/recettes/:id`; decisions in
+  [design-boards.md](design-boards.md#recipescreen-recettesid). Shared pieces added: `PhotoSlider`, `PhotoViewer`, `RichTextView`
+  (the one sanitised rendering of stored HTML, DOMPurify), `CardPill` (promoted from `RecipeCard`), `StepNumber`, `WavyRule`, the `round`
+  `IconButton`, the `danger-outline` `Button`, `headingLevel` on `EmptyState` / `ErrorState`; in the shell, the `TabBar` slot with
+  `BottomSlotContext`, `useGoBack`, `canManageRecipe` and `cookingProgress` (which the CookingScreen will use). Checked at 390, 768 and
+  1280 px with a mocked back end in the browser pane (the local database has no recipe to open).
+
 ## Code organisation
 
 ```
@@ -141,7 +148,7 @@ redirects a visitor to the login screen then back.
 
 After M5, screens can be built independently, in separate sessions, in this order of value: SearchScreen, RecipeScreen,
 auth screens, AccountScreen, RecipeEditorScreen, CookingScreen, then admin (not yet designed). RecipeEditorScreen needs
-the `RichTextEditor` (Lexical) and `RichTextView` components first.
+the `RichTextEditor` (Lexical) first (`RichTextView` exists since RecipeScreen).
 
 ## Known follow-ups
 
@@ -156,6 +163,8 @@ the `RichTextEditor` (Lexical) and `RichTextView` components first.
   until then the placeholders have none. SearchScreen also reads `?categorie=` and `?q=` ([design-boards.md](design-boards.md#the-shell-m4)),
   promotes `RecipeCard` from `screens/HomeScreen/components` to `src/components` (its second user), and may keep the bar's
   search field in step with the page's text.
+- **Deleting a recipe that answers `404`** (already gone) leaves the cached search feeds as they were, since only a successful delete
+  invalidates them (`useDeleteRecipe`): a card may linger until the feeds expire, and opening it shows the 404 page.
 - **API hooks not built yet**: admin writes on categories, tags and units, ingredient rename and delete, and the by-id reads of
   reference data. Add them, with their status tests, with the first screen that needs them ([api-layer.md](api-layer.md)).
 

@@ -45,7 +45,6 @@ describe('the pages with navigation', () => {
   it.each([
     ['/', 'Il en reste un peu'],
     ['/rechercher', 'Rechercher'],
-    ['/recettes/42', 'Recette'],
   ])('serves %s to a visitor, with the navigation around it', async (path, title) => {
     const { container } = renderRoutes(routes, path)
 
@@ -53,6 +52,35 @@ describe('the pages with navigation', () => {
     expect(phoneBar()).toBeInTheDocument()
     expect(desktopBar()).toBeInTheDocument()
     await expectNoAccessibilityViolations(container)
+  })
+
+  it('serves a recipe that exists to a visitor, with the navigation around it', async () => {
+    server.use(
+      http.get(`${API_BASE_URL}/recipes/42`, () =>
+        HttpResponse.json({ id: '42', title: 'Tarte fine aux pommes' }),
+      ),
+    )
+    const { container } = renderRoutes(routes, '/recettes/42')
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Tarte fine aux pommes' }),
+    ).toBeVisible()
+    expect(phoneBar()).toBeInTheDocument()
+    expect(desktopBar()).toBeInTheDocument()
+    await expectNoAccessibilityViolations(container)
+  })
+
+  it('serves a recipe that does not exist as such, still with the navigation', async () => {
+    server.use(http.get(`${API_BASE_URL}/recipes/42`, () => HttpResponse.json({}, { status: 404 })))
+    renderRoutes(routes, '/recettes/42')
+
+    expect(
+      await screen.findByRole('heading', {
+        level: 1,
+        name: "Cette recette n'existe pas ou a été supprimée",
+      }),
+    ).toBeVisible()
+    expect(phoneBar()).toBeInTheDocument()
   })
 
   it('gives a visitor three tabs and no way to create', async () => {
