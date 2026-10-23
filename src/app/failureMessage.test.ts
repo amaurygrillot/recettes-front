@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ApiFailure } from '../api/failure'
-import { failureMessage } from './failureMessage'
+import { failureMessage, feedFailureText, nextPageFailureText } from './failureMessage'
 
 const problem = { status: 400, detail: undefined }
 
@@ -34,5 +34,38 @@ describe('failureMessage', () => {
     ['unavailable', undefined, 'Le serveur est très sollicité. Réessaie dans un instant.'],
   ] as const)('tells a %s caller how long to wait (%s s)', (kind, retryAfterSeconds, expected) => {
     expect(failureMessage({ kind, ...problem, retryAfterSeconds })).toBe(expected)
+  })
+})
+
+describe('feedFailureText', () => {
+  it('words a missing connection in its own way', () => {
+    expect(feedFailureText({ kind: 'network' })).toEqual({
+      title: 'Pas de connexion pour le moment',
+      description: "Vérifie ta connexion internet, puis réessaie. Tes recettes t'attendent.",
+    })
+  })
+
+  it.each(KINDS.filter((failure) => failure.kind !== 'network'))(
+    'gives any other cause a common title and the sentence of its cause (%j)',
+    (failure) => {
+      expect(feedFailureText(failure)).toEqual({
+        title: 'Impossible de charger les recettes',
+        description: failureMessage(failure),
+      })
+    },
+  )
+})
+
+describe('nextPageFailureText', () => {
+  it('keeps the short sentence for a missing connection', () => {
+    expect(nextPageFailureText({ kind: 'network' })).toBe('Impossible de charger la suite.')
+  })
+
+  it('gives the sentence of the cause otherwise', () => {
+    const failure: ApiFailure = { kind: 'unavailable', ...problem, retryAfterSeconds: 30 }
+
+    expect(nextPageFailureText(failure)).toBe(
+      'Le serveur est très sollicité. Réessaie dans 30 secondes.',
+    )
   })
 })

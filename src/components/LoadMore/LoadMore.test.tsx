@@ -1,13 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { expectNoAccessibilityViolations } from '../../../../test/expectNoAccessibilityViolations'
-import type { MoreRecipes } from '../../useRecipeFeed'
-import { LoadMore } from './LoadMore'
+import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
+import { LoadMore, type LoadMoreState } from './LoadMore'
 
-const available = (load = vi.fn()): MoreRecipes => ({ status: 'available', load })
+const available = (load = vi.fn()): LoadMoreState => ({ status: 'available', load })
 
-function renderMore(more: MoreRecipes, lastBatch?: number, shown = 20, total = 134) {
+function renderMore(more: LoadMoreState, lastBatch?: number, shown = 20, total = 134) {
   return render(<LoadMore shown={shown} total={total} more={more} lastBatch={lastBatch} />)
 }
 
@@ -90,7 +89,7 @@ describe('LoadMore', () => {
   describe('when the next page failed', () => {
     it('says so in an alert, keeps the count, and offers to try again', async () => {
       const retry = vi.fn()
-      renderMore({ status: 'failed', failure: { kind: 'network' }, retry })
+      renderMore({ status: 'failed', message: 'Impossible de charger la suite.', retry })
 
       expect(screen.getByRole('alert')).toHaveTextContent('Impossible de charger la suite.')
       expect(screen.getByText('20 sur 134 recettes')).toBeVisible()
@@ -100,28 +99,16 @@ describe('LoadMore', () => {
       expect(retry).toHaveBeenCalledOnce()
     })
 
-    it.each([
-      [
-        { kind: 'unavailable', status: 503, detail: undefined, retryAfterSeconds: 30 } as const,
-        'Le serveur est très sollicité. Réessaie dans 30 secondes.',
-      ],
-      [
-        { kind: 'server-error', status: 500, detail: undefined } as const,
-        'Le serveur a rencontré un problème. Réessaie dans un moment.',
-      ],
-      [
-        {
-          kind: 'rate-limited',
-          status: 429,
-          detail: undefined,
-          retryAfterSeconds: undefined,
-        } as const,
-        'Tu vas un peu vite. Réessaie dans un instant.',
-      ],
-    ])('gives the sentence of the cause when it is not the network (%j)', (failure, sentence) => {
-      renderMore({ status: 'failed', failure, retry: vi.fn() })
+    it('shows the message it is given, whatever the cause', () => {
+      renderMore({
+        status: 'failed',
+        message: 'Le serveur est très sollicité. Réessaie dans 30 secondes.',
+        retry: vi.fn(),
+      })
 
-      expect(screen.getByRole('alert')).toHaveTextContent(sentence)
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Le serveur est très sollicité. Réessaie dans 30 secondes.',
+      )
     })
 
     it('keeps the focus on the button across the failure', async () => {
@@ -133,7 +120,7 @@ describe('LoadMore', () => {
         <LoadMore
           shown={20}
           total={134}
-          more={{ status: 'failed', failure: { kind: 'network' }, retry: vi.fn() }}
+          more={{ status: 'failed', message: 'Impossible de charger la suite.', retry: vi.fn() }}
           lastBatch={undefined}
         />,
       )
@@ -174,7 +161,10 @@ describe('LoadMore', () => {
   it.each([
     ['available', available()],
     ['loading', { status: 'loading', incoming: 20 } as const],
-    ['failed', { status: 'failed', failure: { kind: 'network' }, retry: vi.fn() } as const],
+    [
+      'failed',
+      { status: 'failed', message: 'Impossible de charger la suite.', retry: vi.fn() } as const,
+    ],
     ['exhausted', { status: 'exhausted' } as const],
   ])('has no accessibility violation when %s', async (_state, more) => {
     const { container } = renderMore(more)

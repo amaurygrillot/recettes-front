@@ -1,38 +1,35 @@
 import { useEffect, useRef } from 'react'
-import type { ApiFailure } from '../../../../api/failure'
-import { failureMessage } from '../../../../app/failureMessage'
-import { Button } from '../../../../components/Button/Button'
-import { ErrorBanner } from '../../../../components/ErrorBanner/ErrorBanner'
-import { Icon } from '../../../../components/Icon/Icon'
-import { strings } from '../../strings'
-import type { MoreRecipes } from '../../useRecipeFeed'
+import { Button } from '../Button/Button'
+import { ErrorBanner } from '../ErrorBanner/ErrorBanner'
+import { Icon } from '../Icon/Icon'
+import { strings } from './strings'
 
-const { loadMore } = strings
+/** What « Voir plus de recettes » is doing. */
+export type LoadMoreState =
+  | { status: 'available'; load: () => void }
+  | { status: 'loading'; incoming: number }
+  | { status: 'failed'; message: string; retry: () => void }
+  | { status: 'exhausted' }
 
-type PendingMore = Exclude<MoreRecipes, { status: 'exhausted' }>
+type PendingMore = Exclude<LoadMoreState, { status: 'exhausted' }>
 
 export interface LoadMoreProps {
   /** How many recipes are on the page. */
   shown: number
   /** How many recipes exist. */
   total: number
-  more: MoreRecipes
+  more: LoadMoreState
   /** How many recipes the last request added: announced once they are there. */
   lastBatch: number | undefined
 }
 
-/** A failed next page is « Impossible de charger la suite. » when the network is the cause, else the cause itself. */
-function failedText(failure: ApiFailure): string {
-  return failure.kind === 'network' ? loadMore.failed : failureMessage(failure)
-}
-
-function announcementFor(more: MoreRecipes, lastBatch: number | undefined): string {
-  if (more.status === 'loading') return loadMore.incoming(more.incoming)
-  return lastBatch === undefined ? '' : loadMore.loaded(lastBatch)
+function announcementFor(more: LoadMoreState, lastBatch: number | undefined): string {
+  if (more.status === 'loading') return strings.incoming(more.incoming)
+  return lastBatch === undefined ? '' : strings.loaded(lastBatch)
 }
 
 function counterFor(more: PendingMore, shown: number, total: number): string {
-  return more.status === 'loading' ? loadMore.incoming(more.incoming) : loadMore.count(shown, total)
+  return more.status === 'loading' ? strings.incoming(more.incoming) : strings.count(shown, total)
 }
 
 /**
@@ -44,19 +41,19 @@ function MoreButton({ more }: { more: PendingMore }) {
     case 'loading':
       return (
         <Button variant="secondary" fullWidth busy>
-          {loadMore.waiting}
+          {strings.waiting}
         </Button>
       )
     case 'failed':
       return (
         <Button variant="secondary" fullWidth icon="refresh" onClick={more.retry}>
-          {loadMore.retry}
+          {strings.retry}
         </Button>
       )
     case 'available':
       return (
         <Button variant="secondary" fullWidth onClick={more.load}>
-          {loadMore.action}
+          {strings.action}
           <Icon name="chevron-down" strokeWidth={2.6} />
         </Button>
       )
@@ -86,12 +83,12 @@ export function LoadMore({ shown, total, more, lastBatch }: LoadMoreProps) {
       </p>
       {more.status === 'exhausted' ? (
         <p ref={endRef} tabIndex={-1} className="text-center text-body text-ink-800">
-          {loadMore.end(total)}
+          {strings.end(total)}
         </p>
       ) : (
         <>
           <p className="text-center text-detail text-ink-700">{counterFor(more, shown, total)}</p>
-          {more.status === 'failed' && <ErrorBanner message={failedText(more.failure)} />}
+          {more.status === 'failed' && <ErrorBanner message={more.message} />}
           <MoreButton more={more} />
         </>
       )}

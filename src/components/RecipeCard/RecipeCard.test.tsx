@@ -2,9 +2,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { expectNoAccessibilityViolations } from '../../../../test/expectNoAccessibilityViolations'
-import type { RecipeCardModel } from '../../recipeCards'
-import { RecipeCard } from './RecipeCard'
+import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
+import { RecipeCard, type RecipeCardModel } from './RecipeCard'
 
 const RECIPE: RecipeCardModel = {
   id: '42',

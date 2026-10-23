@@ -1,29 +1,22 @@
-import type { ApiFailure } from '../../../../api/failure'
-import { failureMessage } from '../../../../app/failureMessage'
+import { feedFailureText } from '../../../../app/failureMessage'
 import { paths } from '../../../../app/paths'
+import type { RecipeFeed as RecipeFeedState } from '../../../../app/useRecipeFeed'
 import { BowlIllustration } from '../../../../components/BowlIllustration/BowlIllustration'
 import { Button } from '../../../../components/Button/Button'
 import { EmptyState } from '../../../../components/EmptyState/EmptyState'
 import { ErrorState } from '../../../../components/ErrorState/ErrorState'
+import { FeedGrid } from '../../../../components/FeedGrid/FeedGrid'
 import { LinkButton } from '../../../../components/LinkButton/LinkButton'
 import { LoadingRegion } from '../../../../components/LoadingRegion/LoadingRegion'
+import { LoadMore } from '../../../../components/LoadMore/LoadMore'
+import { RecipeCard } from '../../../../components/RecipeCard/RecipeCard'
+import { RecipeCardSkeletons } from '../../../../components/RecipeCard/RecipeCardSkeletons'
 import { strings } from '../../strings'
-import type { RecipeFeed as RecipeFeedState } from '../../useRecipeFeed'
-import { FeedGrid } from '../FeedGrid/FeedGrid'
-import { LoadMore } from '../LoadMore/LoadMore'
-import { RecipeCard } from '../RecipeCard/RecipeCard'
-import { RecipeCardSkeletons } from '../RecipeCard/RecipeCardSkeletons'
 
 export interface RecipeFeedProps {
   feed: RecipeFeedState
   /** A member allowed to write recipes: the empty feed invites them to write the first. */
   mayCreate: boolean
-}
-
-/** Having no connection is the one cause the design words in its own way; the rest use the cause's sentence. */
-function failureText(failure: ApiFailure): { title: string; description: string } {
-  if (failure.kind === 'network') return strings.failed.network
-  return { title: strings.failed.other.title, description: failureMessage(failure) }
 }
 
 /** The recipes under the title, in whichever state they are: loading, failed, empty or listed. */
@@ -37,7 +30,7 @@ export function RecipeFeed({ feed, mayCreate }: RecipeFeedProps) {
       )
 
     case 'failed': {
-      const { title, description } = failureText(feed.failure)
+      const { title, description } = feedFailureText(feed.failure)
       return (
         <ErrorState title={title} description={description} size="compact">
           <Button icon="refresh" fullWidth onClick={feed.retry}>

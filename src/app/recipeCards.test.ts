@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { API_BASE_URL } from '../../api/apiConfig'
+import { API_BASE_URL } from '../api/apiConfig'
 import { recipeCardsOf, toRecipeCard } from './recipeCards'
 
 const named = (...names: string[]) => names.map((name) => ({ id: `id-${name}`, name }))

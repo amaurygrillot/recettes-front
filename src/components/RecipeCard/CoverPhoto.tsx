@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Icon } from '../../../../components/Icon/Icon'
+import { Icon } from '../Icon/Icon'
 
 export interface CoverPhotoProps {
   /** The picture's address; none for a recipe without a photo. */

@@ -1,4 +1,4 @@
-import { Skeleton } from '../../../../components/Skeleton/Skeleton'
+import { Skeleton } from '../Skeleton/Skeleton'
 
 /** The shape of a card while its recipe is on the way: same frame, same rows, nothing to read. */
 export function RecipeCardSkeleton() {

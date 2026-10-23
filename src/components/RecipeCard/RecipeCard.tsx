@@ -1,10 +1,26 @@
 import { useId } from 'react'
 import { Link } from 'react-router'
-import { formatRelativeDate } from '../../../../lib/formatRelativeDate'
-import type { RecipeCardModel } from '../../recipeCards'
-import { strings } from '../../strings'
+import { formatRelativeDate } from '../../lib/formatRelativeDate'
 import { CardPill } from './CardPill'
 import { CoverPhoto } from './CoverPhoto'
+import { strings } from './strings'
+
+/** What a recipe card shows, resolved by the screen: the card itself knows no URL and no API schema. */
+export interface RecipeCardModel {
+  id: string
+  /** The recipe's page. */
+  path: string
+  title: string
+  /** The thumbnail of the first cover picture; none for a recipe without a photo. */
+  coverUrl: string | undefined
+  categories: readonly string[]
+  tags: readonly string[]
+  /** Tags beyond the ones shown: « +2 ». */
+  hiddenTagCount: number
+  author: string | undefined
+  /** ISO date-time. */
+  createdAt: string | undefined
+}
 
 export interface RecipeCardProps {
   recipe: RecipeCardModel
@@ -12,7 +28,7 @@ export interface RecipeCardProps {
 
 function byline(recipe: RecipeCardModel): string | undefined {
   const when = recipe.createdAt === undefined ? undefined : formatRelativeDate(recipe.createdAt)
-  if (recipe.author !== undefined) return strings.card.byline(recipe.author, when)
+  if (recipe.author !== undefined) return strings.byline(recipe.author, when)
   return when
 }
 
@@ -53,10 +69,8 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
             ))}
             {recipe.hiddenTagCount > 0 && (
               <CardPill tone="overflow">
-                <span aria-hidden="true">{strings.card.moreTags(recipe.hiddenTagCount)}</span>
-                <span className="sr-only">
-                  {strings.card.moreTagsSpoken(recipe.hiddenTagCount)}
-                </span>
+                <span aria-hidden="true">{strings.moreTags(recipe.hiddenTagCount)}</span>
+                <span className="sr-only">{strings.moreTagsSpoken(recipe.hiddenTagCount)}</span>
               </CardPill>
             )}
           </div>

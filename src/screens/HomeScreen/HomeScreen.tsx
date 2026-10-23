@@ -1,13 +1,13 @@
 import { useSession } from '../../api/session'
 import { useCreateButtonMode } from '../../app/createButtonMode'
 import { canCreateRecipes } from '../../app/navigation'
+import { useRecipeFeed } from '../../app/useRecipeFeed'
 import { CategoryTiles } from './components/CategoryTiles/CategoryTiles'
 import { FeedHeading } from './components/FeedHeading/FeedHeading'
 import { HomeHeader } from './components/HomeHeader/HomeHeader'
 import { RecipeFeed } from './components/RecipeFeed/RecipeFeed'
 import { strings } from './strings'
 import { useMainCategories } from './useMainCategories'
-import { useRecipeFeed } from './useRecipeFeed'
 
 /**
  * The front door: the newest recipes of the family, for a visitor as for a member, with the main
@@ -17,7 +17,7 @@ import { useRecipeFeed } from './useRecipeFeed'
 export function HomeScreen() {
   const mayCreate = canCreateRecipes(useSession())
   const categories = useMainCategories()
-  const feed = useRecipeFeed()
+  const feed = useRecipeFeed({})
   // An empty feed already holds the invitation to write a first recipe: the « + » would double it.
   useCreateButtonMode(feed.status === 'empty' ? 'hidden' : 'extends-at-top')
 
