@@ -20,8 +20,8 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 
 ## Status
 
-**Milestones M1 (skeleton and guardrails), M2 (theme and base components), M3 (API client and authentication) and M4
-(router and shell) are done**; next is M5 (the home screen, the quality template for the others). The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
+**Milestones M1 (skeleton and guardrails), M2 (theme and base components), M3 (API client and authentication), M4
+(router and shell) and M5 (the home screen, the quality template for the others) are done**; next are the other screens, SearchScreen first. The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
 prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
 [docs/agent-operating-rules.md](docs/agent-operating-rules.md); canvas boards per screen are in
 [docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
@@ -33,9 +33,12 @@ components in `src/components/` (Icon, Logo, Button, LinkButton, Tag, FilterChip
 BowlIllustration, ErrorState, ErrorBanner, Avatar, AlertDialog, TabBar, TopBar), and a development-only **`/styleguide`** route that
 displays the base ones. M3: the API layer in `src/api` ([docs/api-layer.md](docs/api-layer.md)): generated schema, typed client,
 one error union, the session and token module, query hooks per resource, MSW in every test, and the logger in `src/lib`. M4:
-the router, the shell (phone tab bar with the « + », desktop top bar from 1024 px, login-protected routes that come back after
-the login, the session-expired dialog, a 404 and error boundaries), and a working but plain **LoginScreen**. Not there yet: every
-other product screen (their routes show a `ScreenPlaceholder`; the account placeholder has the real « Se déconnecter »).
+the router, the shell (phone tab bar with the « + », desktop top bar from 1024 px with a search field and the member's avatar,
+login-protected routes that come back after the login, the session-expired dialog, a 404 and error boundaries), a working but plain
+**LoginScreen**. M5: the **HomeScreen** (`src/screens/HomeScreen`: feed with « Voir plus », category shortcuts, every state), the
+extended « + » (`useCreateButtonMode`), `CreateLink`, `Spinner`, `Button busy`. Not there yet: every other product screen (their routes
+show a `ScreenPlaceholder`; the account placeholder has the real « Se déconnecter »). `RecipeCard` is local to HomeScreen until
+SearchScreen needs it; the desktop « Nouvelle recette » lives in each page's header, not in the bar.
 
 ```bash
 npm run dev            # Vite dev server, http://localhost:5173 (port is fixed: strictPort); /styleguide shows the components

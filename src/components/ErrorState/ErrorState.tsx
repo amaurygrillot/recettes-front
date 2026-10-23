@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { classNames } from '../../lib/classNames'
+import { STATE_FRAMES, type StateSize } from '../EmptyState/stateSize'
 import { Icon } from '../Icon/Icon'
 
 export interface ErrorStateProps {
@@ -8,17 +10,30 @@ export interface ErrorStateProps {
   description: string
   /** The way out: a Button « Réessayer », optionally a quiet « Retour à l'accueil ». */
   children?: ReactNode
+  /** `regular` fills a page; `compact` is a block among others (a feed's), with a smaller badge and tighter padding. */
+  size?: StateSize
 }
 
+const BADGES: Record<StateSize, string> = { regular: 'size-20', compact: 'size-16' }
+const ICON_SIZES: Record<StateSize, number> = { regular: 40, compact: 32 }
+
 /** A whole block that failed to load. Announced at once to assistive technology. */
-export function ErrorState({ title, description, children }: ErrorStateProps) {
+export function ErrorState({ title, description, children, size = 'regular' }: ErrorStateProps) {
   return (
     <div
       role="alert"
-      className="flex flex-col items-center gap-3.5 rounded-xl border-2 border-ink-900 bg-paper-50 px-6 py-7 text-center shadow-card"
+      className={classNames(
+        'flex flex-col items-center rounded-xl border-2 border-ink-900 bg-paper-50 text-center shadow-card',
+        STATE_FRAMES[size],
+      )}
     >
-      <div className="grid size-20 place-items-center rounded-full border-3 border-brick bg-brick-bg text-brick">
-        <Icon name="warning" size={40} strokeWidth={2.4} />
+      <div
+        className={classNames(
+          'grid place-items-center rounded-full border-3 border-brick bg-brick-bg text-brick',
+          BADGES[size],
+        )}
+      >
+        <Icon name="warning" size={ICON_SIZES[size]} strokeWidth={2.4} />
       </div>
       <h2 className="font-title text-dialog-title text-ink-900">{title}</h2>
       <p className="text-body text-ink-800">{description}</p>

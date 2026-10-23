@@ -43,11 +43,30 @@ describe('ErrorState', () => {
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
+  it.each(['regular', 'compact'] as const)(
+    'says the same thing at its %s size, with the same warning',
+    (size) => {
+      const { container } = render(
+        <ErrorState title={TITLE} description={DESCRIPTION} size={size} />,
+      )
+
+      expect(screen.getByRole('alert')).toHaveTextContent(TITLE)
+      expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+      expect(container.querySelector('svg')).toHaveAttribute(
+        'width',
+        size === 'compact' ? '32' : '40',
+      )
+    },
+  )
+
   it('has no accessibility violation', async () => {
     const { container } = render(
-      <ErrorState title={TITLE} description={DESCRIPTION}>
-        <Button icon="refresh">Réessayer</Button>
-      </ErrorState>,
+      <div>
+        <ErrorState title={TITLE} description={DESCRIPTION}>
+          <Button icon="refresh">Réessayer</Button>
+        </ErrorState>
+        <ErrorState title={TITLE} description={DESCRIPTION} size="compact" />
+      </div>,
     )
 
     await expectNoAccessibilityViolations(container)

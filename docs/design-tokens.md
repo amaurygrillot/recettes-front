@@ -71,6 +71,7 @@ Loaded from Google Fonts in the canvas; self-host them in the app (no third-part
 | Poster (« Mes recettes ») | Fraunces | 52 / 56 | 800 |
 | Title 1 (recipe name) | Fraunces | 40 / 46 | 700 (800 in the phone mock-up) |
 | Title 2 (section) | Fraunces | 30 / 36 | 700 |
+| Page title (`text-page-title`, home feed) | Fraunces | 30 / 36 (36 / 42 from 1024 px: `text-page-title-lg`) | 800 |
 | Title 3 (recipe card) | Fraunces | 24 / 30 | 700 |
 | State title (`text-state-title`, empty states) | Fraunces | 28 / 34 | 700 |
 | Dialog title (`text-dialog-title`, error blocks, dialogs) | Fraunces | 26 / 32 | 700 |
@@ -79,6 +80,7 @@ Loaded from Google Fonts in the canvas; self-host them in the app (no third-part
 | Label, button | Atkinson | 20 / 24 | 700 |
 | Detail, metadata | Atkinson | 16 / 22 | 400, ink-700 |
 | Annotation | Kalam | 26 / 28 | 400, mustard-700 |
+| Small annotation (`text-annotation-sm`, the note under a page title) | Kalam | 24 / 28.8 | 400, mustard-700 |
 
 The state title and the dialog title are drawn on the « Retours et chargement » board between Title 2 and Title 3; they
 are probably meant to be one size, to unify when the screens that use them are built. Two more sizes appear on boards that
@@ -132,9 +134,16 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   when invalid, 3 px herb + tick when valid, dashed `disabled-border` on `disabled-bg` when disabled), one message under it
   (16, ink-700; bold brick with an alert icon for an error; bold herb for a success). The password toggle, the textarea with
   counter, the select, the checkbox row and the search pill live on the `Champs-avances` board and come with their screens.
+- **Recipe card** (`Carte-accueil`, local to HomeScreen until a second screen needs it): radius 24, 2 px ink, `card` shadow, 4:3
+  photo (butter stripes and a cutlery in a cream disc without one), body padding 14 / 18 / 16 and gap 10; category pills 32 px
+  (butter-200, bold), tag pills 30 px (paper-50, ink-500 outline), « +N » pill dashed on paper-200; title Fraunces 24 / 30 on at
+  most two lines with 60 px reserved; byline 16 / 22 in ink-700. Pressed: butter-100, no shadow, 2 px down.
+- **Create link** (`CreateLink`): the yellow « + », 64 px tall, round alone or extended with « Nouvelle recette ».
 - **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (no animation under `prefers-reduced-motion`), announced as
   « Chargement… » by one status region, shown only after 300 ms, at most 6 per list.
 - **Empty state**: dashed ink-500 frame, radius 24, 176 px ink-line bowl, state title, 18 px text, one 64 px button.
+  **Compact size** (`size="compact"`, drawn on `Accueil-etats` for a block among others): padding 20 / 18, gap 12, 140 px bowl,
+  title 26 / 32; the error block likewise has a 64 px badge (icon 32) instead of 80 px.
   **Error block**: ink outline, `card` shadow, 80 px brick circle with the warning icon, dialog title, 18 px text, a primary
   and a quiet button. **Error banner**: brick on brick-bg, radius 16, alert icon, bold message, optional 56 px action.
 - **Avatar**: 40 / 56 / 64 / 72 / 96 px circle, Fraunces 800 initials at 40 % of the size, 2 px ink outline (3 px and a stamp

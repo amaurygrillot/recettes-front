@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { API_BASE_URL } from '../api/apiConfig'
 import { sessionStore } from '../api/sessionStore'
 import { expectNoAccessibilityViolations } from '../test/expectNoAccessibilityViolations'
@@ -24,7 +24,21 @@ function labelsOf(bar: HTMLElement): (string | null)[] {
     .map((link) => link.textContent)
 }
 
+// The home page asks the back end for its feed and its categories; these tests are about routing.
+function serveRecipes(content: object[]) {
+  server.use(
+    http.get(`${API_BASE_URL}/recipes`, () =>
+      HttpResponse.json({ content, number: 0, last: true, totalElements: content.length }),
+    ),
+    http.get(`${API_BASE_URL}/categories`, () => HttpResponse.json([])),
+  )
+}
+
 describe('the pages with navigation', () => {
+  beforeEach(() => {
+    serveRecipes([])
+  })
+
   it.each([
     ['/', 'Il en reste un peu'],
     ['/rechercher', 'Rechercher'],
@@ -43,24 +57,23 @@ describe('the pages with navigation', () => {
     await screen.findByRole('heading', { level: 1 })
 
     expect(labelsOf(phoneBar())).toEqual(['Accueil', 'Rechercher', 'Se connecter'])
-    expect(screen.queryByRole('link', { name: 'Créer une recette' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Nouvelle recette' })).not.toBeInTheDocument()
   })
 
-  it('gives a member four tabs, and the « + » on the phone and the button on the desktop', async () => {
+  it('gives a member four tabs, and two ways to create: the « + » on a phone, a button on a desktop', async () => {
+    serveRecipes([{ id: '1', title: 'Gratin dauphinois' }])
     signIn()
     renderRoutes(routes, '/')
-    await screen.findByRole('heading', { level: 1 })
+    await screen.findByRole('link', { name: 'Gratin dauphinois' })
 
     expect(labelsOf(phoneBar())).toEqual(['Accueil', 'Rechercher', 'Mes recettes', 'Compte'])
-    expect(screen.getByRole('link', { name: 'Créer une recette' })).toHaveAttribute(
-      'href',
-      '/recettes/nouvelle',
-    )
-    expect(within(desktopBar()).getByRole('link', { name: 'Nouvelle recette' })).toHaveAttribute(
-      'href',
-      '/recettes/nouvelle',
-    )
+    // CSS shows the « + » below 1024 px and the button above; neither exists in jsdom's layout.
+    const creates = screen.getAllByRole('link', { name: 'Nouvelle recette' })
+    expect(creates).toHaveLength(2)
+    creates.forEach((link) => {
+      expect(link).toHaveAttribute('href', '/recettes/nouvelle')
+    })
+    expect(within(desktopBar()).queryByRole('link', { name: 'Nouvelle recette' })).toBeNull()
   })
 
   it('marks the tab of the page you are on', async () => {
@@ -75,11 +88,12 @@ describe('the pages with navigation', () => {
   })
 
   it('does not offer to create to a member without the USER role', async () => {
+    serveRecipes([{ id: '1', title: 'Gratin dauphinois' }])
     signIn({ roles: [] })
     renderRoutes(routes, '/')
-    await screen.findByRole('heading', { level: 1 })
+    await screen.findByRole('link', { name: 'Gratin dauphinois' })
 
-    expect(screen.queryByRole('link', { name: 'Créer une recette' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Nouvelle recette' })).not.toBeInTheDocument()
   })
 
   it('moves between pages with the tabs', async () => {
@@ -176,6 +190,7 @@ describe('a page that needs a login', () => {
   })
 
   it('goes to the home page after a login that was not asked for by a page', async () => {
+    serveRecipes([])
     server.use(http.post(`${API_BASE_URL}/auth/login`, () => HttpResponse.text(fakeToken())))
     const user = userEvent.setup()
     renderRoutes(routes, '/connexion')
@@ -191,6 +206,7 @@ describe('a page that needs a login', () => {
   })
 
   it('lets a member log out from the account page and back to a visitor’s navigation', async () => {
+    serveRecipes([])
     signIn()
     const user = userEvent.setup()
     renderRoutes(routes, '/compte')

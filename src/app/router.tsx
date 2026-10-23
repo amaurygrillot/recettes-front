@@ -1,4 +1,5 @@
 import type { RouteObject } from 'react-router'
+import { HomeScreen } from '../screens/HomeScreen/HomeScreen'
 import { NotFoundScreen } from '../screens/NotFoundScreen/NotFoundScreen'
 import { AccountPlaceholder } from './AccountPlaceholder'
 import { AppShell } from './AppShell'
@@ -28,7 +29,7 @@ const styleguideRoutes: RouteObject[] = import.meta.env.DEV
 
 // Pages with the navigation around them.
 const pagesWithNavigation: RouteObject[] = [
-  { index: true, element: <ScreenPlaceholder title={strings.appName} /> },
+  { index: true, element: <HomeScreen /> },
   { path: paths.search, element: <ScreenPlaceholder title={placeholder.search} /> },
   { path: ROUTE_PATTERNS.recipe, element: <ScreenPlaceholder title={placeholder.recipe} /> },
   {

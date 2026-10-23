@@ -20,7 +20,8 @@ const LOGIN: NavigationItem = { to: paths.login, label: navigation.login, icon: 
  * same icons. A member whose session just expired already sees the visitor's.
  */
 export function navigationItems(session: Session): NavigationItem[] {
-  return session.status === 'member' ? [HOME, SEARCH, MY_RECIPES, ACCOUNT] : [HOME, SEARCH, LOGIN]
+  if (session.status !== 'member') return [HOME, SEARCH, LOGIN]
+  return [HOME, SEARCH, MY_RECIPES, { ...ACCOUNT, avatarName: session.username }]
 }
 
 /** Whether to offer the « + »: only an account allowed to write recipes. The server stays the authority. */

@@ -1,5 +1,6 @@
-import { Link, NavLink } from 'react-router'
+import { NavLink } from 'react-router'
 import { classNames } from '../../lib/classNames'
+import { CreateLink } from '../CreateLink/CreateLink'
 import { Icon } from '../Icon/Icon'
 import type { IconName } from '../Icon/iconShapes'
 
@@ -9,6 +10,8 @@ export interface NavigationItem {
   icon: IconName
   /** Active only on exactly this path (the home page), not on the pages beneath it. */
   end?: boolean | undefined
+  /** The member's name: the top bar shows their avatar in place of the icon. The tab bar keeps the icon. */
+  avatarName?: string | undefined
 }
 
 /** The one action that creates something; it is never a tab. */
@@ -25,6 +28,8 @@ export interface TabBarProps {
   items: readonly NavigationItem[]
   /** Floats above the bar, at its right. Absent for a visitor. */
   createAction?: CreateAction | undefined
+  /** Shows the action with its label (a page that has room for it) instead of the round « + ». */
+  createExpanded?: boolean | undefined
 }
 
 const TAB =
@@ -43,17 +48,14 @@ const PILL_IDLE =
  * over from there). It sits at the end of the page and sticks to the bottom of the screen, so the
  * content never hides behind it.
  */
-export function TabBar({ label, items, createAction }: TabBarProps) {
+export function TabBar({ label, items, createAction, createExpanded = false }: TabBarProps) {
   return (
     <div className="sticky bottom-0 z-20 desktop:hidden">
       {createAction && (
-        <Link
-          to={createAction.to}
-          aria-label={createAction.label}
-          className="absolute right-4 bottom-full mb-4 grid size-16 place-items-center rounded-full border-2 border-ink-900 bg-butter-300 text-ink-900 shadow-stamp hover:bg-butter-400 focus-visible:outline-offset-4 active:translate-1 active:bg-mustard-500 active:shadow-none"
-        >
-          <Icon name="plus" size={30} strokeWidth={3} />
-        </Link>
+        // 16 px above the bar and 16 px from the edge (24 px on a tablet, where the margins are wider).
+        <div className="absolute right-4 bottom-full mb-4 tablet:right-6">
+          <CreateLink to={createAction.to} label={createAction.label} expanded={createExpanded} />
+        </div>
       )}
       <nav
         aria-label={label}

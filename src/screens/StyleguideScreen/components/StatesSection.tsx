@@ -39,6 +39,25 @@ export function StatesSection() {
             </Button>
           </ErrorState>
         </StyleguideSpecimen>
+        <StyleguideSpecimen label={states.compactEmpty}>
+          <EmptyState
+            illustration={<BowlIllustration variant="first-visit" size="compact" />}
+            title={states.emptyBook}
+            description={states.emptyBookText}
+            size="compact"
+          >
+            <Button icon="plus" fullWidth>
+              {states.createRecipe}
+            </Button>
+          </EmptyState>
+        </StyleguideSpecimen>
+        <StyleguideSpecimen label={states.compactError}>
+          <ErrorState title={states.cannotLoad} description={states.cannotLoadText} size="compact">
+            <Button icon="refresh" fullWidth>
+              {states.retry}
+            </Button>
+          </ErrorState>
+        </StyleguideSpecimen>
         <StyleguideSpecimen label={states.banner}>
           <ErrorBanner message={states.interrupted}>
             <Button variant="secondary" size="medium">

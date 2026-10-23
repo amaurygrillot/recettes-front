@@ -20,17 +20,24 @@ const SIZES: Record<ButtonSize, string> = {
   medium: 'min-h-14 text-body',
 }
 
+// Waiting for an answer looks the same whatever the button was: it keeps its place and size, and
+// the pale butter says « working » without the dashed look of a disabled button.
+const BUSY =
+  'cursor-progress border-ink-900 bg-butter-100 text-ink-900 focus-visible:outline-offset-4'
+
 interface ButtonLook {
   variant: ButtonVariant
   size: ButtonSize
   fullWidth: boolean
+  busy?: boolean
 }
 
 /** The one definition of how a button looks, shared by the `<button>` and by the link that looks like one. */
-export function buttonClassName({ variant, size, fullWidth }: ButtonLook): string {
+export function buttonClassName({ variant, size, fullWidth, busy = false }: ButtonLook): string {
   return classNames(
-    'inline-flex cursor-pointer items-center justify-center gap-2.5 rounded-l border-2 px-6 text-center font-bold',
-    VARIANTS[variant],
+    'inline-flex items-center justify-center gap-2.5 rounded-l border-2 px-6 text-center font-bold',
+    !busy && 'cursor-pointer',
+    busy ? BUSY : VARIANTS[variant],
     SIZES[size],
     fullWidth && 'w-full',
   )

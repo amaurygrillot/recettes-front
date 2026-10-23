@@ -33,6 +33,16 @@ describe('Avatar', () => {
     expect(screen.getByRole('img').className).toBe(classes)
   })
 
+  it.each(['Anne Girard', ''])(
+    'can be decorative, then it has no role and no name (%j)',
+    (name) => {
+      const { container } = render(<Avatar name={name} decorative />)
+
+      expect(screen.queryByRole('img')).not.toBeInTheDocument()
+      expect(container.firstElementChild).toHaveAttribute('aria-hidden', 'true')
+    },
+  )
+
   it('is as big as asked', () => {
     render(<Avatar name="Anne Girard" size={96} />)
 

@@ -10,6 +10,21 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        // The libraries change far less often than the app: their own files stay cached across
+        // releases, and none is the 500 kB lump that Vite warns about. A module goes to the first
+        // group that matches, so React's narrower pattern comes before the catch-all.
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules\/(?:react|react-dom|scheduler)\// },
+            { name: 'vendor', test: /node_modules/ },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
