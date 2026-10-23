@@ -31,7 +31,7 @@ for the current page, round « + » of 64 px 16 px above the bar and 16 px from 
   M5 follows them: `TopBar` has no create button any more. **Until each screen is built, a member on a desktop has no create
   button on the pages still showing a placeholder** (the home page has it, beside the feed title); each screen adds its own as
   its board draws it (« Mes recettes » has it in the list header). The field is a real search form (`HeaderSearch`): Enter opens
-  `/rechercher?q=…`; keeping the field in step with the search page's text is for SearchScreen.
+  `/rechercher?q=…`; on the two searching pages it is their field (see SearchScreen below).
 - **The « + » is named « Nouvelle recette », round or extended.** The `Bouton-flottant-feuille` board says « Créer une recette »,
   the home board « Nouvelle recette »; a visible label has to be part of the accessible name, and a name that changed as the page
   scrolled would be confusing, so there is one string (`navigation.newRecipe`). The extended form is the home screen's: it
@@ -43,7 +43,7 @@ for the current page, round « + » of 64 px 16 px above the bar and 16 px from 
   now.** The board's label has to follow (or the back end has to accept an e-mail) when the auth screens are built.
 - **The search page's URL contract** (`searchPath` in `app/paths.ts`): `/rechercher?categorie=<id>` opens with that category
   chosen (home tiles), `/rechercher?q=<text>` with that text in the title search (the bar's field). The fake search field on the
-  phone and tablet opens plain `/rechercher`, where the field has the focus. SearchScreen reads these two parameters.
+  phone and tablet opens plain `/rechercher`, where the field has the focus. SearchScreen reads these (and `exacte`, `tag`, `auteur`, `tri`, see below).
 - **Full-screen screens** (no tab bar): login and the other public auth screens, cooking mode, the recipe editor.
 - The session-expired dialog text is the board's, minus « Ton brouillon est conservé »: no draft exists before the editor does.
 - The filter bottom sheet of `Bouton-flottant-feuille` belongs to SearchScreen, not to the shell.
@@ -72,3 +72,29 @@ Built from `Accueil-mobile`, `Accueil-etats`, `Carte-accueil`, `Accueil-tablette
   (140 px bowl, 64 px badge, tighter padding): `size="compact"` on `EmptyState`, `ErrorState` and `BowlIllustration`.
 - **Dev database**: the local database holds 51 leftover test categories (`dessert-…`, `gouter-…`), so the real home page shows
   a long row of tiles. They are data, not a bug; the front shows every `MAIN` category.
+
+## SearchScreen (`/rechercher` and `/mes-recettes`)
+
+Built from `Rechercher-entrees`, `-filtres`, `-etats`, `-mes-recettes`, `-tablette` and `-ordinateur`. **The URL is the state**:
+`?q=` (title text, 200 characters at most) `&categorie=<id>` `&exacte=1` (only that category) `&tag=<id>` `&auteur=<text>`
+`&tri=recentes|modifiees|titre-az|titre-za`; only what differs from the default is written (`app/searchCriteria.ts`). Changes replace
+the history entry, so « back » returns to where the reader came from. Typing searches after a 300 ms pause (or Enter); the same text
+is typed in the page's field (phone, tablet) or in the bar's (desktop).
+
+**Where the boards ask for more than the API gives** (decided, not asked: the board itself says so on `Rechercher-filtres`):
+
+- **No ingredient filter** (`GET /recipes` has no such criterion): the « Ingrédients » section, chip and sentence are not built.
+- **One category and one tag at a time** (the API takes a single `categoryId` and `tagId`): the category tree uses radio buttons
+  with « Toutes les catégories » to choose none; tags are chips of which one is pressed. A category includes what is filed
+  beneath it, which is the API's default; « Uniquement cette catégorie » (a checkbox under the chosen parent) asks for
+  `includeSubcategories=false`. The badge of a section is therefore 0 or 1. **What the back end would need** for the boards as drawn: a
+  list of category ids and of tag ids (with an AND/OR rule) and an ingredient criterion.
+- « Les plus utilisés »: the API has no usage count, so the tags are all shown (chosen first) and the field narrows them.
+
+Other decisions: filters on a phone and a tablet are a `BottomSheet` working on a **draft** (« Voir les N recettes », N from a page of
+one, applies it; closing drops it; « Réinitialiser » clears the draft), centered from 600 px; on a desktop a 270 px column applies each
+choice at once. The sheet's handle is a button (it closes; there is no drag). The sort is a sheet of radio buttons on a phone and the
+browser's own list on a desktop. Section pills jump to their section and follow the scroll. The suggestions of the category and tag
+fields are a `Combobox` (start of word, accents and case ignored, five at most, nothing created). While a new answer comes, the
+previous one stays with « Recherche… » in the count line. « Mes recettes »: author fixed to the member by id (an `auteur` in the URL
+is ignored), locked chip not counted among the filters, « + » extended at the top of the list and hidden for a first recipe.

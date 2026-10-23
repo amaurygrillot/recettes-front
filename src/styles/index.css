@@ -115,6 +115,8 @@
   --radius-l: 1rem;
   --radius-frame: 1.25rem;
   --radius-xl: 1.5rem;
+  /* Corners of a sheet that rises over the page. */
+  --radius-sheet: 1.75rem;
   --radius-pill: 999px;
 
   /* Shadows are tinted brown, like paper laid on a table. `stamp` is pressed away on :active. */
@@ -153,6 +155,11 @@
 /* Thin outline of tags (1.5 px), between Tailwind's 1 px and 2 px. */
 @utility border-thin {
   border-width: 1.5px;
+}
+
+/* A sheet is at most 85 % of the screen: beyond that its body scrolls, not the sheet. */
+@utility max-h-sheet {
+  max-height: 85dvh;
 }
 
 /* A disabled control is recognisable without colour: dashed border, dimmed text, no shadow. */

@@ -10,10 +10,15 @@ const PLACEHOLDERS = [
   { id: 'fourth', className: 'hidden tablet:block' },
 ] as const
 
+export interface RecipeCardSkeletonsProps {
+  /** As for the grid of the cards they stand in for. */
+  desktopColumns?: 3 | 4
+}
+
 /** The placeholders of a feed that has not arrived (or of the next page). Hidden from assistive technology. */
-export function RecipeCardSkeletons() {
+export function RecipeCardSkeletons({ desktopColumns = 4 }: RecipeCardSkeletonsProps) {
   return (
-    <FeedGrid>
+    <FeedGrid desktopColumns={desktopColumns}>
       {PLACEHOLDERS.map(({ id, className }) => (
         <li key={id} className={className}>
           <RecipeCardSkeleton />

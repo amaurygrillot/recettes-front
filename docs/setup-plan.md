@@ -42,6 +42,10 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   desktop bar of the later boards, the extended « + », `CreateLink`, `Spinner` and `Button busy`, compact `EmptyState` /
   `ErrorState`, the page-title tokens, a vendor chunk split. Not exercised live: « Voir plus » (no recipes in the database).
 
+- **SearchScreen — done (2026-10-23).** `/rechercher` and `/mes-recettes`; decisions and the API gaps in
+  [design-boards.md](design-boards.md#searchscreen-rechercher-and-mes-recettes). Shared pieces promoted or added: `RecipeCard`,
+  `FeedGrid`, `LoadMore`, `BottomSheet`, `Combobox`, `IconButton`, `CountBadge`, `RemovableChip`, `LockedChip`, `RadioRow`, `CheckboxRow`.
+
 ## Code organisation
 
 ```

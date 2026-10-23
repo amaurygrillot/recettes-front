@@ -21,7 +21,7 @@ describe('searchPath', () => {
     [
       'a text and a category',
       { categoryId: 'c-1', query: 'gratin' },
-      '/rechercher?categorie=c-1&q=gratin',
+      '/rechercher?q=gratin&categorie=c-1',
     ],
     ['an empty text', { query: '' }, '/rechercher'],
     [

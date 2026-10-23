@@ -19,6 +19,8 @@ export const strings = {
     // part of the accessible name, and the name should not change as the page scrolls).
     newRecipe: 'Nouvelle recette',
     searchField: 'Chercher une recette',
+    // The bar and the search page both have a search landmark: they need different names.
+    searchLandmark: 'Recherche dans la barre',
   },
 
   sessionExpired: {

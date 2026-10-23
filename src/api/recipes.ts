@@ -48,8 +48,9 @@ export function useRecipeSearch(filters: RecipeSearchFilters) {
 }
 
 /** How many recipes match, without loading them: `totalElements` of a page of one. */
-export function useRecipeCount(filters: RecipeSearchFilters) {
+export function useRecipeCount(filters: RecipeSearchFilters, enabled = true) {
   return useQuery({
+    enabled,
     queryKey: recipeKeys.count(filters),
     queryFn: async ({ signal }) => {
       const page = await searchRecipes({ ...filters, size: 1 }, 0, signal)
