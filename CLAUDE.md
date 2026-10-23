@@ -21,7 +21,7 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 ## Status
 
 **Milestones M1 (skeleton and guardrails), M2 (theme and base components), M3 (API client and authentication), M4
-(router and shell) and M5 (the home screen, the quality template for the others) are done**; next are the other screens, SearchScreen first. The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
+(router and shell) and M5 (the home screen, the quality template for the others) are done**; SearchScreen is done too (`/rechercher`, `/mes-recettes`); next are RecipeScreen, the auth screens, AccountScreen, RecipeEditorScreen, CookingScreen. The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
 prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
 [docs/agent-operating-rules.md](docs/agent-operating-rules.md); canvas boards per screen are in
 [docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
@@ -37,8 +37,7 @@ the router, the shell (phone tab bar with the « + », desktop top bar from 1024
 login-protected routes that come back after the login, the session-expired dialog, a 404 and error boundaries), a working but plain
 **LoginScreen**. M5: the **HomeScreen** (`src/screens/HomeScreen`: feed with « Voir plus », category shortcuts, every state), the
 extended « + » (`useCreateButtonMode`), `CreateLink`, `Spinner`, `Button busy`. Not there yet: every other product screen (their routes
-show a `ScreenPlaceholder`; the account placeholder has the real « Se déconnecter »). `RecipeCard` is local to HomeScreen until
-SearchScreen needs it; the desktop « Nouvelle recette » lives in each page's header, not in the bar.
+show a `ScreenPlaceholder`; the account placeholder has the real « Se déconnecter »). `RecipeCard`, the grid and « Voir plus » are shared components; the desktop « Nouvelle recette » lives in each page's header, not in the bar.
 
 ```bash
 npm run dev            # Vite dev server, http://localhost:5173 (port is fixed: strictPort); /styleguide shows the components

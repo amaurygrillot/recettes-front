@@ -11,6 +11,8 @@ import { routes } from './router'
 
 function serveFeed(content: object[]) {
   server.use(
+    http.get(`${API_BASE_URL}/categories/hierarchy`, () => HttpResponse.json([])),
+    http.get(`${API_BASE_URL}/tags`, () => HttpResponse.json([])),
     http.get(`${API_BASE_URL}/recipes`, () =>
       HttpResponse.json({ content, number: 0, last: true, totalElements: content.length }),
     ),
@@ -107,5 +109,32 @@ describe('the phone « + » of the shell', () => {
     await screen.findByRole('heading', { level: 1, name: 'Rechercher' })
 
     expect(phoneCreate()).toBeInTheDocument()
+  })
+
+  describe('on the pages that search', () => {
+    it('shows its label at the top of « Mes recettes », where recipes are written', async () => {
+      serveFeed([{ id: '1', title: 'Gratin dauphinois' }])
+      renderRoutes(routes, '/mes-recettes')
+      await screen.findByRole('link', { name: 'Gratin dauphinois' })
+
+      expect(phoneCreate()).toHaveTextContent('Nouvelle recette')
+    })
+
+    it('hides it in « Mes recettes » while the list is empty, the empty state having its own button', async () => {
+      serveFeed([])
+      renderRoutes(routes, '/mes-recettes')
+      await screen.findByText("Tu n'as pas encore de recette")
+
+      expect(phoneCreate()).not.toBeInTheDocument()
+    })
+
+    it('stays the plain round « + » on the search page', async () => {
+      serveFeed([{ id: '1', title: 'Gratin dauphinois' }])
+      renderRoutes(routes, '/rechercher')
+      await screen.findByRole('link', { name: 'Gratin dauphinois' })
+
+      expect(phoneCreate()).toHaveTextContent('')
+      expect(phoneCreate()).toHaveAccessibleName('Nouvelle recette')
+    })
   })
 })

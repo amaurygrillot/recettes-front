@@ -19,6 +19,8 @@ export const strings = {
     // part of the accessible name, and the name should not change as the page scrolls).
     newRecipe: 'Nouvelle recette',
     searchField: 'Chercher une recette',
+    // The bar and the search page both have a search landmark: they need different names.
+    searchLandmark: 'Recherche dans la barre',
   },
 
   sessionExpired: {
@@ -69,5 +71,16 @@ export const strings = {
         : `Le serveur est très sollicité. Réessaie dans ${inSeconds(seconds)}.`,
     serverError: 'Le serveur a rencontré un problème. Réessaie dans un moment.',
     unexpected: "Quelque chose s'est mal passé. Réessaie.",
+  },
+
+  // A list of recipes that cannot be loaded (home and search): having no connection is the one
+  // cause the design words in its own way; any other uses the sentence of its cause.
+  feedFailures: {
+    network: {
+      title: 'Pas de connexion pour le moment',
+      description: "Vérifie ta connexion internet, puis réessaie. Tes recettes t'attendent.",
+    },
+    otherTitle: 'Impossible de charger les recettes',
+    nextPage: 'Impossible de charger la suite.',
   },
 } as const

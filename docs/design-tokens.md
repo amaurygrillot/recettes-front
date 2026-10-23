@@ -138,6 +138,7 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   photo (butter stripes and a cutlery in a cream disc without one), body padding 14 / 18 / 16 and gap 10; category pills 32 px
   (butter-200, bold), tag pills 30 px (paper-50, ink-500 outline), « +N » pill dashed on paper-200; title Fraunces 24 / 30 on at
   most two lines with 60 px reserved; byline 16 / 22 in ink-700. Pressed: butter-100, no shadow, 2 px down.
+- **Sheet** (`BottomSheet`): corners `rounded-sheet` (28) on top on a phone, all round and centered from 600 px, 85 % of the screen high at most, `shadow-sheet`, dimmed page `ink-900/58`.
 - **Create link** (`CreateLink`): the yellow « + », 64 px tall, round alone or extended with « Nouvelle recette ».
 - **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (no animation under `prefers-reduced-motion`), announced as
   « Chargement… » by one status region, shown only after 300 ms, at most 6 per list.

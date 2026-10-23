@@ -31,14 +31,17 @@ function serveRecipes(content: object[]) {
       HttpResponse.json({ content, number: 0, last: true, totalElements: content.length }),
     ),
     http.get(`${API_BASE_URL}/categories`, () => HttpResponse.json([])),
+    http.get(`${API_BASE_URL}/categories/hierarchy`, () => HttpResponse.json([])),
+    http.get(`${API_BASE_URL}/tags`, () => HttpResponse.json([])),
   )
 }
 
-describe('the pages with navigation', () => {
-  beforeEach(() => {
-    serveRecipes([])
-  })
+// Whatever the page, the back end has nothing to say unless a test says otherwise.
+beforeEach(() => {
+  serveRecipes([])
+})
 
+describe('the pages with navigation', () => {
   it.each([
     ['/', 'Il en reste un peu'],
     ['/rechercher', 'Rechercher'],
@@ -206,7 +209,6 @@ describe('a page that needs a login', () => {
   })
 
   it('lets a member log out from the account page and back to a visitor’s navigation', async () => {
-    serveRecipes([])
     signIn()
     const user = userEvent.setup()
     renderRoutes(routes, '/compte')

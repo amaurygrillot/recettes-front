@@ -1,7 +1,7 @@
 import type { ApiFailure } from '../api/failure'
 import { strings } from './strings'
 
-const { failures } = strings
+const { failures, feedFailures } = strings
 
 /**
  * The sentence for a failed call, one per cause. A screen that knows better (a `401` on the login
@@ -32,4 +32,15 @@ export function failureMessage(failure: ApiFailure): string {
     case 'unexpected':
       return failures.unexpected
   }
+}
+
+/** The block that replaces a list of recipes which failed to load: what happened, and why. */
+export function feedFailureText(failure: ApiFailure): { title: string; description: string } {
+  if (failure.kind === 'network') return feedFailures.network
+  return { title: feedFailures.otherTitle, description: failureMessage(failure) }
+}
+
+/** The banner under a list when only its next page failed to load. */
+export function nextPageFailureText(failure: ApiFailure): string {
+  return failure.kind === 'network' ? feedFailures.nextPage : failureMessage(failure)
 }

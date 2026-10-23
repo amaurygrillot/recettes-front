@@ -1,28 +1,43 @@
 import { useId, useState, type SubmitEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { Icon } from '../components/Icon/Icon'
 import { logger } from '../lib/logger'
-import { searchPath } from './paths'
+import { isSearchPage, searchPath } from './paths'
+import { MAX_QUERY_LENGTH } from './searchCriteria'
 import { strings } from './strings'
+import { useSearchText } from './useSearchText'
 
 /**
- * The search field of the desktop bar. Submitting it opens the search page on that text; the page
- * itself owns what happens next (results, filters).
+ * The search field of the desktop bar. On the search pages it is their field: what is typed
+ * searches as the reader types. Elsewhere, Enter opens the search page on that text.
  */
 export function HeaderSearch() {
   const navigate = useNavigate()
+  const onSearchPage = isSearchPage(useLocation().pathname)
   const inputId = useId()
-  const [text, setText] = useState('')
+  const pageText = useSearchText()
+  const [draft, setDraft] = useState('')
+
+  const text = onSearchPage ? pageText.text : draft
 
   function search(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
-    const query = text.trim()
+    if (onSearchPage) {
+      pageText.submit()
+      return
+    }
+    const query = draft.trim()
     logger.info('Searching from the top bar', { hasText: query !== '' })
     void navigate(searchPath({ query }))
   }
 
   return (
-    <form role="search" onSubmit={search} className="relative w-72.5 flex-none">
+    <form
+      role="search"
+      aria-label={strings.navigation.searchLandmark}
+      onSubmit={search}
+      className="relative w-72.5 flex-none"
+    >
       <label htmlFor={inputId} className="sr-only">
         {strings.navigation.searchField}
       </label>
@@ -33,8 +48,10 @@ export function HeaderSearch() {
         id={inputId}
         type="search"
         value={text}
+        maxLength={MAX_QUERY_LENGTH}
         onChange={(event) => {
-          setText(event.target.value)
+          if (onSearchPage) pageText.change(event.target.value)
+          else setDraft(event.target.value)
         }}
         placeholder={strings.navigation.searchField}
         className="h-13 w-full rounded-pill border-2 border-ink-500 bg-paper-50 pr-4 pl-13 text-label text-ink-900 placeholder:text-ink-700"

@@ -1,17 +1,18 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { expectNoAccessibilityViolations } from '../test/expectNoAccessibilityViolations'
 import { HeaderSearch } from './HeaderSearch'
 
-function renderSearch() {
+function renderSearch(path = '/') {
   const router = createMemoryRouter(
     [
       { path: '/', element: <HeaderSearch /> },
-      { path: '/rechercher', element: <p>Page de recherche</p> },
+      { path: '/rechercher', element: <HeaderSearch /> },
+      { path: '/mes-recettes', element: <HeaderSearch /> },
     ],
-    { initialEntries: ['/'] },
+    { initialEntries: [path] },
   )
   return { router, ...render(<RouterProvider router={router} />) }
 }
@@ -55,6 +56,44 @@ describe('HeaderSearch', () => {
 
     expect(router.state.location.pathname).toBe('/rechercher')
     expect(router.state.location.search).toBe('')
+  })
+
+  describe('on a search page', () => {
+    it.each(['/rechercher', '/mes-recettes'])(
+      'is the field of the page itself on %s: typing searches after a pause, in the same page',
+      async (path) => {
+        const user = userEvent.setup()
+        const { router } = renderSearch(path)
+
+        await user.type(screen.getByRole('searchbox'), 'tarte')
+        expect(router.state.location.search).toBe('')
+
+        await waitFor(() => {
+          expect(router.state.location.search).toBe('?q=tarte')
+        })
+        expect(router.state.location.pathname).toBe(path)
+        expect(screen.getByRole('searchbox')).toHaveValue('tarte')
+      },
+    )
+
+    it('shows the text of the address, and searches at once on Enter', async () => {
+      const user = userEvent.setup()
+      const { router } = renderSearch('/rechercher?q=gratin&categorie=c-1')
+      expect(screen.getByRole('searchbox')).toHaveValue('gratin')
+
+      await user.type(screen.getByRole('searchbox'), ' dauphinois{Enter}')
+
+      expect(router.state.location.search).toBe('?q=gratin+dauphinois&categorie=c-1')
+    })
+
+    it('does not add a history entry for what is typed', async () => {
+      const user = userEvent.setup()
+      const { router } = renderSearch('/rechercher')
+
+      await user.type(screen.getByRole('searchbox'), 'tarte{Enter}')
+
+      expect(router.state.historyAction).toBe('REPLACE')
+    })
   })
 
   it('has no accessibility violation', async () => {
