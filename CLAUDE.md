@@ -20,8 +20,8 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 
 ## Status
 
-**Milestones M1 (skeleton and guardrails) and M2 (theme and base components) are done**; next is M3 (API client and
-authentication). The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
+**Milestones M1 (skeleton and guardrails), M2 (theme and base components), M3 (API client and authentication) and M4
+(router and shell) are done**; next is M5 (the home screen, the quality template for the others). The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
 prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
 [docs/agent-operating-rules.md](docs/agent-operating-rules.md); canvas boards per screen are in
 [docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
@@ -29,9 +29,13 @@ prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
 
 What exists: the Vite + React + TypeScript project, the strict TypeScript flags, ESLint with the import boundaries and the bans
 (tested by `scripts/eslintGuardrails.test.ts`), the Tailwind theme from the design tokens, self-hosted fonts, the base
-components in `src/components/` (Icon, Logo, Button, Tag, FilterChip, TextField, Skeleton, LoadingRegion, EmptyState,
-BowlIllustration, ErrorState, ErrorBanner, Avatar), and a development-only **`/styleguide`** route that displays them. Not there
-yet: the API client and `src/api`, the logger, the real router and shell, every product screen.
+components in `src/components/` (Icon, Logo, Button, LinkButton, Tag, FilterChip, TextField, Skeleton, LoadingRegion, EmptyState,
+BowlIllustration, ErrorState, ErrorBanner, Avatar, AlertDialog, TabBar, TopBar), and a development-only **`/styleguide`** route that
+displays the base ones. M3: the API layer in `src/api` ([docs/api-layer.md](docs/api-layer.md)): generated schema, typed client,
+one error union, the session and token module, query hooks per resource, MSW in every test, and the logger in `src/lib`. M4:
+the router, the shell (phone tab bar with the « + », desktop top bar from 1024 px, login-protected routes that come back after
+the login, the session-expired dialog, a 404 and error boundaries), and a working but plain **LoginScreen**. Not there yet: every
+other product screen (their routes show a `ScreenPlaceholder`; the account placeholder has the real « Se déconnecter »).
 
 ```bash
 npm run dev            # Vite dev server, http://localhost:5173 (port is fixed: strictPort); /styleguide shows the components

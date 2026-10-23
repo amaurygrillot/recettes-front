@@ -26,6 +26,15 @@ made. Update this file as milestones land.
   (`asChild` with Radix `Slot`), a `headingLevel` on `EmptyState` / `ErrorState` for page-level use, a shared field frame once
   the password, textarea and select fields exist. The development-only
   `/styleguide` route (`src/screens/StyleguideScreen`) shows them and is absent from the production bundle.
+- **M3 · API client and authentication — done (2026-10-23).** See [api-layer.md](api-layer.md). Every status of every operation the
+  designed screens use is tested with MSW. **One check is pending: the manual `GET /recipes` against the running back end, and
+  the CORS check** — the back end was not running on port 8080 (and its project is not open in the IDE), so the browser was only
+  verified up to « connection refused » (the preflight and the `POST` were both sent to `localhost:8080`, and the login form showed
+  « Impossible de joindre le serveur »). Run it once the back is up: log in, then open any page that calls the API.
+- **M4 · Router and shell — done (2026-10-23).** Routes below; pages with the navigation around them, and full-screen pages without
+  (login, registration, password screens, cooking mode, the recipe editor: their boards draw no tab bar). `requireMember` is a route
+  loader (it runs on entry, so a member whose session expires stays on the page and the dialog takes over). Decisions and divergences
+  between boards are in [design-boards.md](design-boards.md#the-shell-m4).
 
 ## Code organisation
 

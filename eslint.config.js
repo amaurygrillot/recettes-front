@@ -137,6 +137,12 @@ export default defineConfig([
     },
   },
 
+  // The logger wrapper is the one place that writes to the console.
+  {
+    files: ['src/lib/logger.ts'],
+    rules: { 'no-console': 'off' },
+  },
+
   // The one place allowed to render stored HTML, and only through the attribute.
   {
     files: ['src/components/RichTextView/RichTextView.tsx'],
@@ -146,7 +152,8 @@ export default defineConfig([
   // Only api, screens and the app shell talk to the server; everything else gets data as props.
   {
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/api/**', 'src/screens/**', 'src/app/**'],
+    // The test support wraps hooks in a query client; it is not shipped.
+    ignores: ['src/api/**', 'src/screens/**', 'src/app/**', 'src/test/**'],
     rules: {
       'no-restricted-imports': [
         'error',

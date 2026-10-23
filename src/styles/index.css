@@ -171,3 +171,26 @@
     @apply outline-3 outline-offset-3 outline-ink-900;
   }
 }
+
+/* The phone's tab bar keeps its 20 px of air under the tabs, more where the device draws a home
+   indicator (the viewport is `viewport-fit=cover`). */
+@utility pb-safe-bar {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+/* The layout grid: side margins of 16 / 32 / 64 px (phone, tablet, desktop), the content centered
+   and 1152 px wide at most, so that margins and content add up to the screen up to 1280 px. */
+@utility page-margins {
+  margin-inline: auto;
+  box-sizing: content-box;
+  max-width: var(--container-content);
+  padding-inline: 1rem;
+
+  @media (width >= theme(--breakpoint-tablet)) {
+    padding-inline: 2rem;
+  }
+
+  @media (width >= theme(--breakpoint-desktop)) {
+    padding-inline: 4rem;
+  }
+}

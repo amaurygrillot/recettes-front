@@ -215,6 +215,13 @@ describe('code bans', () => {
     expect(ruleIds).toContain(expectedRuleId)
   })
 
+  it('lets the logger, and only it, write to the console', async () => {
+    const code = "console.log('x')\n"
+
+    expect(await lint('src/lib/logger.ts', code)).toEqual([])
+    expect(await lint('src/lib/other.ts', code)).toContain('no-console')
+  })
+
   it('lets RichTextView, and only it, use dangerouslySetInnerHTML', async () => {
     const code = 'export const Thing = () => <div dangerouslySetInnerHTML={{ __html: "" }} />\n'
 

@@ -168,7 +168,13 @@ top bar from 1024 px.
 > Theme names: breakpoints `tablet:` (600 px) and `desktop:` (1024 px), widths `max-w-content` (1152 px) and `max-w-reading`
 > (680 px).
 
+The grid is the `page-margins` utility of the theme (16 / 32 / 64 px of margin, content centered at 1152 px, the margins and the
+content adding up to the screen up to 1280 px); the shell and the desktop bar both use it. `pb-safe-bar` is the 20 px under the
+phone's tabs, more on a device with a home indicator (the viewport is `viewport-fit=cover`).
+
 ## Navigation
+
+(Built in M4; the decisions and the divergences between boards are in [design-boards.md](design-boards.md#the-shell-m4).)
 
 Phone: fixed bottom tab bar, icon + label, active tab in butter-300 with outline. Visitor: Accueil, Rechercher, Se
 connecter. Logged in: Accueil, Rechercher, Mes recettes, Compte. A floating « + » (yellow) creates a recipe, above the
