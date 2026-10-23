@@ -26,6 +26,15 @@ made. Update this file as milestones land.
   (`asChild` with Radix `Slot`), a `headingLevel` on `EmptyState` / `ErrorState` for page-level use, a shared field frame once
   the password, textarea and select fields exist. The development-only
   `/styleguide` route (`src/screens/StyleguideScreen`) shows them and is absent from the production bundle.
+- **M3 · API client and authentication — done (2026-10-23).** See [api-layer.md](api-layer.md). Every status of every operation the
+  designed screens use is tested with MSW. **The live check was done on 2026-10-23, once the back end was running**: a login from the front works (confirmed by the user), the CORS preflight answers
+`Access-Control-Allow-Origin: http://localhost:5173` with `Location` and `Retry-After` exposed, and calls made from the page at
+`localhost:5173` through the typed client returned `200` for `/categories` (52) and `/recipes` (empty page, the database has no recipe yet) and a
+parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-replay and a refused upload (429/503).
+- **M4 · Router and shell — done (2026-10-23).** Routes below; pages with the navigation around them, and full-screen pages without
+  (login, registration, password screens, cooking mode, the recipe editor: their boards draw no tab bar). `requireMember` is a route
+  loader (it runs on entry, so a member whose session expires stays on the page and the dialog takes over). Decisions and divergences
+  between boards are in [design-boards.md](design-boards.md#the-shell-m4).
 
 ## Code organisation
 
@@ -123,6 +132,20 @@ redirects a visitor to the login screen then back.
 After M5, screens can be built independently, in separate sessions, in this order of value: SearchScreen, RecipeScreen,
 auth screens, AccountScreen, RecipeEditorScreen, CookingScreen, then admin (not yet designed). RecipeEditorScreen needs
 the `RichTextEditor` (Lexical) and `RichTextView` components first.
+
+## Known follow-ups
+
+- **Finish the LoginScreen (decided 2026-10-23: a later session, with the other auth screens).** M4 shipped a working stand-in
+  (`src/screens/LoginScreen`: username and password, validation, a banner for a refused login and for the other failure causes,
+  return to the page that asked for the login). Still to build from the « Marque-ecrans » board: the butter band with the large seal on
+  the phone and the butter panel beside the form on desktop (checked at 390, 768 and 1280 px, only 390 px was looked at in M4), the
+  password show/hide toggle (`Champs-avances` board), the brick outline on the field concerned by a refused login, and the
+  registration, forgot-password and reset-password screens that its links lead to (placeholders today). The first field stays
+  « Nom d'utilisateur » until the board's « Adresse e-mail » is reconciled with the API, which logs in by username only.
+- **Reconcile the desktop bar and the extended « + »** with the home boards when building M5: see
+  [design-boards.md](design-boards.md#the-shell-m4).
+- **API hooks not built yet**: admin writes on categories, tags and units, ingredient rename and delete, and the by-id reads of
+  reference data. Add them, with their status tests, with the first screen that needs them ([api-layer.md](api-layer.md)).
 
 ## Working with agents
 

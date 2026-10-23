@@ -73,8 +73,25 @@ usable, `typescript@6` still resolves to 6.0.3), so nothing changed. `npm instal
 | `@eslint/js`, `globals`, `@types/react`, `@types/react-dom`, `@types/node` | 10.0.1, 17.13.0, 19.3.0, 19.3.0, 26.6.5 | Lint and type support. |
 | `openapi-typescript` | 7.13.0 | `npm run api:generate` (the override above applies to it), through its Node API: the output is byte for byte the CLI's. The schema itself is committed in M3. |
 
-Not installed yet, on purpose: TanStack Query, `openapi-fetch`, MSW, React Hook Form, Zod, Radix, dnd-kit, Lexical, DOMPurify,
-Playwright. A dependency is added by the milestone that uses it.
+### Installed in M3 and M4 (2026-10-23)
+
+`npm view` re-run before installing: every version is still the latest, the tree resolves with no `--force`, and `npm audit`
+reports the same four findings as before (the `braces` chain above), nothing new.
+
+| Package | Version | Why |
+|---|---|---|
+| `@tanstack/react-query` | 5.104.5 | Server state; the `ApiRequestError` registration is in `src/api/queryClient.ts`. |
+| `openapi-fetch` | 0.17.0 | The typed client; created with `fetch: (request) => globalThis.fetch(request)`. Middleware: `onResponse` may return a new `Response`, which is how a refused GET is replayed. |
+| `msw` | 3.0.3 | The fake back end of the tests (`src/test/server.ts`). |
+| `react-hook-form` · `@hookform/resolvers` · `zod` | 7.90.0 · 6.0.0 · 4.6.7 | The login form; Zod also reads the claims of the JWT. |
+| `radix-ui` | 1.8.1 | `AlertDialog` (the session-expired dialog). |
+
+Notes: the production bundle is 498 kB (154 kB gzip) before any real screen, with the login screen split out (50 kB): watch it in M5.
+In tests, `src/test/setup.ts` starts MSW with `onUnhandledFrame: 'error'`; `FormData` and `File` from jsdom cannot be sent by
+Node's `fetch` once a handler reads the body (see [api-layer.md](api-layer.md#testing-it)). Radix sets `pointer-events: none` on
+`body` while a modal is open: a test clicks the veil (the dialog's parent), not `document.body`.
+
+Not installed yet, on purpose: dnd-kit, Lexical, DOMPurify, Playwright. A dependency is added by the milestone that uses it.
 
 **`npm audit` reports 4 high-severity findings**, all one chain: `eslint-plugin-boundaries` → `@boundaries/elements` →
 `micromatch` → `braces` (stack exhaustion on deeply nested glob patterns). It is development tooling that only ever matches

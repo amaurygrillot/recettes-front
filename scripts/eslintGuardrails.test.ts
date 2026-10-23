@@ -2,7 +2,7 @@
 import { resolve } from 'node:path'
 import { ESLint } from 'eslint'
 import tseslint from 'typescript-eslint'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 // The production ESLint configuration, minus type-aware parsing: the snippets below are linted
 // from memory (no file on disk), so every rule under test must work without type information.
@@ -18,6 +18,12 @@ async function lint(filePath: string, code: string): Promise<(string | null)[]> 
   const [result] = await eslint.lintText(code, { filePath })
   return (result?.messages ?? []).map((message) => message.ruleId)
 }
+
+// The first lint pays ESLint's cold start (config, plugins, a scan of `src`), which can pass the
+// default 5 s timeout when the whole suite runs in parallel: do it once, here, with room to spare.
+beforeAll(async () => {
+  await lint('src/lib/warmUp.ts', 'export {}\n')
+}, 60_000)
 
 describe('architecture boundaries', () => {
   it.each([
@@ -213,6 +219,13 @@ describe('code bans', () => {
     const ruleIds = await lint(filePath, code)
 
     expect(ruleIds).toContain(expectedRuleId)
+  })
+
+  it('lets the logger, and only it, write to the console', async () => {
+    const code = "console.log('x')\n"
+
+    expect(await lint('src/lib/logger.ts', code)).toEqual([])
+    expect(await lint('src/lib/other.ts', code)).toContain('no-console')
   })
 
   it('lets RichTextView, and only it, use dangerouslySetInnerHTML', async () => {
