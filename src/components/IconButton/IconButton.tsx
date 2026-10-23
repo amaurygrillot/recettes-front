@@ -14,8 +14,9 @@ export type IconButtonProps = Omit<
   /**
    * `outlined`: a 56 px button with an ink outline (« Filtres »). `active`: the same in yellow with
    * the stamp shadow, for a button whose option is on. `bare`: no frame, for a cross in a field or a sheet.
+   * `round`: a cream disc, readable over any photo (the way back, the author's menu).
    */
-  variant?: 'outlined' | 'active' | 'bare'
+  variant?: 'outlined' | 'active' | 'bare' | 'round'
   /** 56 px by default; 48 px inside a field. */
   size?: 'large' | 'medium'
   /** A count of what is active, drawn on the corner; say it in `label` too. Nothing at zero. */
@@ -28,6 +29,8 @@ const VARIANTS = {
   active:
     'rounded-l border-2 border-ink-900 bg-butter-300 shadow-stamp-sm enabled:active:bg-mustard-500 focus-visible:outline-offset-3',
   bare: 'rounded-m border-2 border-transparent enabled:hover:bg-paper-200 enabled:active:bg-paper-300',
+  round:
+    'rounded-full border-2 border-ink-900 bg-paper-50 shadow-paper enabled:active:bg-butter-200 focus-visible:outline-offset-3',
 }
 
 const SIZES = { large: 'size-14', medium: 'size-12' }

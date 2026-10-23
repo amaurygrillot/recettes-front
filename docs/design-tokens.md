@@ -109,6 +109,7 @@ padding, between cards, between sections, breathing room). They are Tailwind's o
 | stamp | `4px 4px 0 #2B1D12` | Buttons, chosen element. **Pressed: no shadow, translated 4 px** |
 | stamp-sm | `3px 3px 0 #2B1D12` | The chosen filter chip |
 | sheet | `0 16px 36px rgba(43,29,18,.26)` | Panels and dialogs that overlap |
+| bar | `0 -2px 6px rgba(43,29,18,.10)` | A bar fixed above the tabs (the recipe's « Cuisiner pas à pas »): the shadow falls upwards |
 
 Components are generally outlined in 2 px ink-900.
 
@@ -139,6 +140,12 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   (butter-200, bold), tag pills 30 px (paper-50, ink-500 outline), « +N » pill dashed on paper-200; title Fraunces 24 / 30 on at
   most two lines with 60 px reserved; byline 16 / 22 in ink-700. Pressed: butter-100, no shadow, 2 px down.
 - **Sheet** (`BottomSheet`): corners `rounded-sheet` (28) on top on a phone, all round and centered from 600 px, 85 % of the screen high at most, `shadow-sheet`, dimmed page `ink-900/58`.
+- **Recipe page** (`Fiche-*`): title `recipe-title` (40 / 46, 800) on a phone, `title-display` (48 / 52, 800) on a tablet, `poster` on a
+  desktop; ingredient lines and steps in the `step` size (22 / 34); ingredient quantities bold, notes in `label` ink-700; dashed
+  `ink-500` rules between lines and steps; `WavyRule` closes the title block. The way back and the author's menu are `IconButton`
+  `round` (a cream disc, 2 px ink, `paper` shadow) over the photo; the gallery's arrows are 56 px of the same disc; the counter is an ink
+  pill. `Button` `danger-outline` (brick text on paper, 2 px ink) is « Supprimer » beside the title. `.rich-text` (in `index.css`) sets
+  the paragraph gap (18), list indents (24) and item gap (8) of what an author wrote.
 - **Create link** (`CreateLink`): the yellow « + », 64 px tall, round alone or extended with « Nouvelle recette ».
 - **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (no animation under `prefers-reduced-motion`), announced as
   « Chargement… » by one status region, shown only after 300 ms, at most 6 per list.

@@ -1,5 +1,6 @@
 import type { RouteObject } from 'react-router'
 import { HomeScreen } from '../screens/HomeScreen/HomeScreen'
+import { RecipeScreen } from '../screens/RecipeScreen/RecipeScreen'
 import { MyRecipesScreen } from '../screens/SearchScreen/MyRecipesScreen'
 import { SearchScreen } from '../screens/SearchScreen/SearchScreen'
 import { NotFoundScreen } from '../screens/NotFoundScreen/NotFoundScreen'
@@ -33,7 +34,7 @@ const styleguideRoutes: RouteObject[] = import.meta.env.DEV
 const pagesWithNavigation: RouteObject[] = [
   { index: true, element: <HomeScreen /> },
   { path: paths.search, element: <SearchScreen /> },
-  { path: ROUTE_PATTERNS.recipe, element: <ScreenPlaceholder title={placeholder.recipe} /> },
+  { path: ROUTE_PATTERNS.recipe, element: <RecipeScreen /> },
   {
     loader: requireMember,
     children: [

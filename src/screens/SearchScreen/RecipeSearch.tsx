@@ -2,14 +2,12 @@ import { useSession } from '../../api/session'
 import { useCreateButtonMode, type CreateButtonMode } from '../../app/createButtonMode'
 import { canCreateRecipes } from '../../app/navigation'
 import { isNarrowed } from '../../app/searchCriteria'
+import { DESKTOP_QUERY } from '../../lib/breakpoints'
 import { useMediaQuery } from '../../lib/useMediaQuery'
 import { DesktopLayout } from './components/DesktopLayout/DesktopLayout'
 import { PhoneLayout } from './components/PhoneLayout/PhoneLayout'
 import type { SearchScope } from './recipeFilters'
 import { useSearchPage } from './useSearchPage'
-
-/** The width from which the top bar, and with it the filters' column, take over from the sheet. */
-const DESKTOP_QUERY = '(min-width: 1024px)'
 
 /**
  * « Mes recettes » is where recipes are written: its « + » shows its label at the top of the list,

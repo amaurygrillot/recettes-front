@@ -28,3 +28,12 @@ export function navigationItems(session: Session): NavigationItem[] {
 export function canCreateRecipes(session: Session): boolean {
   return session.status === 'member' && session.roles.includes('USER')
 }
+
+/**
+ * Whether to offer to change or delete a recipe: its author, and an administrator. The server
+ * stays the authority (a refused change answers 403).
+ */
+export function canManageRecipe(session: Session, authorId: string | undefined): boolean {
+  if (session.status !== 'member') return false
+  return session.roles.includes('ADMIN') || (authorId !== undefined && session.userId === authorId)
+}

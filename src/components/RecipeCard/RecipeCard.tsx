@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import { Link } from 'react-router'
 import { formatRelativeDate } from '../../lib/formatRelativeDate'
-import { CardPill } from './CardPill'
+import { CardPill } from '../CardPill/CardPill'
 import { CoverPhoto } from './CoverPhoto'
 import { strings } from './strings'
 

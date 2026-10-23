@@ -5,6 +5,7 @@ import { TabBar } from '../components/TabBar/TabBar'
 import { TopBar } from '../components/TopBar/TopBar'
 import { classNames } from '../lib/classNames'
 import { useScrolledDown } from '../lib/useScrolledDown'
+import { BottomSlotContext } from './bottomSlot'
 import {
   CreateButtonModeContext,
   DEFAULT_CREATE_BUTTON_MODE,
@@ -25,36 +26,44 @@ const { navigation } = strings
 export function AppShell() {
   const session = useSession()
   const items = navigationItems(session)
-  const mayCreate = canCreateRecipes(session)
   const [createMode, setCreateMode] = useState<CreateButtonMode>(DEFAULT_CREATE_BUTTON_MODE)
+  const createAction =
+    canCreateRecipes(session) && createMode !== 'hidden'
+      ? { to: paths.newRecipe, label: navigation.newRecipe }
+      : undefined
   const scrolledDown = useScrolledDown()
+  const [bottomSlot, setBottomSlot] = useState<HTMLElement | null>(null)
 
   return (
     <CreateButtonModeContext value={setCreateMode}>
-      <div className="flex min-h-dvh flex-col">
-        <TopBar
-          label={navigation.desktopLabel}
-          homeLabel={navigation.homeLink}
-          items={items}
-          search={<HeaderSearch />}
-        />
-        <div className="flex-1">
-          {/* The « + » floats over the last 104 px of a phone's page: they stay clear for it. */}
-          <div className={classNames('page-margins', mayCreate && 'pb-26 desktop:pb-0')}>
-            <Outlet />
+      <BottomSlotContext value={bottomSlot}>
+        <div className="flex min-h-dvh flex-col">
+          <TopBar
+            label={navigation.desktopLabel}
+            homeLabel={navigation.homeLink}
+            items={items}
+            search={<HeaderSearch />}
+          />
+          <div className="flex-1">
+            {/* The « + » floats over the last 104 px of a phone's page: they stay clear for it. */}
+            <div
+              className={classNames(
+                'page-margins',
+                createAction !== undefined && 'pb-26 desktop:pb-0',
+              )}
+            >
+              <Outlet />
+            </div>
           </div>
+          <TabBar
+            label={navigation.phoneLabel}
+            items={items}
+            createAction={createAction}
+            createExpanded={createMode === 'extends-at-top' && !scrolledDown}
+            slotRef={setBottomSlot}
+          />
         </div>
-        <TabBar
-          label={navigation.phoneLabel}
-          items={items}
-          createAction={
-            mayCreate && createMode !== 'hidden'
-              ? { to: paths.newRecipe, label: navigation.newRecipe }
-              : undefined
-          }
-          createExpanded={createMode === 'extends-at-top' && !scrolledDown}
-        />
-      </div>
+      </BottomSlotContext>
     </CreateButtonModeContext>
   )
 }

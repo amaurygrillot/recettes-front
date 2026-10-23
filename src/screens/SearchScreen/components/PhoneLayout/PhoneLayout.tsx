@@ -1,4 +1,5 @@
 import { isNarrowed } from '../../../../app/searchCriteria'
+import { TABLET_QUERY } from '../../../../lib/breakpoints'
 import { useMediaQuery } from '../../../../lib/useMediaQuery'
 import { NO_FILTERS } from '../../filterChoices'
 import type { SearchScope } from '../../recipeFilters'
@@ -9,9 +10,6 @@ import { FiltersControl } from '../FiltersControl/FiltersControl'
 import { ResultsBar } from '../ResultsBar/ResultsBar'
 import { SearchField } from '../SearchField/SearchField'
 import { SearchResults } from '../SearchResults/SearchResults'
-
-/** From this width the « Filtres » button carries its word. */
-const TABLET_QUERY = '(min-width: 600px)'
 
 export interface PhoneLayoutProps {
   page: SearchPage

@@ -1,3 +1,4 @@
+import type { Ref } from 'react'
 import { NavLink } from 'react-router'
 import { classNames } from '../../lib/classNames'
 import { CreateLink } from '../CreateLink/CreateLink'
@@ -30,6 +31,8 @@ export interface TabBarProps {
   createAction?: CreateAction | undefined
   /** Shows the action with its label (a page that has room for it) instead of the round « + ». */
   createExpanded?: boolean | undefined
+  /** An empty place just above the tabs, for a page to put a bar into (a portal target). */
+  slotRef?: Ref<HTMLDivElement> | undefined
 }
 
 const TAB =
@@ -48,7 +51,13 @@ const PILL_IDLE =
  * over from there). It sits at the end of the page and sticks to the bottom of the screen, so the
  * content never hides behind it.
  */
-export function TabBar({ label, items, createAction, createExpanded = false }: TabBarProps) {
+export function TabBar({
+  label,
+  items,
+  createAction,
+  createExpanded = false,
+  slotRef,
+}: TabBarProps) {
   return (
     <div className="sticky bottom-0 z-20 desktop:hidden">
       {createAction && (
@@ -57,6 +66,7 @@ export function TabBar({ label, items, createAction, createExpanded = false }: T
           <CreateLink to={createAction.to} label={createAction.label} expanded={createExpanded} />
         </div>
       )}
+      <div ref={slotRef} />
       <nav
         aria-label={label}
         className="flex gap-0.5 border-t-2 border-ink-900 bg-paper-50 pt-2 pb-safe-bar"
