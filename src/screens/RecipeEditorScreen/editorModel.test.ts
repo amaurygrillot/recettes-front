@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { emptyValues, quantityToText, valuesFromRecipe } from './editorModel'
+import {
+  emptyGroup,
+  emptyLine,
+  emptyValues,
+  isBlankGroup,
+  isBlankLine,
+  newRecipeValues,
+  quantityToText,
+  valuesFromRecipe,
+} from './editorModel'
 
 const label = (category: { name?: string; parentCategoryId?: string | null }) =>
   category.parentCategoryId ? `Desserts › ${category.name}` : (category.name ?? '')
@@ -14,6 +23,20 @@ describe('quantityToText', () => {
     [undefined, ''],
   ])('writes %s as « %s »', (quantity, text) => {
     expect(quantityToText(quantity)).toBe(text)
+  })
+})
+
+describe('newRecipeValues', () => {
+  it('has the places for an ingredient and a step, and nothing written in them', () => {
+    expect(newRecipeValues()).toEqual({
+      ...emptyValues(),
+      groups: [{ title: '', lines: [{ ingredient: null, quantity: '', unitId: '', note: '' }] }],
+      steps: [{ html: '', photos: [] }],
+    })
+  })
+
+  it('gives a new copy each time, so that one recipe never writes into another', () => {
+    expect(newRecipeValues().groups).not.toBe(newRecipeValues().groups)
   })
 })
 
@@ -118,5 +141,29 @@ describe('valuesFromRecipe', () => {
     expect(values.categories).toEqual([])
     expect(values.photos).toEqual([])
     expect(values.groups).toEqual([{ title: '', lines: [] }])
+  })
+})
+
+describe('what is blank', () => {
+  it('knows a line that was only added', () => {
+    expect(isBlankLine(emptyLine())).toBe(true)
+  })
+
+  it.each([
+    ['an ingredient', { ingredient: { id: 'a', label: 'farine' } }],
+    ['a quantity', { quantity: '2' }],
+    ['a unit', { unitId: 'g' }],
+    ['a note', { note: 'tamisée' }],
+  ])('does not call blank a line that has %s', (_what, changes) => {
+    expect(isBlankLine({ ...emptyLine(), ...changes })).toBe(false)
+  })
+
+  it('knows a group that was only added', () => {
+    expect(isBlankGroup(emptyGroup())).toBe(true)
+  })
+
+  it('does not call blank a group with a title, or with a line that has something', () => {
+    expect(isBlankGroup({ ...emptyGroup(), title: 'Pour la pâte' })).toBe(false)
+    expect(isBlankGroup({ title: '', lines: [{ ...emptyLine(), note: 'x' }] })).toBe(false)
   })
 })

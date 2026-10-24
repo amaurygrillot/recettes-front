@@ -166,10 +166,21 @@
 
   --animate-skeleton: skeleton 1.4s ease-in-out infinite;
   --animate-spinner: spinner 0.9s linear infinite;
+  --animate-progress: progress 1.3s ease-in-out infinite;
 
   @keyframes spinner {
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  /* The bar of a wait whose length is not known: a segment that goes across. */
+  @keyframes progress {
+    from {
+      translate: -100%;
+    }
+    to {
+      translate: 250%;
     }
   }
 

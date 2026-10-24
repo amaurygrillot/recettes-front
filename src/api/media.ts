@@ -12,10 +12,12 @@ export function mediaUrl(id: string, variant: MediaVariant = 'full'): string {
   return variant === 'full' ? url : `${url}?variant=${variant}`
 }
 
-export function uploadMedia(file: File) {
+/** Sends one picture. The signal ends the request when the person gives the picture up. */
+export function uploadMedia(file: File, signal?: AbortSignal) {
   logger.info('Uploading a picture', { sizeBytes: file.size })
   return unwrap(
     api.POST('/media', {
+      ...(signal === undefined ? {} : { signal }),
       // The generated type calls the file a string; the real body is multipart, built here.
       body: { file: '' },
       bodySerializer: () => {
@@ -32,5 +34,5 @@ export function uploadMedia(file: File) {
  * references. Fails with `payload-too-large` (413), `rate-limited` (429) or `unavailable` (503).
  */
 export function useUploadMedia() {
-  return useMutation({ mutationFn: uploadMedia })
+  return useMutation({ mutationFn: (file: File) => uploadMedia(file) })
 }

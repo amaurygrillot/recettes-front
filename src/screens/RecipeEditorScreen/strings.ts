@@ -44,6 +44,110 @@ export const strings = {
     tags: 'Tags',
   },
 
+  // The photos of the cover, and of a step: the same tiles.
+  photos: {
+    add: 'Ajouter une photo',
+    formats: 'JPEG ou PNG, 8 Mo au plus.',
+    coverNote: 'La première photo sera la couverture.',
+    takePhoto: 'Prendre une photo',
+    gallery: 'Galerie',
+    chooseFromGallery: 'Choisir dans la galerie',
+    cameraInput: 'Photo à prendre',
+    galleryInput: 'Photos à envoyer',
+    close: 'Fermer',
+    cover: 'Couverture',
+    photo: (position: number) => `Photo ${position}`,
+    group: (position: number, total: number) => `Photo ${position} sur ${total}`,
+    remove: (position: number) => `Retirer la photo ${position}`,
+    handle: (position: number) => `Déplacer la photo ${position}`,
+    moveLeft: (position: number) => `Déplacer la photo ${position} vers la gauche`,
+    moveRight: (position: number) => `Déplacer la photo ${position} vers la droite`,
+    altText: 'Texte alternatif',
+    altTextPlaceholder: 'Décris la photo',
+    reorderHint:
+      'Glisse une photo, ou touche les flèches, pour changer l’ordre. La première est la couverture.',
+    dropHere: 'Déposer ici',
+    moved: (position: number, newPosition: number, total: number) =>
+      `Photo ${position} déplacée en position ${newPosition} sur ${total}`,
+    lifted: (position: number, total: number) =>
+      `Photo ${position} prise, sur ${total}. Utilise les flèches pour la déplacer.`,
+    dropped: (position: number, total: number) => `Photo ${position} déposée, sur ${total}`,
+    dragCancelled: 'Déplacement annulé',
+    dragInstructions:
+      'Pour déplacer une photo : appuie sur espace, utilise les flèches, puis espace pour la déposer.',
+    gripRole: 'photo à déplacer',
+    sending: 'Envoi…',
+    sendingGroup: 'Envoi en cours',
+    progress: 'Envoi de la photo',
+    cancelSend: 'Annuler l’envoi',
+    retry: 'Réessayer',
+    retryIn: (seconds: number) => `Réessayer dans ${seconds} s`,
+    giveUp: 'Retirer',
+    problems: {
+      format: 'JPEG ou PNG uniquement',
+      size: '8 Mo maximum',
+      rateLimited: (seconds: number | undefined) =>
+        seconds === undefined
+          ? 'Trop d’envois d’affilée, réessaie dans un instant'
+          : `Trop d’envois d’affilée, réessaie dans ${seconds} secondes`,
+      busy: 'Service momentanément saturé, réessaie',
+    },
+    stillSending: 'Une photo est encore en cours d’envoi. Réessaie dans un instant.',
+    stepPhotos: 'Photos de l’étape',
+  },
+
+  // The ingredient groups and their lines.
+  ingredients: {
+    empty: 'Aucun ingrédient pour l’instant',
+    addGroup: 'Ajouter un groupe',
+    addLine: 'Ajouter un ingrédient',
+    count: (count: number) => (count === 1 ? '1 ingrédient' : `${count} ingrédients`),
+    untitled: 'Groupe sans titre',
+    groupOf: (title: string) => (title === '' ? 'Groupe sans titre' : `Groupe ${title}`),
+    rename: 'Renommer',
+    addTitle: 'Ajouter un titre',
+    titleField: 'Titre du groupe',
+    validateTitle: 'Valider le titre',
+    moveGroupUp: 'Monter le groupe',
+    moveGroupDown: 'Descendre le groupe',
+    removeGroup: 'Retirer le groupe',
+    removeGroupTitle: 'Retirer ce groupe ?',
+    removeGroupText: (title: string, count: number) =>
+      `« ${title === '' ? 'Groupe sans titre' : title} » et ${count === 1 ? 'son ingrédient seront retirés' : `ses ${count} ingrédients seront retirés`} de la recette. Rien n’est supprimé tant que tu n’as pas enregistré.`,
+    removeGroupConfirm: 'Retirer le groupe',
+    cancel: 'Annuler',
+    groupMoved: (position: number, newPosition: number, total: number) =>
+      `Groupe ${position} déplacé en position ${newPosition} sur ${total}`,
+    line: (position: number) => `Ingrédient ${position}`,
+    grip: (position: number) => `Déplacer l’ingrédient ${position}`,
+    gripRole: 'ingrédient à déplacer',
+    remove: (position: number) => `Retirer l’ingrédient ${position}`,
+    moveUp: (position: number) => `Monter l’ingrédient ${position}`,
+    moveDown: (position: number) => `Descendre l’ingrédient ${position}`,
+    lineMoved: (position: number, newPosition: number, total: number) =>
+      `Ingrédient ${position} déplacé en position ${newPosition} sur ${total}`,
+    lineLifted: (position: number, total: number) =>
+      `Ingrédient ${position} pris, sur ${total}. Utilise les flèches pour le déplacer.`,
+    lineDropped: (position: number, total: number) => `Ingrédient ${position} déposé, sur ${total}`,
+    dragInstructions:
+      'Pour déplacer un ingrédient : appuie sur espace, utilise les flèches, puis espace pour le déposer.',
+    ingredient: 'Ingrédient',
+    ingredientPlaceholder: 'Ex. farine de blé',
+    suggestions: 'Ingrédients existants',
+    create: (typed: string) => `Créer « ${typed} »`,
+    creating: (name: string) => `Création de « ${name} »…`,
+    created: 'Ingrédient créé, il est dans la liste',
+    exists: (name: string) => `« ${name} » existe déjà. On l’a choisi pour toi.`,
+    createFailed: (name: string) => `Impossible de créer « ${name} ». Réessaie dans un instant.`,
+    quantity: 'Quantité',
+    unit: 'Unité',
+    noUnit: '—',
+    note: 'Note',
+    notePlaceholder: 'Ex. haché',
+    removed: 'Ingrédient retiré.',
+    undo: 'Annuler',
+  },
+
   // What the two choice fields and their sheets say.
   choice: {
     category: {

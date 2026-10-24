@@ -19,4 +19,13 @@ describe('uploadMedia', () => {
 
     expect(part).toMatchObject({ name: 'tarte.jpg', type: 'image/jpeg', size: 10 })
   })
+
+  it('gives up when the signal says the picture is not wanted any more', async () => {
+    const controller = new AbortController()
+    controller.abort()
+
+    await expect(
+      uploadMedia(new File(['jpeg bytes'], 'tarte.jpg', { type: 'image/jpeg' }), controller.signal),
+    ).rejects.toBeDefined()
+  })
 })

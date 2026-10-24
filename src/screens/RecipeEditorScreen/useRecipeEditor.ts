@@ -23,6 +23,7 @@ import { useDraftOffer } from './useDraftOffer'
 import { useDraftSaving } from './useDraftSaving'
 import { useLeaveGuard } from './useLeaveGuard'
 import { useSaveRecipe } from './useSaveRecipe'
+import { useUploadsOnTheirWay } from './uploadTracker'
 
 export interface RecipeEditorOptions {
   /** The recipe being changed, or nothing for a new one. */
@@ -59,6 +60,7 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
   const missing = useWatch({ control: form.control, compute: problemsOf })
 
   const saving = useSaveRecipe(recipeId)
+  const uploads = useUploadsOnTheirWay()
   const offer = useDraftOffer(beginning.offered, {
     onResume: (values) => {
       logger.info('Taking up the draft of a recipe')
@@ -111,7 +113,12 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
   const submit = form.handleSubmit(
     (values) => {
       setAttempted(false)
-      if (!saving.pending) saving.save(values)
+      if (uploads.count > 0) {
+        // A picture still on its way would be left out of the recipe without a word.
+        toasts.failure({ message: strings.photos.stillSending })
+      } else if (!saving.pending) {
+        saving.save(values)
+      }
     },
     () => {
       logger.info('The recipe cannot be saved yet: something is missing')
@@ -127,6 +134,7 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
     /** What is missing, once « Enregistrer » found something, until it is all there. */
     problems: attempted ? missing : [],
     submit,
+    uploadTracker: uploads.tracker,
     pending: saving.pending,
     refusal: saving.refusal,
     guard,

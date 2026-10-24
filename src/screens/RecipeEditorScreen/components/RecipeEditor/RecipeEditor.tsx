@@ -10,6 +10,7 @@ import { goToProblem } from '../../goToProblem'
 import { ReferencesContext, type References } from '../../references'
 import { strings } from '../../strings'
 import type { EditorValues } from '../../editorModel'
+import { UploadTrackerContext } from '../../uploadTracker'
 import { useRecipeEditor } from '../../useRecipeEditor'
 import { DeleteRecipeSection } from '../DeleteRecipeSection/DeleteRecipeSection'
 import { DiscardDraftDialog } from '../DiscardDraftDialog/DiscardDraftDialog'
@@ -18,7 +19,9 @@ import { EditorFrame } from '../EditorFrame/EditorFrame'
 import { EditorMessage } from '../EditorMessage/EditorMessage'
 import { EditorRefusal } from '../EditorRefusal/EditorRefusal'
 import { InformationSection } from '../InformationSection/InformationSection'
+import { IngredientsSection } from '../IngredientsSection/IngredientsSection'
 import { LeaveDialog } from '../LeaveDialog/LeaveDialog'
+import { PhotosSection } from '../PhotosSection/PhotosSection'
 import { ProblemSummary } from '../ProblemSummary/ProblemSummary'
 
 export interface RecipeEditorProps {
@@ -65,73 +68,77 @@ export function RecipeEditor({ recipeId, initial, references }: RecipeEditorProp
 
   return (
     <ReferencesContext value={references}>
-      <FormProvider {...editor.form}>
-        <EditorFrame
-          title={title}
-          onClose={editor.close}
-          draft={editor.draftState}
-          banner={
-            editor.problems.length > 0 && (
-              <ProblemSummary
-                problems={editor.problems}
-                onGoTo={({ anchor }) => {
-                  goToProblem(anchor)
-                }}
+      <UploadTrackerContext value={editor.uploadTracker}>
+        <FormProvider {...editor.form}>
+          <EditorFrame
+            title={title}
+            onClose={editor.close}
+            draft={editor.draftState}
+            banner={
+              editor.problems.length > 0 && (
+                <ProblemSummary
+                  problems={editor.problems}
+                  onGoTo={({ anchor }) => {
+                    goToProblem(anchor)
+                  }}
+                />
+              )
+            }
+            index={
+              <SectionIndex
+                label={strings.sections.label}
+                items={SECTIONS}
+                activeId={active}
+                onSelect={goTo}
               />
-            )
-          }
-          index={
-            <SectionIndex
-              label={strings.sections.label}
-              items={SECTIONS}
-              activeId={active}
-              onSelect={goTo}
-            />
-          }
-          actions={
-            <>
-              <Button variant="secondary" disabled={editor.pending} onClick={editor.close}>
-                {strings.cancel}
-              </Button>
-              <Button type="submit" form={FORM_ID} busy={editor.pending}>
-                {editor.pending ? strings.saving : strings.save}
-              </Button>
-            </>
-          }
-        >
-          {editor.offer.offer !== undefined && (
-            <DraftBanner
-              when={formatWhen(new Date(editor.offer.offer.savedAt), new Date())}
-              onResume={editor.offer.resume}
-              onStartOver={editor.offer.askToStartOver}
-            />
-          )}
-          <form
-            id={FORM_ID}
-            noValidate
-            onSubmit={(event) => void editor.submit(event)}
-            className="contents"
+            }
+            actions={
+              <>
+                <Button variant="secondary" disabled={editor.pending} onClick={editor.close}>
+                  {strings.cancel}
+                </Button>
+                <Button type="submit" form={FORM_ID} busy={editor.pending}>
+                  {editor.pending ? strings.saving : strings.save}
+                </Button>
+              </>
+            }
           >
-            {/* Everything is locked while the recipe is on its way: it cannot be changed under the request. */}
-            <fieldset disabled={editor.pending} key={editor.version} className="contents">
-              <InformationSection />
-            </fieldset>
-          </form>
-          {recipeId !== undefined && (
-            <DeleteRecipeSection recipeId={recipeId} recipeTitle={initial.title} />
-          )}
-        </EditorFrame>
-        <LeaveDialog
-          open={editor.guard.blocked}
-          onStay={editor.guard.stay}
-          onLeave={editor.guard.leave}
-        />
-        <DiscardDraftDialog
-          open={editor.offer.confirming}
-          onKeep={editor.offer.keep}
-          onDiscard={editor.offer.startOver}
-        />
-      </FormProvider>
+            {editor.offer.offer !== undefined && (
+              <DraftBanner
+                when={formatWhen(new Date(editor.offer.offer.savedAt), new Date())}
+                onResume={editor.offer.resume}
+                onStartOver={editor.offer.askToStartOver}
+              />
+            )}
+            <form
+              id={FORM_ID}
+              noValidate
+              onSubmit={(event) => void editor.submit(event)}
+              className="contents"
+            >
+              {/* Everything is locked while the recipe is on its way: it cannot be changed under the request. */}
+              <fieldset disabled={editor.pending} key={editor.version} className="contents">
+                <InformationSection />
+                <PhotosSection />
+                <IngredientsSection />
+              </fieldset>
+            </form>
+            {recipeId !== undefined && (
+              <DeleteRecipeSection recipeId={recipeId} recipeTitle={initial.title} />
+            )}
+          </EditorFrame>
+          <LeaveDialog
+            open={editor.guard.blocked}
+            onStay={editor.guard.stay}
+            onLeave={editor.guard.leave}
+          />
+          <DiscardDraftDialog
+            open={editor.offer.confirming}
+            onKeep={editor.offer.keep}
+            onDiscard={editor.offer.startOver}
+          />
+        </FormProvider>
+      </UploadTrackerContext>
     </ReferencesContext>
   )
 }

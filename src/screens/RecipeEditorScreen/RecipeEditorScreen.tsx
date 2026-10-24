@@ -12,7 +12,7 @@ import { Skeleton } from '../../components/Skeleton/Skeleton'
 import { EditorMessage } from './components/EditorMessage/EditorMessage'
 import { EditorRefusal } from './components/EditorRefusal/EditorRefusal'
 import { RecipeEditor } from './components/RecipeEditor/RecipeEditor'
-import { emptyValues, valuesFromRecipe } from './editorModel'
+import { newRecipeValues, valuesFromRecipe } from './editorModel'
 import { useReferencesState, type References } from './references'
 import { strings } from './strings'
 
@@ -114,7 +114,7 @@ export function RecipeEditorScreen() {
     return (
       <RecipeEditor
         recipeId={undefined}
-        initial={emptyValues()}
+        initial={newRecipeValues()}
         references={references.references}
       />
     )

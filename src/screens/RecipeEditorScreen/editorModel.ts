@@ -14,6 +14,9 @@ export interface PhotoValue {
   altText: string
 }
 
+/** Where the form keeps a list of photos: the recipe's cover, or the photos of one step. */
+export type PhotoListName = 'photos' | `steps.${number}.photos`
+
 /** One line of the ingredient list. `quantity` is what was typed (« 1,5 »): it is read when saving. */
 export interface LineValue {
   ingredient: Choice | null
@@ -75,6 +78,14 @@ export function emptyValues(): EditorValues {
   }
 }
 
+/**
+ * What a new recipe starts from: nothing written, but the places to write the two things every recipe
+ * needs, an ingredient in a group without a title and a step, are there already.
+ */
+export function newRecipeValues(): EditorValues {
+  return { ...emptyValues(), groups: [emptyGroup()], steps: [emptyStep()] }
+}
+
 /** The French decimal comma, as a quantity is written and read: `1.5` is shown `1,5`. */
 export function quantityToText(quantity: number | null | undefined): string {
   return quantity === null || quantity === undefined ? '' : String(quantity).replace('.', ',')
@@ -133,4 +144,19 @@ export function valuesFromRecipe(
 /** Whether two forms hold the same recipe: what tells a form that was changed from one that was only opened. */
 export function sameValues(a: EditorValues, b: EditorValues): boolean {
   return JSON.stringify(a) === JSON.stringify(b)
+}
+
+/** A line with nothing in it: the one a new group starts with, or one that was added and not filled. */
+export function isBlankLine(line: LineValue): boolean {
+  return (
+    line.ingredient === null &&
+    line.quantity.trim() === '' &&
+    line.unitId === '' &&
+    line.note === ''
+  )
+}
+
+/** A group with no title and only blank lines: removing it loses nothing, so it is not asked about. */
+export function isBlankGroup(group: GroupValue): boolean {
+  return group.title.trim() === '' && group.lines.every(isBlankLine)
 }

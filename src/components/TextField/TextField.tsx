@@ -18,6 +18,8 @@ export type TextFieldProps = Omit<
     trailing?: ReactNode
     /** The characters typed out of the limit: shown under the field once it gets near. */
     counter?: FieldCounter | undefined
+    /** For a field in a narrow tile: less padding and a body-size text, the same 56 px. */
+    compact?: boolean
   }
 
 export function TextField({
@@ -30,6 +32,7 @@ export function TextField({
   success,
   trailing,
   counter,
+  compact = false,
   type = 'text',
   ...rest
 }: TextFieldProps) {
@@ -47,7 +50,8 @@ export function TextField({
           aria-invalid={status === 'error' ? true : undefined}
           aria-describedby={message ? messageId : undefined}
           className={classNames(
-            'h-14 w-full rounded-m px-4 text-label text-ink-900 placeholder:text-ink-700',
+            'h-14 w-full rounded-m text-ink-900 placeholder:text-ink-700',
+            compact ? 'px-3 text-body' : 'px-4 text-label',
             'disabled-look',
             FIELD_BORDERS[status],
             trailing !== undefined && 'pr-17',
