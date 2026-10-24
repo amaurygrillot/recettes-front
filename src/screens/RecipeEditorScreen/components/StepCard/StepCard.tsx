@@ -1,19 +1,16 @@
 import type { ComponentProps } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { Icon } from '../../../../components/Icon/Icon'
 import { RichTextEditor } from '../../../../components/RichTextEditor/RichTextEditor'
-import { classNames } from '../../../../lib/classNames'
 import type { EditorValues } from '../../editorModel'
 import { messageOf } from '../../fieldError'
 import { useSaving } from '../../savingContext'
 import { strings } from '../../strings'
+import { GestureButton } from '../GestureButton/GestureButton'
+import { GripButton } from '../GestureButton/GripButton'
 import { NumberBadge } from '../NumberBadge/NumberBadge'
 import { PhotoGallery } from '../PhotoGallery/PhotoGallery'
 
 const { steps } = strings
-
-const SMALL_BUTTON =
-  'inline-grid size-11 shrink-0 cursor-pointer place-items-center rounded-m border-2 border-ink-900 bg-paper-50 enabled:active:bg-butter-200 disabled:cursor-not-allowed disabled:border-dashed disabled:border-disabled-border disabled:bg-disabled-bg disabled:text-disabled-text'
 
 export interface StepCardProps {
   /** Where the step is, from 0: its number is this plus one, and follows it wherever it is moved. */
@@ -41,50 +38,35 @@ export function StepCard({ index, total, handle, onMove, onRemove }: StepCardPro
       className="flex flex-col gap-3.5 rounded-frame border-2 border-ink-900 bg-paper-50 px-3.5 pt-3 pb-3.5"
     >
       <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          aria-label={steps.grip(position)}
-          {...handle}
-          className="inline-grid size-11 shrink-0 cursor-grab touch-none place-items-center rounded-m border-2 border-transparent text-ink-700 focus-visible:text-ink-900 active:cursor-grabbing"
-        >
-          <Icon name="grip" size={22} />
-        </button>
+        <GripButton label={steps.grip(position)} {...handle} />
         <NumberBadge number={position} />
         <h3 className="ml-0.5 min-w-0 flex-1 font-title text-label font-bold whitespace-nowrap">
           {steps.step(position)}
         </h3>
-        <button
-          type="button"
-          aria-label={steps.moveUp(position)}
+        <GestureButton
+          label={steps.moveUp(position)}
+          icon="chevron-up"
+          data-move="back"
           disabled={index === 0}
           onClick={() => {
             onMove(-1)
           }}
-          className={SMALL_BUTTON}
-          data-move="back"
-        >
-          <Icon name="chevron-up" size={22} strokeWidth={2.6} />
-        </button>
-        <button
-          type="button"
-          aria-label={steps.moveDown(position)}
+        />
+        <GestureButton
+          label={steps.moveDown(position)}
+          icon="chevron-down"
+          data-move="forward"
           disabled={index === total - 1}
           onClick={() => {
             onMove(1)
           }}
-          className={SMALL_BUTTON}
-          data-move="forward"
-        >
-          <Icon name="chevron-down" size={22} strokeWidth={2.6} />
-        </button>
-        <button
-          type="button"
-          aria-label={steps.remove(position)}
+        />
+        <GestureButton
+          label={steps.remove(position)}
+          icon="trash"
+          tone="brick"
           onClick={onRemove}
-          className={classNames(SMALL_BUTTON, 'text-brick')}
-        >
-          <Icon name="trash" size={22} strokeWidth={2.4} />
-        </button>
+        />
       </div>
       <Controller
         control={control}

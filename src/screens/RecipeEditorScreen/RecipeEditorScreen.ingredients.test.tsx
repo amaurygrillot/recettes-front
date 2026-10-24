@@ -294,6 +294,20 @@ describe('RecipeEditorScreen: the ingredients', () => {
       expect(line(1).getByLabelText('Quantité')).toHaveValue('250')
     })
 
+    it('says that a group needs a line once its last one is removed, where the line was', async () => {
+      const backend = useEditorBackend()
+      const user = userEvent.setup()
+      renderEditor('/recettes/nouvelle')
+      await findForm()
+      await fillMinimalRecipe(user)
+      await user.click(line(1).getByRole('button', { name: 'Retirer l’ingrédient 1' }))
+
+      await user.click(save())
+
+      expect(section().getByText('Ajoute au moins un ingrédient à ce groupe.')).toBeVisible()
+      expect(backend.sent).toEqual([])
+    })
+
     it('moves a line down and up with its buttons', async () => {
       useEditorBackend()
       const user = userEvent.setup()

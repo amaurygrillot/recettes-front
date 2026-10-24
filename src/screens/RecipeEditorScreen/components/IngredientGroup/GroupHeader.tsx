@@ -7,11 +7,9 @@ import type { EditorValues } from '../../editorModel'
 import { LIMITS } from '../../editorSchema'
 import { messageOf } from '../../fieldError'
 import { strings } from '../../strings'
+import { GestureButton } from '../GestureButton/GestureButton'
 
 const { ingredients } = strings
-
-const SQUARE_BUTTON =
-  'inline-grid size-12 shrink-0 cursor-pointer place-items-center rounded-m border-2 border-ink-900 bg-paper-50 enabled:active:bg-butter-200 disabled:cursor-not-allowed disabled:border-dashed disabled:border-disabled-border disabled:bg-disabled-bg disabled:text-disabled-text'
 
 export interface GroupHeaderProps {
   index: number
@@ -71,38 +69,33 @@ export function GroupHeader({ index, total, lineCount, onMove, onRemove }: Group
           <Icon name={renaming ? 'check' : 'edit'} size={22} strokeWidth={2.4} />
           {renaming ? ingredients.validateTitle : toggleLabel}
         </button>
-        <button
-          type="button"
-          aria-label={ingredients.moveGroupUp}
+        <GestureButton
+          label={ingredients.moveGroupUp}
+          icon="chevron-up"
+          size="large"
+          data-move="back"
           disabled={index === 0}
           onClick={() => {
             onMove(-1)
           }}
-          className={SQUARE_BUTTON}
-          data-move="back"
-        >
-          <Icon name="chevron-up" size={24} strokeWidth={2.6} />
-        </button>
-        <button
-          type="button"
-          aria-label={ingredients.moveGroupDown}
+        />
+        <GestureButton
+          label={ingredients.moveGroupDown}
+          icon="chevron-down"
+          size="large"
+          data-move="forward"
           disabled={index === total - 1}
           onClick={() => {
             onMove(1)
           }}
-          className={SQUARE_BUTTON}
-          data-move="forward"
-        >
-          <Icon name="chevron-down" size={24} strokeWidth={2.6} />
-        </button>
-        <button
-          type="button"
-          aria-label={ingredients.removeGroup}
+        />
+        <GestureButton
+          label={ingredients.removeGroup}
+          icon="trash"
+          size="large"
+          tone="brick"
           onClick={onRemove}
-          className={`${SQUARE_BUTTON} text-brick`}
-        >
-          <Icon name="trash" size={24} strokeWidth={2.4} />
-        </button>
+        />
       </div>
     </div>
   )

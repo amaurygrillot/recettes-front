@@ -214,6 +214,20 @@ describe('RecipeEditorScreen: the draft', () => {
   })
 
   describe('after a lost session', () => {
+    it('is not replaced by the form when the session ends before the question was answered', async () => {
+      useEditorBackend()
+      leaveADraft(undefined)
+      renderEditor('/recettes/nouvelle')
+      await findForm()
+
+      act(() => {
+        sessionStore.expire(sessionStore.getToken() ?? '')
+      })
+
+      expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte à moitié écrite')
+      expect(wasInterrupted(draftKey(undefined))).toBe(false)
+    })
+
     it('is taken up again without asking, and says that nothing was lost', async () => {
       useEditorBackend()
       leaveADraft(undefined)

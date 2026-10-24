@@ -233,3 +233,70 @@ plain `LexicalComposer` is deprecated in this release). Checked in the browser a
   restore a draft). It does not report the text it started with as a change.
 - **Tests**: jsdom does not deliver typed characters to a contenteditable, so insertions go through the editor's own API
   (`getNearestEditorFromDOMNode`); the buttons, commands, history and conversions under test are the real ones.
+
+## RecipeEditorScreen (`/recettes/nouvelle` and `/recettes/:id/modifier`)
+
+Boards: `Editeur-cadre`, `Editeur-categories-tags`, `Editeur-photos`, `Editeur-ingredients`, `Editeur-etapes-conseil`, `Editeur-validation`,
+`Editeur-session-droits`, `Editeur-grands-ecrans` (and `Editeur-texte-riche`, see below). One screen for creating and for changing; a full-screen
+task (no tab bar), behind `requireMember`. Checked in the browser pane at 390, 768 and 1280 px with a mocked back end (the harness mocks every
+endpoint it calls, including `POST /media` and `POST /ingredients`).
+
+- **It opens when it can be used**: the vocabulary (category tree, tags, units: three public calls) is loaded first, then, to change a recipe, the
+  recipe itself. Loading, a failure (« Impossible d'ouvrir l'éditeur » with « Réessayer »), a recipe that is not there (`404`, the bowl) and a recipe
+  the member may not change (`403` from the server, or `canManageRecipe` false: the padlock, « Retour à la recette ») are whole pages, never a
+  form that could not be saved. The editor is keyed by the recipe: going from one recipe to another starts again from the new one.
+- **One form, one model** (`editorModel.ts`): `EditorValues` is the whole recipe in the shape the form needs (a category is `{ id, label }`, a
+  quantity is the text typed, `1,5` or `1.5`). A new recipe starts from `newRecipeValues()`: nothing written, but one group without title with one
+  empty line and one empty step already there (the boards draw no such start; asking for « Ajouter un groupe » then « Ajouter un ingrédient » on a
+  phone for every recipe is friction the data model does not need). The rules are one Zod schema (`editorSchema`, limits of the contract: title 200,
+  group title 200, note 200, picture description 500, quantity a decimal of zero or more); the server stays the authority and its `400` is shown.
+- **Saving is `POST /recipes` or `PUT /recipes/{id}` with the whole form**: an update replaces every collection it carries, so it always sends
+  them all, and an emptied introduction or tip is `{ text: '' }` / `''` (an absent field would leave it). The button is `Enregistrer`, not a form
+  submit: « Entrée » in a field ends the line and never sends a recipe from a phone's « Go » key. While it is on its way the button is busy, the
+  fields (a `fieldset`) and the rich texts (`locked`) are locked, and it cannot be sent twice.
+- **What is missing is said twice and never once**: after a refused `Enregistrer` a brick banner under the bar says « Il manque / Il reste N choses :
+  … » with a 44 px link per kind (the focus goes to the first field to correct, a link takes to the part), each field says its own defect, and from a
+  desktop the index counts the things to correct in each section (« Informations, 2 problèmes »). The summary is live: it follows what is mended and
+  disappears when all is there. `problems.ts` is the one place that turns the schema's issues into these words.
+- **Every failure of a save keeps the form**: `400` and other refusals that trying again cannot mend are a notification that stays; `5xx`, `503`
+  (with `Retry-After`) and a lost connection add « Réessayer », which sends the same recipe; `403` and `404` replace the form by their page, keeping the
+  draft; `401` is the app's session dialog (no second message), see the draft below.
+- **The draft** (`editorDraft.ts`, `useDraftSaving.ts`): the whole form is kept in `localStorage`, one draft per recipe being changed and one for
+  the new recipe, 600 ms after the typing pauses, with the indicator of the board (« Enregistrement du brouillon… », « Brouillon enregistré sur cet
+  appareil », « … non enregistré » when the device refuses). A form equal to what it started from has no draft (opening a recipe creates none). A
+  draft found at the opening is **offered** (« Reprendre ton brouillon ? », « Reprendre » / « Recommencer »; the second asks again, and its first
+  answer keeps the draft); typing before answering does not overwrite it. A draft equal to the recipe is not offered.
+- **A lost session loses nothing**: at `401` the draft is kept at once and the tab notes it (`sessionStorage`); the app's dialog sends the member to
+  the login with this address as the way back, and the editor, opened again, takes the draft up **without asking** and says « Te revoilà : ton
+  brouillon est intact. ». The note is read once. The leave guard stands aside without a session.
+- **Leaving with changes asks** (`useBlocker` for the cross, « Annuler » and the browser's back, `beforeunload` for a tab that closes): « Quitter
+  sans enregistrer ? », the first answer (« Continuer à modifier ») the primary one, since nothing is destroyed either way. Saved: the editor
+  leaves for the recipe by replacing its entry, so « retour » does not come back to a form.
+- **Reordering has three ways everywhere**: the grip (dnd-kit: pointer with a 6 px threshold so a tap on the grip is not a drag, and keyboard, space
+  to take, arrows, space to drop), two buttons (arrows on a photo, « Monter » / « Descendre » on a group, a line and a step), and French
+  announcements for both. After a button moved an item the focus follows it. Photos and steps are numbered by rank, so reordering renumbers.
+  A line stays in its group (no drag between groups, as the board says). The lifted item is drawn tilted over the page and its place says
+  « Déposer ici »; **there is no drop animation** (it waits for an animation frame, which a hidden tab or `prefers-reduced-motion` never gives).
+- **Photos** (`PhotoGallery`, the same tiles for the cover and for each step): JPEG or PNG of 8 MB at most, checked before anything is sent; sent
+  one after the other so the list keeps the order they were chosen in; a refusal stays in its place under its words (`413` « 8 Mo maximum »,
+  `429` the button counts down the `Retry-After`, `503` « Service momentanément saturé », a lost connection) until it is sent again or given
+  up; « Annuler l'envoi » aborts the request. **Differences from the board**: the bar of a picture on its way is indeterminate (the browser's
+  `fetch` has no upload progress, the board draws « 64 % »); a format or size refusal offers only « Retirer » (the board adds « Réessayer », which
+  could only fail again); a picture on its way has no preview. A save asked while a picture is still on its way is refused with a notification
+  (the picture would be left out without a word). The first photo is « Couverture ».
+- **Ingredients** (`AutocompleteField`, `useIngredientChoice`): the ingredient of a line is chosen among those that exist (`namePrefix`, as typed,
+  200 ms after the typing pauses), never by the typing alone; editing the text takes the choice back. When nothing is exactly right the last
+  line of the list is « Créer « x » » (only offered once the search for what is typed is answered): the field is locked while it is made, then the
+  ingredient is chosen. **`409` is not an error**: the ingredient that exists is looked up and chosen, with « « x » existe déjà. On l'a choisi pour
+  toi. ». Any other failure says so under the line, keeps the text and offers « Réessayer ». Units are a native `select` of the existing ones.
+  The quantity accepts the French comma. A line removed can be taken back from the notification (« Ingrédient retiré. Annuler », 4 s); a group
+  with something in it asks first (the first answer keeps it), a blank one goes at once. Errors are said once under the whole line, wide enough
+  to read, with the note's counter.
+- **The tip** is the stitched frame of the recipe page with its handwritten title, a plain ink frame with the ring while it is written in; its
+  tools come with the keyboard on a phone (no bar at rest), inside the frame from a tablet. The title of the field is « le petit conseil » where the
+  recipe page says « le conseil de la cuisinière »: the boards disagree, left as they are (a question for the designer).
+- **Deleting** (`DeleteRecipeSection`) is a brick underlined link at the foot of the page, only when changing; it uses the same dialog and
+  `useRecipeDeletion` as the recipe page, and the same failure banner (`DeletionFailureBanner`).
+- **Tests**: `RecipeEditorScreen.*.test.tsx` share `editor.testkit.tsx` (the fake back end, the render, the fill-in helpers); a `*.testkit.tsx`
+  file is test code for the lint rules. The photo tests replace `uploadMedia` (jsdom's `FormData` cannot be sent by Node's `fetch` once a handler
+  waits, see [frontend-stack.md](frontend-stack.md)); the request itself is the API layer's tests. Rich texts are written through Lexical's API.

@@ -1,7 +1,6 @@
 import { useId, type ComponentProps } from 'react'
 import { useController, useFormContext, useWatch } from 'react-hook-form'
 import { AutocompleteField } from '../../../../components/AutocompleteField/AutocompleteField'
-import { Icon } from '../../../../components/Icon/Icon'
 import { SelectField } from '../../../../components/SelectField/SelectField'
 import { TextField } from '../../../../components/TextField/TextField'
 import { FieldMessage } from '../../../../components/TextField/fieldParts'
@@ -11,12 +10,11 @@ import { messageOf } from '../../fieldError'
 import { useReferences } from '../../references'
 import { strings } from '../../strings'
 import { useIngredientChoice } from '../../useIngredientChoice'
+import { GestureButton } from '../GestureButton/GestureButton'
+import { GripButton } from '../GestureButton/GripButton'
 import { IngredientNotice } from './IngredientNotice'
 
 const { ingredients } = strings
-
-const SMALL_BUTTON =
-  'inline-grid size-11 shrink-0 cursor-pointer place-items-center rounded-m border-2 border-ink-900 bg-paper-50 enabled:active:bg-butter-200 disabled:cursor-not-allowed disabled:border-dashed disabled:border-disabled-border disabled:bg-disabled-bg disabled:text-disabled-text'
 
 export interface IngredientLineProps {
   groupIndex: number
@@ -73,14 +71,7 @@ export function IngredientLine({
     >
       <div className="flex items-start gap-1.5">
         <div className="mt-7.5 flex h-14 shrink-0 items-center">
-          <button
-            type="button"
-            aria-label={ingredients.grip(position)}
-            {...handle}
-            className="inline-grid size-11 cursor-grab touch-none place-items-center rounded-m border-2 border-transparent text-ink-700 focus-visible:text-ink-900 active:cursor-grabbing"
-          >
-            <Icon name="grip" size={22} />
-          </button>
+          <GripButton label={ingredients.grip(position)} {...handle} />
         </div>
         <div className="min-w-0 flex-1">
           <AutocompleteField
@@ -100,14 +91,12 @@ export function IngredientLine({
           />
         </div>
         <div className="mt-7.5 flex h-14 shrink-0 items-center">
-          <button
-            type="button"
-            aria-label={ingredients.remove(position)}
+          <GestureButton
+            label={ingredients.remove(position)}
+            icon="trash"
+            tone="brick"
             onClick={onRemove}
-            className={`${SMALL_BUTTON} text-brick`}
-          >
-            <Icon name="trash" size={22} strokeWidth={2.4} />
-          </button>
+          />
         </div>
       </div>
       {choice.outcome !== undefined && (
@@ -162,30 +151,24 @@ export function IngredientLine({
         )}
       </div>
       <div className="hidden gap-2 group-focus-within/line:flex">
-        <button
-          type="button"
-          aria-label={ingredients.moveUp(position)}
+        <GestureButton
+          label={ingredients.moveUp(position)}
+          icon="chevron-up"
+          data-move="back"
           disabled={index === 0}
           onClick={() => {
             onMove(-1)
           }}
-          className={SMALL_BUTTON}
-          data-move="back"
-        >
-          <Icon name="chevron-up" size={22} strokeWidth={2.6} />
-        </button>
-        <button
-          type="button"
-          aria-label={ingredients.moveDown(position)}
+        />
+        <GestureButton
+          label={ingredients.moveDown(position)}
+          icon="chevron-down"
+          data-move="forward"
           disabled={index === total - 1}
           onClick={() => {
             onMove(1)
           }}
-          className={SMALL_BUTTON}
-          data-move="forward"
-        >
-          <Icon name="chevron-down" size={22} strokeWidth={2.6} />
-        </button>
+        />
       </div>
     </div>
   )

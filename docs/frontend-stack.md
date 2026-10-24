@@ -91,7 +91,8 @@ In tests, `src/test/setup.ts` starts MSW with `onUnhandledFrame: 'error'`; `Form
 Node's `fetch` once a handler reads the body (see [api-layer.md](api-layer.md#testing-it)). Radix sets `pointer-events: none` on
 `body` while a modal is open: a test clicks the veil (the dialog's parent), not `document.body`.
 
-Not installed yet, on purpose: dnd-kit, Playwright. A dependency is added by the milestone that uses it (DOMPurify 3.4.17
+Not installed yet, on purpose: Playwright. A dependency is added by the milestone that uses it (dnd-kit 6.3.1 / 10.0.0 / utilities 3.2.2 came with the
+RecipeEditorScreen: pointer and keyboard sorting of photos, ingredient lines and steps, always with buttons as the other way; DOMPurify 3.4.17
 came with the RecipeScreen, for `RichTextView`; Lexical 0.52.0 came with the RichTextEditor, `lexical`, `@lexical/react`, `@lexical/list`,
 `@lexical/html`, `@lexical/history`, `@lexical/rich-text` and `@lexical/utils` all pinned to the same exact version, which is how they have to move).
 

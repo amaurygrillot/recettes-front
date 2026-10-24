@@ -1,7 +1,9 @@
 import { useFieldArray, useFormContext, useWatch } from 'react-hook-form'
 import { Button } from '../../../../components/Button/Button'
+import { FieldMessage } from '../../../../components/TextField/fieldParts'
 import { useToasts } from '../../../../app/useToasts'
 import { emptyLine, type EditorValues, type LineValue } from '../../editorModel'
+import { messageOf } from '../../fieldError'
 import { strings } from '../../strings'
 import { useFocusNewItem } from '../../useFocusNewItem'
 import { useFollowedMove } from '../../useFollowedMove'
@@ -40,7 +42,7 @@ export function IngredientGroup({
   onMoveGroup,
   onRemoveGroup,
 }: IngredientGroupProps) {
-  const { control, getValues } = useFormContext<EditorValues>()
+  const { control, getValues, getFieldState, formState } = useFormContext<EditorValues>()
   const toasts = useToasts()
   const { fields, append, insert, remove, move } = useFieldArray({
     control,
@@ -54,6 +56,12 @@ export function IngredientGroup({
     move,
     announce: ingredients.lineMoved,
   })
+
+  // A group whose last line was removed: it says it needs one, where the line was.
+  const emptied =
+    fields.length === 0
+      ? messageOf(getFieldState(`groups.${index}.lines`, formState).error)
+      : undefined
 
   function addLine(): void {
     focusNewLine()
@@ -125,6 +133,15 @@ export function IngredientGroup({
           </SortableItem>
         ))}
       </SortableList>
+      {emptied !== undefined && (
+        <FieldMessage
+          id={`group-${index}-lines-error`}
+          status="error"
+          message={emptied}
+          counter={undefined}
+          counterLabel={strings.counter}
+        />
+      )}
       <Button variant="secondary" size="medium" icon="plus" fullWidth onClick={addLine}>
         {ingredients.addLine}
       </Button>

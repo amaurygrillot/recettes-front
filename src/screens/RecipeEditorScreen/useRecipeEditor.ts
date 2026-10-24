@@ -99,6 +99,8 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
   }, [])
 
   const keepForTheReturn = useEffectEvent(() => {
+    // A draft that waits for its answer is already what is kept: the form must not replace it.
+    if (offer.offer !== undefined) return
     logger.info('The session ended with a recipe open: keeping its draft')
     draft.keepNow()
     markInterrupted(storageKey)

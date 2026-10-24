@@ -106,6 +106,8 @@ Dependencies point one way: **`screens` → `components` → `lib`**, and `api` 
 - Components, their files and their folders: `PascalCase`. Hooks: `useThing`. Everything else: `camelCase`. Constants that
   are truly constant: `SCREAMING_SNAKE_CASE`.
 - A component folder contains `Thing.tsx`, `Thing.test.tsx`, and `strings.ts` if it has text. Nothing else by default.
+- A helper shared by the tests of one screen (a fake back end, a render function) is named `*.testkit.tsx`: the lint rules treat it as test code
+  (it may import `src/test`, is not held to the text and fast-refresh rules) and Vitest does not run it.
 - French text only in `strings.ts`, tutoiement, never concatenated from fragments that break in another sentence order.
 
 ## Logging

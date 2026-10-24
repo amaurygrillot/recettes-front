@@ -3,6 +3,8 @@ import { mediaUrl } from '../../../../api/media'
 import { classNames } from '../../../../lib/classNames'
 import { Icon } from '../../../../components/Icon/Icon'
 import { strings } from '../../strings'
+import { GestureButton } from '../GestureButton/GestureButton'
+import { GripButton } from '../GestureButton/GripButton'
 
 export interface PhotoTileProps {
   /** Counted from 1. */
@@ -23,9 +25,6 @@ export interface PhotoTileProps {
   /** The field of its description. */
   children: ReactNode
 }
-
-const GESTURE_BUTTON =
-  'inline-grid size-11 shrink-0 cursor-pointer place-items-center rounded-m border-2 border-ink-900 bg-paper-50 text-ink-900 enabled:active:bg-butter-200 disabled:cursor-not-allowed disabled:border-dashed disabled:border-disabled-border disabled:bg-disabled-bg disabled:text-disabled-text'
 
 /**
  * One photo of a list (the cover, or a step): the picture in the 4:3 frame of the recipe page, what it
@@ -83,38 +82,25 @@ export function PhotoTile({
       </div>
       <div className="flex flex-col gap-2.5 px-2 pt-2 pb-3">
         <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            aria-label={photos.handle(position)}
-            {...handle}
-            className="inline-grid size-11 shrink-0 cursor-grab touch-none place-items-center rounded-m border-2 border-transparent text-ink-700 focus-visible:text-ink-900 active:cursor-grabbing"
-          >
-            <Icon name="grip" size={22} />
-          </button>
-          <button
-            type="button"
-            aria-label={photos.moveLeft(position)}
+          <GripButton label={photos.handle(position)} {...handle} />
+          <GestureButton
+            label={photos.moveLeft(position)}
+            icon="chevron-left"
             data-move="back"
             disabled={!canMoveBack}
             onClick={() => {
               onMove(-1)
             }}
-            className={GESTURE_BUTTON}
-          >
-            <Icon name="chevron-left" size={22} strokeWidth={2.6} />
-          </button>
-          <button
-            type="button"
-            aria-label={photos.moveRight(position)}
+          />
+          <GestureButton
+            label={photos.moveRight(position)}
+            icon="chevron-right"
             data-move="forward"
             disabled={!canMoveForward}
             onClick={() => {
               onMove(1)
             }}
-            className={GESTURE_BUTTON}
-          >
-            <Icon name="chevron-right" size={22} strokeWidth={2.6} />
-          </button>
+          />
         </div>
         {children}
       </div>

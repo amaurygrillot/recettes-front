@@ -55,6 +55,12 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   `SectionIndex` with `useActiveSection`, `useMember`, `sessionStore.rename`, `useKnownAccount`, `app/conflictedField` (promoted from the
   registration), `SubmitButton` options. Checked at 390, 768 and 1280 px with a mocked back end in the browser pane.
 
+- **RecipeEditorScreen — done (2026-10-24).** `/recettes/nouvelle` and `/recettes/:id/modifier`; decisions, and the differences from the boards, in
+  [design-boards.md](design-boards.md#recipeeditorscreen-recettesnouvelle-and-recettesidmodifier). Shared pieces added: `AutocompleteField`,
+  `SelectField`, `TextArea`, `ChoiceField`, `SearchPill`, `ProgressBar`, `DeleteRecipeDialog` and `DeletionFailureBanner` (shared with the recipe page),
+  `TextField` `counter` and `compact`, `ErrorState` `icon`, `RichTextEditor` `locked` and the stitched tip frame, `useToasts` actions (« Annuler »),
+  `useDebouncedValue`, `plainText`, `formatWhen`, `uploadMedia` with an abort signal; dnd-kit is installed. Checked at 390, 768 and 1280 px.
+
 - **Auth screens — done (2026-10-23).** Sign-in (finished), registration with its welcome, forgotten password, new password; decisions in
   [design-boards.md](design-boards.md#auth-screens-sign-in-registration-forgotten-and-new-password). Shared pieces added: `AuthFrame`,
   `PasswordField`, `StateBadge`, `TextField` options (`note`, `hintMet`, `invalid`, `trailing`), `useCountdown`, `useFocusOnMount`, `maskEmail`,
@@ -161,8 +167,7 @@ redirects a visitor to the login screen then back.
 1280 px and every state is tested. **This screen is the quality template for all the others.**
 
 After M5, screens can be built independently, in separate sessions, in this order of value: SearchScreen, RecipeScreen,
-auth screens, AccountScreen, RecipeEditorScreen, CookingScreen, then admin (not yet designed). RecipeEditorScreen needs
-the `RichTextEditor` (Lexical) first (`RichTextView` exists since RecipeScreen).
+auth screens, AccountScreen, RecipeEditorScreen (done), CookingScreen, then admin (not yet designed).
 
 ## Known follow-ups
 
@@ -172,6 +177,10 @@ the `RichTextEditor` (Lexical) first (`RichTextView` exists since RecipeScreen).
   search field in step with the page's text.
 - **The account page cannot read the account** (no `GET` for the signed-in profile): ask the back end for a `GET /users/me`. Until then the address and
   the names show only after a change in the same visit, and a renamed member keeps the old username in the token until the next sign-in.
+- **A recipe is replaced whole by an update**: two devices editing the same recipe overwrite one another (the editor opens a copy at most 30 s
+  old, then keeps it). A last-write-wins hobby project accepts it; a `version` or `updatedAt` precondition on `PUT /recipes/{id}` would end it.
+- **Pictures that were uploaded and never saved stay on the back end** (a cancelled upload that arrived anyway, a photo removed before saving):
+  there is no `DELETE /media/{id}` to clean them with.
 - **The « Administration » row of the account page** is left out until the first admin screen exists.
 - **The sign-in asks for a username**, as the API does, where the board says « Adresse e-mail »: reconcile them if the back end ever logs in by address.
 - **Deleting a recipe that answers `404`** (already gone) leaves the cached search feeds as they were, since only a successful delete

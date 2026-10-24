@@ -222,3 +222,5 @@ the canvas (`Main` and `Logo-bol` boards); they were copied into `src/components
 parts that change with the tone are painted through CSS variables (`--stamp`, `--bowl`, `--rice`, `--band`) that the `Logo`
 component sets. The
 favicon is `public/favicon.svg` (the bowl on a butter tile).
+
+- **Recipe editor** (`Editeur-*`): `text-editor-title` (26 / 32, 800) for the title of a phone's top bar (a desktop uses `text-auth-state-title`); the section headings use `text-section-title`; `animate-progress` is the bar of a wait whose length is not known (`ProgressBar` without a value; static under `prefers-reduced-motion`). A photo tile is 173 px wide on a phone (two columns, three from 600 px, four from 1024 px), its picture in the 4:3 frame; the editor's index entries are 52 px pills with a 32 px numbered badge and a brick count; `TextField` has a `compact` option (12 px sides, body size, still 56 px high) for the three fields of an ingredient line and the description of a photo.
