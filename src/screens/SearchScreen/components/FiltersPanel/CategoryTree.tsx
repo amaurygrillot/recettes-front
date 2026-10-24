@@ -1,7 +1,7 @@
 import { CheckboxRow } from '../../../../components/CheckboxRow/CheckboxRow'
 import { IconButton } from '../../../../components/IconButton/IconButton'
 import { RadioRow } from '../../../../components/RadioRow/RadioRow'
-import type { CategoryNode } from '../../categoryNodes'
+import type { CategoryNode } from '../../../../app/categoryNodes'
 import { strings } from '../../strings'
 
 const { category } = strings.filters

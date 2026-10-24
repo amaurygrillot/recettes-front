@@ -127,10 +127,14 @@
   --text-auth-title-lg--line-height: 2.875rem;
   --text-auth-title-lg--font-weight: 800;
   --text-auth-title-lg--letter-spacing: -0.01em;
-  /* The username on the account page, beside its 96 px avatar. */
-  --text-identity-name: 1.75rem;
-  --text-identity-name--line-height: 2.125rem;
-  --text-identity-name--font-weight: 800;
+  /* A title of 28/34 in 800: the username beside the 96 px avatar of the account page, the heading of each section of the recipe editor. */
+  --text-section-title: 1.75rem;
+  --text-section-title--line-height: 2.125rem;
+  --text-section-title--font-weight: 800;
+  /* The title of the recipe editor on a phone: 26/32 in 800 (a desktop uses auth-state-title). */
+  --text-editor-title: 1.625rem;
+  --text-editor-title--line-height: 2rem;
+  --text-editor-title--font-weight: 800;
   /* The handwritten line under the welcome title. */
   --text-annotation-lg: 1.875rem;
   --text-annotation-lg--line-height: 2.0625rem;

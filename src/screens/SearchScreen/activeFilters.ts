@@ -1,6 +1,6 @@
 import type { SearchCriteria } from '../../app/searchCriteria'
 import type { ActiveFilter } from './components/ActiveFilters/ActiveFilters'
-import { findCategory } from './categoryNodes'
+import { findCategory } from '../../app/categoryNodes'
 import type { FilterChoices } from './filterChoices'
 import { strings } from './strings'
 import type { FilterOptions } from './useFilterOptions'

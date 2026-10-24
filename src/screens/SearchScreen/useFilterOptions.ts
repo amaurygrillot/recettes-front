@@ -1,6 +1,6 @@
 import { useCategoryHierarchy, useTags } from '../../api/referenceData'
 import type { ComboboxOption } from '../../components/Combobox/Combobox'
-import { categoryNodesOf, categoryOptionsOf, type CategoryNode } from './categoryNodes'
+import { categoryNodesOf, categoryOptionsOf, type CategoryNode } from '../../app/categoryNodes'
 
 export interface TagChoice {
   id: string

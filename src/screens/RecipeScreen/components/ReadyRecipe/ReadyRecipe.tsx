@@ -1,17 +1,17 @@
 import type { ReactNode } from 'react'
 import { useSession } from '../../../../api/session'
 import { canManageRecipe } from '../../../../app/navigation'
+import { useRecipeDeletion } from '../../../../app/useRecipeDeletion'
 import { ErrorBanner } from '../../../../components/ErrorBanner/ErrorBanner'
 import { Button } from '../../../../components/Button/Button'
+import { DeleteRecipeDialog } from '../../../../components/DeleteRecipeDialog/DeleteRecipeDialog'
 import { PhotoSlider } from '../../../../components/PhotoSlider/PhotoSlider'
 import { DESKTOP_QUERY } from '../../../../lib/breakpoints'
 import { useMediaQuery } from '../../../../lib/useMediaQuery'
 import type { RecipeView } from '../../recipeView'
 import { strings } from '../../strings'
-import { useRecipeDeletion } from '../../useRecipeDeletion'
 import { AdviceNote } from '../AdviceNote/AdviceNote'
 import { CookingEntry } from '../CookingEntry/CookingEntry'
-import { DeleteDialog } from '../DeleteDialog/DeleteDialog'
 import { IngredientsSection } from '../IngredientsSection/IngredientsSection'
 import { ManageButtons } from '../ManageRecipe/ManageButtons'
 import { ManageMenu } from '../ManageRecipe/ManageMenu'
@@ -83,7 +83,7 @@ export function ReadyRecipe({ recipe, backButton }: ReadyRecipeProps) {
           </div>
         </div>
       </div>
-      <DeleteDialog
+      <DeleteRecipeDialog
         open={deletion.dialogOpen}
         recipeTitle={recipe.title}
         busy={deletion.pending}
