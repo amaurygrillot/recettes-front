@@ -36,15 +36,6 @@ export const strings = {
     backHome: "Retour à l'accueil",
   },
 
-  // Titles of the screens that are not built yet (see ScreenPlaceholder).
-  placeholder: {
-    comingSoon: 'Cet écran arrive bientôt.',
-    search: 'Rechercher',
-    myRecipes: 'Mes recettes',
-    recipe: 'Recette',
-    cooking: 'Pas à pas',
-  },
-
   // The stack of notifications.
   notifications: 'Notifications',
   retry: 'Réessayer',

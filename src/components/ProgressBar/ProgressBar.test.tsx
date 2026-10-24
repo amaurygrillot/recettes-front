@@ -19,6 +19,15 @@ describe('ProgressBar', () => {
     )
   })
 
+  it('can be thin, and still says how far it is', () => {
+    render(<ProgressBar label="Étape 17 sur 24" value={70} size="thin" />)
+
+    expect(screen.getByRole('progressbar', { name: 'Étape 17 sur 24' })).toHaveAttribute(
+      'aria-valuenow',
+      '70',
+    )
+  })
+
   it('has no accessibility violation', async () => {
     const { container } = render(<ProgressBar label="Envoi de la photo" />)
 

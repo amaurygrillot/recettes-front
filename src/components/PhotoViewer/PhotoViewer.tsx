@@ -1,4 +1,5 @@
 import { Dialog } from 'radix-ui'
+import { useSwipe } from '../../lib/useSwipe'
 import { Icon } from '../Icon/Icon'
 import { IconButton } from '../IconButton/IconButton'
 import { strings } from './strings'
@@ -33,6 +34,11 @@ export function PhotoViewer({ photos, index, onIndexChange, onClose }: PhotoView
     if (index !== undefined) onIndexChange((index + step + total) % total)
   }
 
+  // A finger that goes left brings the next photo, as turning a page does.
+  const swipe = useSwipe((direction) => {
+    if (total > 1) move(direction === 'left' ? 1 : -1)
+  })
+
   return (
     <Dialog.Root
       open={shown !== undefined}
@@ -49,7 +55,8 @@ export function PhotoViewer({ photos, index, onIndexChange, onClose }: PhotoView
             if (event.key === 'ArrowLeft') move(-1)
             if (event.key === 'ArrowRight') move(1)
           }}
-          className="fixed inset-0 z-50 grid place-items-center p-4 outline-none"
+          {...swipe}
+          className="fixed inset-0 z-50 grid touch-pan-y place-items-center p-4 outline-none"
         >
           <Dialog.Title className="sr-only">{strings.title((index ?? 0) + 1, total)}</Dialog.Title>
           {shown !== undefined && (
@@ -58,6 +65,11 @@ export function PhotoViewer({ photos, index, onIndexChange, onClose }: PhotoView
               alt={shown.alt}
               className="max-h-full max-w-full rounded-l border-2 border-paper-50 object-contain"
             />
+          )}
+          {total > 1 && index !== undefined && (
+            <span className="absolute top-5 left-4 rounded-pill border-2 border-ink-900 bg-paper-50 px-3.5 py-1 text-body font-bold text-ink-900">
+              {strings.counter(index + 1, total)}
+            </span>
           )}
           <div className="absolute top-4 right-4">
             <Dialog.Close asChild>

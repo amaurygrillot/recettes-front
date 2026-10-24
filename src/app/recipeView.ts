@@ -1,9 +1,9 @@
-import { mediaUrl } from '../../api/media'
-import type { components } from '../../api/schema'
-import type { SliderPhoto } from '../../components/PhotoSlider/PhotoSlider'
-import type { ViewerPhoto } from '../../components/PhotoViewer/PhotoViewer'
-import { formatLongDate } from '../../lib/formatLongDate'
-import { ingredientLine, type IngredientLine } from '../../lib/ingredientLine'
+import { mediaUrl } from '../api/media'
+import type { components } from '../api/schema'
+import type { SliderPhoto } from '../components/PhotoSlider/PhotoSlider'
+import type { ViewerPhoto } from '../components/PhotoViewer/PhotoViewer'
+import { formatLongDate } from '../lib/formatLongDate'
+import { ingredientLine, type IngredientLine } from '../lib/ingredientLine'
 
 type Schemas = components['schemas']
 

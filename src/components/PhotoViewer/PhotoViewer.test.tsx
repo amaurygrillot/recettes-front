@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it } from 'vitest'
@@ -68,6 +68,39 @@ describe('PhotoViewer', () => {
     expect(shown()).toBe('/full/1')
     await user.keyboard('{ArrowLeft}')
     expect(shown()).toBe('/full/3')
+  })
+
+  it('says which photo of how many, in a pill', async () => {
+    const user = userEvent.setup()
+    render(<Harness />)
+    await user.click(screen.getByRole('button', { name: 'Agrandir la photo 2' }))
+
+    expect(await screen.findByText('2 / 3')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Photo suivante' }))
+    expect(screen.getByText('3 / 3')).toBeVisible()
+  })
+
+  it('has no counter for a single photo', async () => {
+    render(<Harness list={photos.slice(0, 1)} />)
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Agrandir la photo 1' }))
+    await screen.findByRole('dialog')
+
+    expect(screen.queryByText('1 / 1')).not.toBeInTheDocument()
+  })
+
+  it('moves between the photos with a swipe of the finger', async () => {
+    render(<Harness />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Agrandir la photo 2' }))
+    const dialog = await screen.findByRole('dialog')
+
+    fireEvent.pointerDown(dialog, { clientX: 300, clientY: 400, pointerType: 'touch' })
+    fireEvent.pointerUp(dialog, { clientX: 120, clientY: 410, pointerType: 'touch' })
+    expect(shown()).toBe('/full/3')
+
+    fireEvent.pointerDown(dialog, { clientX: 100, clientY: 400, pointerType: 'touch' })
+    fireEvent.pointerUp(dialog, { clientX: 280, clientY: 400, pointerType: 'touch' })
+    expect(shown()).toBe('/full/2')
   })
 
   it('shows the alternative text it is given', async () => {

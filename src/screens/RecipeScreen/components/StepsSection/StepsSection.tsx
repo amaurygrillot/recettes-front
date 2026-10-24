@@ -3,7 +3,7 @@ import { PhotoViewer } from '../../../../components/PhotoViewer/PhotoViewer'
 import { RichTextView } from '../../../../components/RichTextView/RichTextView'
 import { StepNumber } from '../../../../components/StepNumber/StepNumber'
 import { classNames } from '../../../../lib/classNames'
-import type { StepView } from '../../recipeView'
+import type { StepView } from '../../../../app/recipeView'
 import { strings } from '../../strings'
 
 export interface StepsSectionProps {

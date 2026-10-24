@@ -61,6 +61,11 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   `TextField` `counter` and `compact`, `ErrorState` `icon`, `RichTextEditor` `locked` and the stitched tip frame, `useToasts` actions (« Annuler »),
   `useDebouncedValue`, `plainText`, `formatWhen`, `uploadMedia` with an abort signal; dnd-kit is installed. Checked at 390, 768 and 1280 px.
 
+- **CookingScreen — done (2026-10-24).** `/recettes/:id/pas-a-pas`; decisions in
+  [design-boards.md](design-boards.md#cookingscreen-recettesidpas-a-pas). Shared pieces added or promoted: `AdviceNote` and `RecipeProblem` / `recipeView` (to `app/`),
+  `StepNumber` stamp, `ProgressBar` thin, `PhotoViewer` counter and swipe, `useSwipe`, `useWakeLock`, `useCanScrollMore`. The placeholder screen is gone: every
+  product screen of the boards exists. Checked at 390, 768 and 1280 px.
+
 - **Auth screens — done (2026-10-23).** Sign-in (finished), registration with its welcome, forgotten password, new password; decisions in
   [design-boards.md](design-boards.md#auth-screens-sign-in-registration-forgotten-and-new-password). Shared pieces added: `AuthFrame`,
   `PasswordField`, `StateBadge`, `TextField` options (`note`, `hintMet`, `invalid`, `trailing`), `useCountdown`, `useFocusOnMount`, `maskEmail`,
@@ -167,7 +172,7 @@ redirects a visitor to the login screen then back.
 1280 px and every state is tested. **This screen is the quality template for all the others.**
 
 After M5, screens can be built independently, in separate sessions, in this order of value: SearchScreen, RecipeScreen,
-auth screens, AccountScreen, RecipeEditorScreen (done), CookingScreen, then admin (not yet designed).
+auth screens, AccountScreen, RecipeEditorScreen, CookingScreen (all done), then admin (not yet designed).
 
 ## Known follow-ups
 

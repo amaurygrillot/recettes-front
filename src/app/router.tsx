@@ -11,10 +11,6 @@ import { requireMember } from './requireMember'
 import { RootFallback } from './RootFallback'
 import { RootLayout } from './RootLayout'
 import { RouteError } from './RouteError'
-import { ScreenPlaceholder } from './ScreenPlaceholder'
-import { strings } from './strings'
-
-const { placeholder } = strings
 
 // Only exists in development: `import.meta.env.DEV` is a build-time constant, so the dynamic
 // import below (and the whole screen) is left out of the production bundle.
@@ -82,7 +78,13 @@ const fullScreenPages: RouteObject[] = [
       return { Component: ResetPasswordScreen }
     },
   },
-  { path: ROUTE_PATTERNS.cooking, element: <ScreenPlaceholder title={placeholder.cooking} /> },
+  {
+    path: ROUTE_PATTERNS.cooking,
+    lazy: async () => {
+      const { CookingScreen } = await import('../screens/CookingScreen/CookingScreen')
+      return { Component: CookingScreen }
+    },
+  },
   {
     loader: requireMember,
     children: [

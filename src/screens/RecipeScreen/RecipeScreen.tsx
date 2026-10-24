@@ -7,7 +7,7 @@ import { useGoBack } from '../../app/useGoBack'
 import { IconButton } from '../../components/IconButton/IconButton'
 import { ReadyRecipe } from './components/ReadyRecipe/ReadyRecipe'
 import { RecipeSkeleton } from './components/RecipeSkeleton/RecipeSkeleton'
-import { toRecipeView } from './recipeView'
+import { toRecipeView } from '../../app/recipeView'
 import { strings } from './strings'
 
 /**

@@ -8,7 +8,7 @@ import { DeletionFailureBanner } from '../../../../components/DeletionFailureBan
 import { PhotoSlider } from '../../../../components/PhotoSlider/PhotoSlider'
 import { DESKTOP_QUERY } from '../../../../lib/breakpoints'
 import { useMediaQuery } from '../../../../lib/useMediaQuery'
-import type { RecipeView } from '../../recipeView'
+import type { RecipeView } from '../../../../app/recipeView'
 import { strings } from '../../strings'
 import { CookingEntry } from '../CookingEntry/CookingEntry'
 import { IngredientsSection } from '../IngredientsSection/IngredientsSection'

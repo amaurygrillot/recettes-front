@@ -30,7 +30,7 @@ for the current page, round « + » of 64 px 16 px above the bar and 16 px from 
   `Fiche-grands-ecrans` and `Compte-grands-ecrans` agree on another bar: 88 px, logo left, tabs **centered**, a 290 px **search
   field**, the account tab with the member's **avatar**, and « + Nouvelle recette » **in the page header** instead of in the bar.
   M5 follows them: `TopBar` has no create button any more. **Until each screen is built, a member on a desktop has no create
-  button on the pages still showing a placeholder** (the home page has it, beside the feed title); each screen adds its own as
+  button on the pages that do not have one yet** (the home page has it, beside the feed title); each screen adds its own as
   its board draws it (« Mes recettes » has it in the list header). The field is a real search form (`HeaderSearch`): Enter opens
   `/rechercher?q=…`; on the two searching pages it is their field (see SearchScreen below).
 - **The « + » is named « Nouvelle recette », round or extended.** The `Bouton-flottant-feuille` board says « Créer une recette »,
@@ -130,7 +130,7 @@ Public: the content is the same for a visitor, a member and the author; only the
   of the page is enough (and sticky on desktop).
 - **Who may change it**: `canManageRecipe(session, authorId)` (the author, or an `ADMIN`; the server stays the authority). A « ⋯ »
   `DropdownMenu` on a phone and tablet, two buttons beside the title on a desktop. « Modifier » links to `/recettes/:id/modifier`
-  (a placeholder until the editor exists).
+  (the recipe editor).
 - **Deleting**: an `AlertDialog` names the recipe and says it is irreversible; « Annuler » comes first and has the focus. After the
   confirmation the dialog stays up with a busy button while the request is on its way (it cannot be sent twice), then the page leaves for
   the search with `replace`. A `404` counts as deleted; any other failure closes the dialog, keeps the page and shows a banner with the
@@ -300,3 +300,37 @@ endpoint it calls, including `POST /media` and `POST /ingredients`).
 - **Tests**: `RecipeEditorScreen.*.test.tsx` share `editor.testkit.tsx` (the fake back end, the render, the fill-in helpers); a `*.testkit.tsx`
   file is test code for the lint rules. The photo tests replace `uploadMedia` (jsdom's `FormData` cannot be sent by Node's `fetch` once a handler
   waits, see [frontend-stack.md](frontend-stack.md)); the request itself is the API layer's tests. Rich texts are written through Lexical's API.
+
+## CookingScreen (`/recettes/:id/pas-a-pas`)
+
+Boards: `Pas-a-pas-entree` (the entry, built with the recipe page), `Pas-a-pas-etape`, `Pas-a-pas-fin`, `Pas-a-pas-etats`, `Pas-a-pas-grands-ecrans`. A full-screen mode, open to anyone with the
+link (like the recipe, no login). Checked in the browser pane at 390, 768 and 1280 px with a mocked back end.
+
+- **It is the recipe, one step at a time**: the page loads `GET /recipes/{id}` and builds the same view model as the recipe page
+  (`app/recipeView`, moved there from the recipe screen since both read it). A recipe that is not there, that cannot be loaded (`RecipeProblem`,
+  moved to `app/` for the same reason, with its « Réessayer ») or that has **no step** is said on a page of its own: the mode is never opened empty
+  (the entry button does not exist for such a recipe, this is for a typed address).
+- **A step** (`Cooking`): the top (« Quitter », the title on up to two lines, « Étape 3 sur 8 » and the progress), the stamp (`StepNumber` with its word: brick,
+  104 px, tilted), the instruction in the 22/34 text (`RichTextView`, sanitised like everywhere), the photos, a full-width « Ingrédients » row, and the
+  foot with « Précédent » and « Suivant » (64 px, the second twice as wide, « Terminer » with a tick on the last step). Only the instruction scrolls, from its
+  top for each step; a fade at the foot says when there is more below. A recipe of one step has no progress and no « Précédent ».
+- **Progress** (`StepProgress`): a segment per step up to twelve (done in ink, current in yellow with an ink outline, to come in cream with a lighter outline: three signs, not
+  the colour alone), a thin continuous bar (`ProgressBar size="thin"`) from thirteen. It is `role="progressbar"`, and « Étape 3 sur 8 » is a polite live region.
+- **Three ways forward and back, none the only one**: the buttons, a swipe (`useSwipe`: a finger or a pen, at least 60 px and mostly sideways, so scrolling is not a swipe, and never
+  a mouse, which selects text), and « ← » « → » on a keyboard (« Échap » asks to quit); the keys are left alone while a dialog, a sheet or the viewer is open. A hint
+  « Glisse pour changer d'étape » is told once per device (`localStorage`), disappears after six seconds or at the first change of step.
+- **Where the cook is** (`useCookingProgress`, `app/cookingProgress`): the step is remembered from the second one on, so that the recipe page says « Reprendre à l'étape 3 »; coming back to the first
+  step or finishing forgets it; a remembered step past the last one (the recipe lost some) is clamped. Quitting keeps it.
+- **The ingredients to tick** (`useIngredientChecks`): a sheet from the bottom on a phone (`BottomSheet`), a panel on the right from a tablet (320 px, 420 px from a desktop; opened from the
+  top bar, the step moves aside), the same checklist: lines of 64 px with a 36 px box, a ready line is yellow-ticked, struck through and in ink 700 (still 6.9:1). The ticks live as long
+  as the recipe is open (nothing is stored: what was set out an hour ago says nothing about the next time); « 3 sur 10 prêts » is on the row, in the sheet and beside the top button.
+- **Leaving asks** (`QuitDialog`): « Quitter le pas à pas ? » with « Rester » (secondary, first, focused) and « Quitter » (primary: nothing is lost, so no brick).
+- **The end** (`FinishScreen`): « Bon appétit ! » (focused), the brick stamp laid on the cover photo (or alone without one), what was cooked (« l'unique étape » in the singular), the cook's
+  tip in the stitched frame (`AdviceNote`, promoted to a shared component, titled « le petit conseil » here as on the board; the recipe page says « le conseil de la cuisinière ») only when the recipe has one, and
+  « Revenir à la recette » (primary) / « Retour aux recettes ».
+- **The photos** reuse `PhotoViewer`, which gained the counter pill (« 2 / 3 ») and a swipe from the board; one photo is a 4:3 frame with 24 px corners, several a row of thumbnails.
+- **Not on the boards, but a kitchen needs it**: the screen is kept on while cooking (`useWakeLock`, the Screen Wake Lock API; asked again when the page is back, ignored where the browser has none or refuses).
+  No timer, no other function the data does not have (the board says so).
+- **Differences from the boards**: the title may take two lines (at 390 px a long title would otherwise be cut by the large « Quitter »); there is no key for « Ingrédients » (none is drawn); « Ingrédients » uses the
+  « Couverts » icon the board suggests; the board's photo « Agrandir la photo » is a button, not a link.
+- **Tests**: `CookingScreen.test.tsx` goes through every state and gesture at the three widths; the hooks that need a browser API (`useSwipe`, `useWakeLock`, `useCanScrollMore`) have their own tests.
