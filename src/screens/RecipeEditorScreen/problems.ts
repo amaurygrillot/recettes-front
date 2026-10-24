@@ -73,6 +73,25 @@ function problemAt(path: readonly PropertyKey[], message: string): Problem {
   return FIELD_TO_FIX
 }
 
+/** The five sections of the form, as the index names them. */
+export type SectionId = 'informations' | 'photos' | 'ingredients' | 'steps' | 'advice'
+
+/** The section of the form a field is in, from where it is (`['steps', 0, 'photos', 1, 'altText']`). */
+function sectionOf(path: readonly PropertyKey[]): SectionId {
+  switch (path[0]) {
+    case 'photos':
+      return 'photos'
+    case 'groups':
+      return 'ingredients'
+    case 'steps':
+      return 'steps'
+    case 'advice':
+      return 'advice'
+    default:
+      return 'informations'
+  }
+}
+
 const PAGE_ORDER: readonly ProblemAnchor[] = [
   'title',
   'categories',
@@ -102,4 +121,18 @@ export function summaryText(problems: readonly Problem[]): string {
   return problems.every(({ kind }) => kind === 'missing')
     ? summary.missing(problems.length, things)
     : summary.toFix(problems.length, things)
+}
+
+/** How many things are wrong in each section, said the way the summary counts them: a kind of defect counts once. */
+export function problemCounts(values: EditorValues): Partial<Record<SectionId, number>> {
+  const result = editorSchema.safeParse(values)
+  if (result.success) return {}
+
+  const kinds = new Map<SectionId, Set<string>>()
+  for (const issue of result.error.issues) {
+    const section = sectionOf(issue.path)
+    const { label } = problemAt(issue.path, issue.message)
+    kinds.set(section, (kinds.get(section) ?? new Set<string>()).add(label))
+  }
+  return Object.fromEntries([...kinds].map(([section, labels]) => [section, labels.size]))
 }

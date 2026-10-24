@@ -119,5 +119,5 @@ export function RecipeEditorScreen() {
       />
     )
   }
-  return <RecipeToChange id={id} references={references.references} />
+  return <RecipeToChange key={id} id={id} references={references.references} />
 }

@@ -43,6 +43,9 @@ export function useSaveRecipe(recipeId: string | undefined): SaveRecipe {
       setSavedId(recipe.id ?? recipeId)
     }
     const onFailed = ({ failure }: ApiRequestError) => {
+      logger.warn('The recipe was not saved', { kind: failure.kind })
+      // The dialog of the app says that the session is over and brings the person back: nothing to add.
+      if (failure.kind === 'unauthorized') return
       if (recipeId !== undefined && failure.kind === 'forbidden') {
         setRefusal('forbidden')
       } else if (recipeId !== undefined && failure.kind === 'not-found') {

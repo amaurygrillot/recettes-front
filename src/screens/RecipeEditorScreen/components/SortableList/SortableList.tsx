@@ -125,7 +125,9 @@ export function SortableList({
           {after}
         </ul>
       </SortableContext>
-      <DragOverlay>{liftedId === null ? null : renderLifted(liftedId)}</DragOverlay>
+      <DragOverlay dropAnimation={null}>
+        {liftedId === null ? null : renderLifted(liftedId)}
+      </DragOverlay>
     </DndContext>
   )
 }

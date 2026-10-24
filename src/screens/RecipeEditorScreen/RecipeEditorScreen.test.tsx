@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { delay, http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -181,6 +181,24 @@ describe('RecipeEditorScreen', () => {
       renderEditor('/recettes/r-1/modifier')
 
       await findForm()
+    })
+
+    it('opens with the recipe it is now asked for, not the one it showed before', async () => {
+      useEditorBackend()
+      server.use(
+        http.get(`${API}/recipes/:id`, ({ params }) =>
+          HttpResponse.json(storedRecipe({ id: params.id, title: `Recette ${String(params.id)}` })),
+        ),
+      )
+      const { router } = renderEditor('/recettes/r-1/modifier')
+      await findForm()
+      expect(screen.getByLabelText('Titre')).toHaveValue('Recette r-1')
+
+      await act(() => router.navigate('/recettes/r-2/modifier'))
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Titre')).toHaveValue('Recette r-2')
+      })
     })
 
     it('has no accessibility violation', async () => {

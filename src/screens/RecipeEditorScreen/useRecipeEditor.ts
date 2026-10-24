@@ -17,7 +17,7 @@ import {
 } from './editorDraft'
 import { sameValues, type EditorValues } from './editorModel'
 import { editorSchema } from './editorSchema'
-import { problemsOf } from './problems'
+import { problemCounts, problemsOf } from './problems'
 import { strings } from './strings'
 import { useDraftOffer } from './useDraftOffer'
 import { useDraftSaving } from './useDraftSaving'
@@ -44,7 +44,8 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
   const [initial] = useState(given)
   const navigate = useNavigate()
   const toasts = useToasts()
-  const sessionExpired = useSession().status === 'expired'
+  const sessionStatus = useSession().status
+  const sessionExpired = sessionStatus === 'expired'
   const goBack = useGoBack(recipeId === undefined ? paths.home : paths.recipe(recipeId))
 
   const [beginning] = useState(() => readBeginning(storageKey, initial))
@@ -58,6 +59,7 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
 
   const changed = useWatch({ control: form.control, compute: (all) => !sameValues(all, initial) })
   const missing = useWatch({ control: form.control, compute: problemsOf })
+  const countsBySection = useWatch({ control: form.control, compute: problemCounts })
 
   const saving = useSaveRecipe(recipeId)
   const uploads = useUploadsOnTheirWay()
@@ -82,7 +84,10 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
     // Not while the draft waits for an answer: typing must not replace it before it was chosen.
     enabled: offer.offer === undefined && saving.savedId === undefined,
   })
-  const guard = useLeaveGuard(changed && saving.savedId === undefined && !sessionExpired)
+  const guard = useLeaveGuard(
+    // Without a session the way out is the login, and the draft is kept: nothing is left to ask about.
+    changed && saving.savedId === undefined && sessionStatus === 'member',
+  )
 
   const announceReturn = useEffectEvent(() => {
     if (!wasInterrupted(storageKey)) return
@@ -133,6 +138,8 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
     draftState: draft.state,
     /** What is missing, once « Enregistrer » found something, until it is all there. */
     problems: attempted ? missing : [],
+    /** The same, counted for each section, for the index. */
+    problemCounts: attempted ? countsBySection : {},
     submit,
     uploadTracker: uploads.tracker,
     pending: saving.pending,

@@ -1,6 +1,7 @@
-import { screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { sessionStore } from '../../api/sessionStore'
 import { installMatchMedia, removeMatchMedia } from '../../test/matchMedia'
 import { draftKey, loadDraft, markInterrupted, saveDraft, wasInterrupted } from './editorDraft'
 import { validValues } from './editorFixtures'
@@ -314,6 +315,23 @@ describe('RecipeEditorScreen: leaving', () => {
     await user.click(screen.getByRole('button', { name: 'Annuler' }))
 
     expect(screen.getByRole('alertdialog', { name: 'Quitter sans enregistrer ?' })).toBeVisible()
+  })
+
+  it('does not ask once the session is lost: the draft is kept, and the way out is the login', async () => {
+    useEditorBackend()
+    const user = userEvent.setup()
+    renderEditor('/recettes/nouvelle')
+    await findForm()
+    await user.type(title(), 'Tarte')
+
+    act(() => {
+      sessionStore.expire(sessionStore.getToken() ?? '')
+    })
+    await user.click(close())
+
+    expect(await screen.findByText('Page d’accueil')).toBeVisible()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte')
   })
 
   it('does not ask when what was changed was changed back', async () => {

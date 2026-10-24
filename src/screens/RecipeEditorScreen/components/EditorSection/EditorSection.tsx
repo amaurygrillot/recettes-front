@@ -26,7 +26,7 @@ export function EditorSection({
       id={id}
       aria-labelledby={`${id}-title`}
       className={classNames(
-        'flex scroll-mt-40 flex-col gap-4.5',
+        'flex scroll-mt-48 flex-col gap-4.5',
         invalid && 'rounded-xl border-3 border-brick bg-brick-wash p-4',
       )}
     >

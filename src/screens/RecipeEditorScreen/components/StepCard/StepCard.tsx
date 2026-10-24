@@ -50,7 +50,7 @@ export function StepCard({ index, total, handle, onMove, onRemove }: StepCardPro
           <Icon name="grip" size={22} />
         </button>
         <NumberBadge number={position} />
-        <h3 className="ml-0.5 min-w-0 flex-1 font-title text-[1.1875rem] leading-[1.625rem] font-bold whitespace-nowrap">
+        <h3 className="ml-0.5 min-w-0 flex-1 font-title text-label font-bold whitespace-nowrap">
           {steps.step(position)}
         </h3>
         <button

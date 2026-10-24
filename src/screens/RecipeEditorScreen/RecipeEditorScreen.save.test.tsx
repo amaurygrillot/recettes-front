@@ -47,6 +47,21 @@ describe('RecipeEditorScreen: what is missing', () => {
     expect(screen.getByText('Écris au moins une phrase pour cette étape.')).toBeVisible()
   })
 
+  it('counts what is to correct in each section on the index, once saving was refused', async () => {
+    useEditorBackend()
+    const user = userEvent.setup()
+    renderEditor('/recettes/nouvelle')
+    await findForm()
+    expect(screen.queryByRole('link', { name: /problème/ })).not.toBeInTheDocument()
+
+    await user.click(save())
+
+    expect(screen.getByRole('link', { name: 'Informations, 2 problèmes' })).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Ingrédients, 1 problème' })).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Étapes, 1 problème' })).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Photos' })).toBeVisible()
+  })
+
   it('puts the focus on the first field to correct', async () => {
     useEditorBackend()
     const user = userEvent.setup()

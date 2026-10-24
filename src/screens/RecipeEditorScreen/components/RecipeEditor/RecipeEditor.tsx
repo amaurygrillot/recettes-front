@@ -1,12 +1,9 @@
 import { FormProvider } from 'react-hook-form'
 import { Button } from '../../../../components/Button/Button'
-import {
-  SectionIndex,
-  type SectionIndexItem,
-} from '../../../../components/SectionIndex/SectionIndex'
 import { useActiveSection } from '../../../../lib/useActiveSection'
 import { formatWhen } from '../../../../lib/formatWhen'
 import { goToProblem } from '../../goToProblem'
+import type { SectionId } from '../../problems'
 import { ReferencesContext, type References } from '../../references'
 import { strings } from '../../strings'
 import type { EditorValues } from '../../editorModel'
@@ -17,6 +14,7 @@ import { DeleteRecipeSection } from '../DeleteRecipeSection/DeleteRecipeSection'
 import { DiscardDraftDialog } from '../DiscardDraftDialog/DiscardDraftDialog'
 import { DraftBanner } from '../DraftBanner/DraftBanner'
 import { EditorFrame } from '../EditorFrame/EditorFrame'
+import { EditorIndex } from '../EditorIndex/EditorIndex'
 import { EditorMessage } from '../EditorMessage/EditorMessage'
 import { EditorRefusal } from '../EditorRefusal/EditorRefusal'
 import { AdviceSection } from '../AdviceSection/AdviceSection'
@@ -35,14 +33,13 @@ export interface RecipeEditorProps {
   references: References
 }
 
-const SECTIONS: readonly SectionIndexItem[] = [
-  { id: 'informations', label: strings.sections.information, icon: 'edit' },
-  { id: 'photos', label: strings.sections.photos, icon: 'image' },
-  { id: 'ingredients', label: strings.sections.ingredients, icon: 'plate' },
-  { id: 'steps', label: strings.sections.steps, icon: 'list-number' },
-  { id: 'advice', label: strings.sections.advice, icon: 'chef-hat' },
+const SECTION_IDS: readonly SectionId[] = [
+  'informations',
+  'photos',
+  'ingredients',
+  'steps',
+  'advice',
 ]
-const SECTION_IDS = SECTIONS.map(({ id }) => id)
 
 /**
  * Writing a recipe, new or existing: the sections of the form between a fixed top (the cross, the
@@ -87,12 +84,7 @@ export function RecipeEditor({ recipeId, initial, references }: RecipeEditorProp
                 )
               }
               index={
-                <SectionIndex
-                  label={strings.sections.label}
-                  items={SECTIONS}
-                  activeId={active}
-                  onSelect={goTo}
-                />
+                <EditorIndex activeId={active} problems={editor.problemCounts} onSelect={goTo} />
               }
               actions={
                 <>

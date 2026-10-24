@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { emptyValues } from './editorModel'
 import { editorSchema } from './editorSchema'
 import { validValues } from './editorFixtures'
-import { problemsOf, summaryText } from './problems'
+import { problemCounts, problemsOf, summaryText } from './problems'
 
 function messagesAt(values: ReturnType<typeof validValues>, first: string): string[] {
   const result = editorSchema.safeParse(values)
@@ -176,5 +176,40 @@ describe('the rules of a recipe', () => {
     expect(summaryText(problemsOf(values))).toBe(
       'Il reste 2 choses à corriger : un titre plus court, une catégorie.',
     )
+  })
+})
+
+describe('problemCounts', () => {
+  it('has nothing to count for a complete recipe', () => {
+    expect(problemCounts(validValues())).toEqual({})
+  })
+
+  it('counts what is missing in each section, as the summary does', () => {
+    expect(problemCounts(emptyValues())).toEqual({ informations: 2, ingredients: 1, steps: 1 })
+  })
+
+  it('counts a kind of defect once, however many lines have it', () => {
+    const values = validValues()
+    values.groups = [
+      {
+        title: '',
+        lines: [
+          { ingredient: null, quantity: '', unitId: '', note: '' },
+          { ingredient: null, quantity: '', unitId: '', note: '' },
+        ],
+      },
+    ]
+
+    expect(problemCounts(values)).toEqual({ ingredients: 1 })
+  })
+
+  it('puts a description of a cover photo in photos, and one of a step photo in the steps', () => {
+    const values = validValues()
+    values.photos = [{ mediaId: 'm-1', altText: 'a'.repeat(501) }]
+    values.steps = [
+      { html: '<p>Mélange.</p>', photos: [{ mediaId: 'm-2', altText: 'b'.repeat(501) }] },
+    ]
+
+    expect(problemCounts(values)).toEqual({ photos: 1, steps: 1 })
   })
 })

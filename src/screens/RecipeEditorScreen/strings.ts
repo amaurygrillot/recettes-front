@@ -24,6 +24,8 @@ export const strings = {
 
   sections: {
     label: 'Sections du formulaire',
+    withProblems: (label: string, count: number) =>
+      `${label}, ${count === 1 ? '1 problème' : `${count} problèmes`}`,
     information: 'Informations',
     photos: 'Photos',
     photosTitle: 'Photos de couverture',
