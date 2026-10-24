@@ -124,4 +124,33 @@ export const strings = {
 
   saved: 'Recette enregistrée.',
   saveFailure: 'Enregistrement impossible.',
+
+  loading: "Chargement de l'éditeur…",
+  loadFailed: 'Impossible d’ouvrir l’éditeur',
+  referencesFailed: 'Les catégories, les tags et les unités n’ont pas pu être chargés.',
+  retry: 'Réessayer',
+
+  // Leaving with something not saved: the draft is kept, so nothing is lost either way.
+  leave: {
+    title: 'Quitter sans enregistrer ?',
+    text: 'Tes modifications ne sont pas enregistrées dans la recette. Un brouillon est gardé sur cet appareil.',
+    stay: 'Continuer à modifier',
+    leave: 'Quitter',
+  },
+
+  // A whole page instead of a form that could not be saved.
+  forbidden: {
+    title: "Tu n'as pas le droit de modifier cette recette.",
+    text: 'Seuls son auteur et les administrateurs peuvent la modifier. Tu peux la lire, comme tout le monde.',
+    toRecipe: 'Retour à la recette',
+    toRecipes: 'Voir les recettes',
+  },
+  gone: {
+    title: "Cette recette n'existe plus.",
+    text: 'Elle a été supprimée, ou le lien est ancien. Si tu y écrivais, ton brouillon reste sur cet appareil.',
+    toRecipes: 'Voir les recettes',
+    toHome: "Retour à l'accueil",
+  },
+
+  deleteLink: 'Supprimer la recette',
 }

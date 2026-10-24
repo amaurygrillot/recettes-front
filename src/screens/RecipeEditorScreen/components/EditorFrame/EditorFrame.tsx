@@ -1,16 +1,7 @@
 import type { ReactNode } from 'react'
-import { IconButton } from '../../../../components/IconButton/IconButton'
-import { strings } from '../../strings'
-import { DraftStatus, type DraftState } from '../DraftStatus/DraftStatus'
+import { EditorHeader, type EditorHeaderProps } from '../EditorHeader/EditorHeader'
 
-export interface EditorFrameProps {
-  /** « Nouvelle recette » or « Modifier la recette ». */
-  title: string
-  /** The cross: closes the editor (asking first when something was changed and not saved). */
-  onClose: () => void
-  draft: DraftState
-  /** Under the top bar and fixed with it: what is missing, once « Enregistrer » found something. */
-  banner?: ReactNode
+export interface EditorFrameProps extends EditorHeaderProps {
   /** The index of the sections, from a desktop. */
   index?: ReactNode
   /** The sections, and what comes before them. */
@@ -24,31 +15,10 @@ export interface EditorFrameProps {
  * of the draft) and the bottom (cancel and save) stay where they are, and only the middle scrolls. From a
  * desktop the sections have their index on the left and the bar sits at the foot of the column.
  */
-export function EditorFrame({
-  title,
-  onClose,
-  draft,
-  banner,
-  index,
-  children,
-  actions,
-}: EditorFrameProps) {
+export function EditorFrame({ index, children, actions, ...header }: EditorFrameProps) {
   return (
     <main className="flex min-h-dvh flex-col bg-paper-100">
-      <header className="sticky top-0 z-30">
-        <div className="flex flex-col gap-1.5 border-b-2 border-paper-300 bg-paper-100 px-4 pt-3.5 pb-2.5 desktop:h-24 desktop:flex-row desktop:items-center desktop:gap-5 desktop:border-ink-900 desktop:bg-paper-50 desktop:px-16 desktop:py-0">
-          <div className="flex items-center gap-3 desktop:gap-5">
-            <IconButton label={strings.close} icon="close" variant="outlined" onClick={onClose} />
-            <h1 className="min-w-0 flex-1 font-title text-editor-title desktop:text-auth-state-title">
-              {title}
-            </h1>
-          </div>
-          <div className="desktop:ml-auto">
-            <DraftStatus state={draft} />
-          </div>
-        </div>
-        {banner}
-      </header>
+      <EditorHeader {...header} />
       <div className="mx-auto flex w-full max-w-267 flex-1 gap-12 px-4 pt-4.5 tablet:px-8 desktop:px-0 desktop:pt-7">
         {index && (
           <div className="hidden w-55 shrink-0 desktop:block">

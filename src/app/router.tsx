@@ -45,6 +45,11 @@ const pagesWithNavigation: RouteObject[] = [
   { path: '*', element: <NotFoundScreen /> },
 ]
 
+const lazyRecipeEditor: NonNullable<RouteObject['lazy']> = async () => {
+  const { RecipeEditorScreen } = await import('../screens/RecipeEditorScreen/RecipeEditorScreen')
+  return { Component: RecipeEditorScreen }
+}
+
 // Full-screen tasks: no navigation, the screen has the whole page.
 const fullScreenPages: RouteObject[] = [
   {
@@ -81,11 +86,8 @@ const fullScreenPages: RouteObject[] = [
   {
     loader: requireMember,
     children: [
-      { path: paths.newRecipe, element: <ScreenPlaceholder title={placeholder.newRecipe} /> },
-      {
-        path: ROUTE_PATTERNS.editRecipe,
-        element: <ScreenPlaceholder title={placeholder.editRecipe} />,
-      },
+      { path: paths.newRecipe, lazy: lazyRecipeEditor },
+      { path: ROUTE_PATTERNS.editRecipe, lazy: lazyRecipeEditor },
     ],
   },
   ...styleguideRoutes,

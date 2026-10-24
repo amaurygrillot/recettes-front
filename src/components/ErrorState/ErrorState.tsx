@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { classNames } from '../../lib/classNames'
 import { STATE_FRAMES, type StateSize } from '../EmptyState/stateSize'
 import { Icon } from '../Icon/Icon'
+import type { IconName } from '../Icon/iconShapes'
 
 export interface ErrorStateProps {
   /** What happened, in a few words: « Impossible de charger les recettes ». */
@@ -14,6 +15,8 @@ export interface ErrorStateProps {
   size?: StateSize
   /** `1` when the block is the whole page's message; `2` otherwise. */
   headingLevel?: 1 | 2
+  /** In the badge: the warning triangle by default, the padlock for what the person may not do. */
+  icon?: IconName
 }
 
 const BADGES: Record<StateSize, string> = { regular: 'size-20', compact: 'size-16' }
@@ -26,6 +29,7 @@ export function ErrorState({
   children,
   size = 'regular',
   headingLevel = 2,
+  icon = 'warning',
 }: ErrorStateProps) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2'
   return (
@@ -42,7 +46,7 @@ export function ErrorState({
           BADGES[size],
         )}
       >
-        <Icon name="warning" size={ICON_SIZES[size]} strokeWidth={2.4} />
+        <Icon name={icon} size={ICON_SIZES[size]} strokeWidth={2.4} />
       </div>
       <Heading className="font-title text-dialog-title text-ink-900">{title}</Heading>
       <p className="text-body text-ink-800">{description}</p>

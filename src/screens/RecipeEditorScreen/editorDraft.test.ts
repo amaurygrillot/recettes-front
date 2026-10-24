@@ -4,9 +4,10 @@ import {
   clearDraft,
   draftKey,
   loadDraft,
+  forgetInterrupted,
   markInterrupted,
   saveDraft,
-  takeInterrupted,
+  wasInterrupted,
 } from './editorDraft'
 
 describe('the draft of a recipe', () => {
@@ -79,21 +80,29 @@ describe('the draft of a recipe', () => {
     })
 
     expect(loadDraft('k')).toBeUndefined()
-    expect(takeInterrupted('k')).toBe(false)
+    expect(wasInterrupted('k')).toBe(false)
   })
 
   describe('a draft left by a lost session', () => {
-    it('is noted once, and then forgotten: it is only asked when the page opens again', () => {
+    it('is noted, and asking does not change it: a render that runs twice gets the same answer', () => {
       markInterrupted('k')
 
-      expect(takeInterrupted('k')).toBe(true)
-      expect(takeInterrupted('k')).toBe(false)
+      expect(wasInterrupted('k')).toBe(true)
+      expect(wasInterrupted('k')).toBe(true)
+    })
+
+    it('is forgotten once it has been taken up', () => {
+      markInterrupted('k')
+
+      forgetInterrupted('k')
+
+      expect(wasInterrupted('k')).toBe(false)
     })
 
     it('is not noted for another draft', () => {
       markInterrupted('k')
 
-      expect(takeInterrupted('other')).toBe(false)
+      expect(wasInterrupted('other')).toBe(false)
     })
 
     it('is forgotten with the draft', () => {
@@ -101,7 +110,7 @@ describe('the draft of a recipe', () => {
 
       clearDraft('k')
 
-      expect(takeInterrupted('k')).toBe(false)
+      expect(wasInterrupted('k')).toBe(false)
     })
   })
 })

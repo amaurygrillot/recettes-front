@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { EditorValues } from './editorModel'
+import { sameValues, type EditorValues } from './editorModel'
 import { draftValuesSchema } from './editorSchema'
 
 /**
@@ -66,13 +66,44 @@ export function markInterrupted(key: string): void {
   }
 }
 
-/** Whether the draft was left by a lost session, forgetting it: it is asked once, when the page opens. */
-export function takeInterrupted(key: string): boolean {
+/** Whether the draft was left by a lost session. Reading changes nothing: it can be asked again by a render that runs twice. */
+export function wasInterrupted(key: string): boolean {
   try {
-    const interrupted = window.sessionStorage.getItem(`${INTERRUPTED_PREFIX}${key}`) !== null
-    window.sessionStorage.removeItem(`${INTERRUPTED_PREFIX}${key}`)
-    return interrupted
+    return window.sessionStorage.getItem(`${INTERRUPTED_PREFIX}${key}`) !== null
   } catch {
     return false
   }
+}
+
+/** Forgets that the draft was left by a lost session: it has been taken up. */
+export function forgetInterrupted(key: string): void {
+  try {
+    window.sessionStorage.removeItem(`${INTERRUPTED_PREFIX}${key}`)
+  } catch {
+    // Nothing was kept, so there is nothing to forget.
+  }
+}
+
+/** What the editor opens with, and what it has to ask. */
+export interface Beginning {
+  values: EditorValues
+  /** A draft that waits for an answer: « Reprendre ton brouillon ? ». */
+  offered: Draft | undefined
+  /** The draft was taken up without asking: the session was lost, and the member is back. */
+  resumed: boolean
+}
+
+/**
+ * How the editor opens: with the draft when the member left it by losing their session, with what
+ * the recipe holds and the draft offered when there is one, with what the recipe holds when not. A
+ * draft that holds what the recipe holds already is not a draft.
+ */
+export function readBeginning(key: string, initial: EditorValues): Beginning {
+  const draft = loadDraft(key)
+  if (draft === undefined || sameValues(draft.values, initial)) {
+    return { values: initial, offered: undefined, resumed: false }
+  }
+  return wasInterrupted(key)
+    ? { values: draft.values, offered: undefined, resumed: true }
+    : { values: initial, offered: draft, resumed: false }
 }

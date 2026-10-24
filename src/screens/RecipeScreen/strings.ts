@@ -36,11 +36,6 @@ export const strings = {
     delete: 'Supprimer',
   },
 
-  deletion: {
-    failed: 'Suppression impossible.',
-    retry: 'Réessayer',
-  },
-
   loading: 'Chargement de la recette…',
 
   notFound: {

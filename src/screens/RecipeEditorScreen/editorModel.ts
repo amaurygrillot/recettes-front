@@ -129,3 +129,8 @@ export function valuesFromRecipe(
     advice: recipe.recommendations ?? '',
   }
 }
+
+/** Whether two forms hold the same recipe: what tells a form that was changed from one that was only opened. */
+export function sameValues(a: EditorValues, b: EditorValues): boolean {
+  return JSON.stringify(a) === JSON.stringify(b)
+}
