@@ -159,11 +159,28 @@ describe('the full-screen pages', () => {
     ['/mot-de-passe-oublie', 'Mot de passe oublié'],
     ['/reset-password?token=abc&email=camille%40example.org', 'Nouveau mot de passe'],
     ['/reset-password', "Ce lien n'est plus valable"],
-    ['/recettes/42/pas-a-pas', 'Pas à pas'],
   ])('serves %s with no navigation', async (path, title) => {
     renderRoutes(routes, path)
 
     expect(await screen.findByRole('heading', { level: 1, name: title })).toBeVisible()
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
+  })
+
+  it('serves the step-by-step mode with no navigation, for anyone with the link', async () => {
+    server.use(
+      http.get(`${API_BASE_URL}/recipes/42`, () =>
+        HttpResponse.json({
+          id: '42',
+          title: 'Tarte fine aux pommes',
+          steps: [{ instruction: '<p>Mélange tout.</p>' }],
+        }),
+      ),
+    )
+    renderRoutes(routes, '/recettes/42/pas-a-pas')
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Tarte fine aux pommes' }),
+    ).toBeVisible()
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
   })
 

@@ -1,5 +1,5 @@
 import { strings } from '../../strings'
-import type { IngredientGroupView } from '../../recipeView'
+import type { IngredientGroupView } from '../../../../app/recipeView'
 
 export interface IngredientsSectionProps {
   groups: readonly IngredientGroupView[]

@@ -8,4 +8,11 @@ describe('StepNumber', () => {
 
     expect(screen.getByText('3')).toHaveAttribute('aria-hidden', 'true')
   })
+
+  it('can be the large stamp, with its word above the number, hidden in the same way', () => {
+    render(<StepNumber number={3} word="ÉTAPE" />)
+
+    expect(screen.getByText('ÉTAPE').parentElement).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
 })

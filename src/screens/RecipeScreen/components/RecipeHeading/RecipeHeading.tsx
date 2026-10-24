@@ -3,7 +3,7 @@ import { CardPill } from '../../../../components/CardPill/CardPill'
 import { RichTextView } from '../../../../components/RichTextView/RichTextView'
 import { WavyRule } from '../../../../components/WavyRule/WavyRule'
 import { strings } from '../../strings'
-import type { RecipeView } from '../../recipeView'
+import type { RecipeView } from '../../../../app/recipeView'
 
 export interface RecipeHeadingProps {
   recipe: RecipeView
