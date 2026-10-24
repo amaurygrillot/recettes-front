@@ -61,6 +61,25 @@ export const strings = {
     authorValue: 'Ajouté par Amaury',
     authorHint: "Seul l'auteur peut modifier ce champ.",
   },
+  richText: {
+    title: 'Texte riche',
+    empty: 'Vide, avec son exemple',
+    filled: 'Rempli, avec une liste',
+    error: 'Erreur',
+    advice: 'Le conseil, avec une aide',
+    introduction: 'Introduction',
+    step: "Texte de l'étape",
+    adviceLabel: 'Conseil',
+    optional: 'facultatif',
+    introductionPlaceholder:
+      'Présente ta recette en quelques phrases : d’où elle vient, quand la préparer.',
+    stepPlaceholder: 'Ex. Fais fondre le beurre à feu doux.',
+    advicePlaceholder: 'Un geste, une astuce, ce que tu referais autrement.',
+    errorMessage: 'Écris au moins une phrase pour cette étape.',
+    hint: 'Une ou deux phrases suffisent.',
+    filledHtml:
+      '<p>Pour la <strong>pâte</strong>, prépare :</p><ul><li>la farine, le sel et le beurre froid</li><li>l’œuf et l’eau froide</li></ul>',
+  },
   loading: {
     title: 'Chargement',
     recipeCard: 'Carte recette',

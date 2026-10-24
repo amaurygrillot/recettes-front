@@ -11,6 +11,7 @@ const SECTION_TITLES = [
   strings.buttons.title,
   strings.tags.title,
   strings.fields.title,
+  strings.richText.title,
   strings.loading.title,
   strings.states.title,
   strings.avatars.title,
