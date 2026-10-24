@@ -1,12 +1,12 @@
-import type { ApiFailure } from '../../../../api/failure'
-import { failureMessage, feedFailureText } from '../../../../app/failureMessage'
-import { paths } from '../../../../app/paths'
-import { BowlIllustration } from '../../../../components/BowlIllustration/BowlIllustration'
-import { Button } from '../../../../components/Button/Button'
-import { EmptyState } from '../../../../components/EmptyState/EmptyState'
-import { ErrorState } from '../../../../components/ErrorState/ErrorState'
-import { LinkButton } from '../../../../components/LinkButton/LinkButton'
-import { strings } from '../../strings'
+import type { ApiFailure } from '../../api/failure'
+import { BowlIllustration } from '../../components/BowlIllustration/BowlIllustration'
+import { Button } from '../../components/Button/Button'
+import { EmptyState } from '../../components/EmptyState/EmptyState'
+import { ErrorState } from '../../components/ErrorState/ErrorState'
+import { LinkButton } from '../../components/LinkButton/LinkButton'
+import { failureMessage, feedFailureText } from '../failureMessage'
+import { paths } from '../paths'
+import { strings } from './strings'
 
 export interface RecipeProblemProps {
   failure: ApiFailure
