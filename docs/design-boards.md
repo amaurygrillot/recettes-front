@@ -209,3 +209,27 @@ Built from `Compte-page`, `Compte-etats` and `Compte-grands-ecrans`, checked at 
   of the board). A renamed member keeps their old username in the token until the next sign-in, so a reload shows the old one again; the app shows
   the new one for the life of the tab (`sessionStore.rename`).
 - **Left out**: the « Administration » row (the pages it leads to are not designed yet).
+
+## RichTextEditor (`Editeur-texte-riche`)
+
+One component for the three rich texts of a recipe (`variant`: `introduction` 18/28 and 144 px, `step` 22/34 and 160 px, `advice` 18/28 and
+112 px), built on Lexical **0.52.0, every package pinned to that exact version**, with the extension API (`LexicalExtensionComposer`; the
+plain `LexicalComposer` is deprecated in this release). Checked in the browser at 390, 768 and 1280 px through the development `/styleguide`.
+
+- **Six tools, in three groups, and no more**: bold, italic · bulleted list, numbered list · undo, redo. 44 px buttons, `aria-pressed` for the
+  tools that are on at the caret (yellow, ink outline), undo and redo dashed while there is nothing to undo or redo. Pressing a tool never takes
+  the focus out of the text (`mousedown` is prevented). Ctrl + B, I, Z and Shift + Z work as in any editor.
+- **What it refuses**: no heading, quote, underline, link, image or colour. A shortcut for another format is swallowed
+  (`FORMAT_TEXT_COMMAND`), a heading or a quote that arrives with a paste becomes a paragraph (node transform), and Tab leaves the field.
+- **What it stores** (`htmlConversion.ts`): the HTML is written by hand from the editor's tree, in the viewer's own vocabulary only (`p`, `br`,
+  `strong`, `em`, `ul`, `ol`, `li`), with no attribute (Lexical's own export adds styles and classes), without the blank paragraphs and list
+  items a stray Enter leaves, and `''` when nothing is written. **What it opens** goes through the same `sanitizeRichText` (DOMPurify) as the
+  viewer first, so a script stored in a recipe never gets into the editor either. Both directions are tested against hostile input.
+- **The field**: label above (with « facultatif »), a frame like the text fields (2 px ink-500; 2 px ink and a 3 px ring on focus; 3 px brick and a
+  rosy background in error), the toolbar in the field's top on a tablet and a desktop. **On a phone, while the text has the focus, the toolbar
+  leaves the field and sits on the whole width just above the keyboard** (`useKeyboardInset`, from `visualViewport`); it keeps its place in the
+  DOM (so Tab still reaches it) and the field keeps its height (the text does not jump).
+- **Use**: `initialHtml` and `onChange(html)`: the editor keeps the text itself after it has started (give it a new `key` to replace it, e.g. to
+  restore a draft). It does not report the text it started with as a change.
+- **Tests**: jsdom does not deliver typed characters to a contenteditable, so insertions go through the editor's own API
+  (`getNearestEditorFromDOMNode`); the buttons, commands, history and conversions under test are the real ones.

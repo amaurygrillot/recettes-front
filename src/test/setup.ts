@@ -17,6 +17,16 @@ if (typeof window !== 'undefined' && typeof window.ResizeObserver === 'undefined
 // jsdom has no layout, so it has no scrolling into view either.
 if (typeof Element !== 'undefined') Element.prototype.scrollIntoView = () => undefined
 
+// ...nor the boxes of a text selection, which the rich text editor measures to keep its caret in view.
+if (typeof Range !== 'undefined') {
+  const nowhere = new DOMRect(0, 0, 0, 0)
+  Range.prototype.getBoundingClientRect = () => nowhere
+  Range.prototype.getClientRects = () => {
+    const noRectangle: DOMRect[] = []
+    return Object.assign(noRectangle, { item: () => null })
+  }
+}
+
 beforeAll(() => {
   // MSW 3 calls it a « frame »: an unanswered request fails loudly instead of reaching the network.
   server.listen({ onUnhandledFrame: 'error' })

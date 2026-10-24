@@ -46,6 +46,10 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   [design-boards.md](design-boards.md#searchscreen-rechercher-and-mes-recettes). Shared pieces promoted or added: `RecipeCard`,
   `FeedGrid`, `LoadMore`, `BottomSheet`, `Combobox`, `IconButton`, `CountBadge`, `RemovableChip`, `LockedChip`, `RadioRow`, `CheckboxRow`.
 
+- **RichTextEditor — done (2026-10-24).** `src/components/RichTextEditor` (Lexical 0.52.0, pinned), `sanitizeRichText` shared with the viewer,
+  `useKeyboardInset`; decisions in [design-boards.md](design-boards.md#richtexteditor-editeur-texte-riche). It is shown in the development
+  `/styleguide` until the RecipeEditorScreen uses it (and lazy-loads it, so Lexical stays out of the pages everybody opens).
+
 - **AccountScreen — done (2026-10-24).** `/compte`; decisions, and what the back end cannot do (no way to read the profile), in
   [design-boards.md](design-boards.md#accountscreen-compte). Shared pieces added: `Toast` and `ToastsProvider` / `useToasts` (in `RootLayout`),
   `SectionIndex` with `useActiveSection`, `useMember`, `sessionStore.rename`, `useKnownAccount`, `app/conflictedField` (promoted from the
