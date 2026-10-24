@@ -19,7 +19,7 @@ export function IdentityBlock({ member, known }: IdentityBlockProps) {
       {/* The initials of the first and last name when they are known, else of the username. */}
       <Avatar name={fullName === '' ? member.username : fullName} size={96} decorative />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="font-title text-identity-name [overflow-wrap:anywhere]">{member.username}</p>
+        <p className="font-title text-section-title [overflow-wrap:anywhere]">{member.username}</p>
         {known?.email && (
           <p className="text-body [overflow-wrap:anywhere] text-ink-800">{known.email}</p>
         )}

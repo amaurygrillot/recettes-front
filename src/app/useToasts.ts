@@ -7,9 +7,15 @@ export interface FailureNotice {
   retry?: (() => void) | undefined
 }
 
+/** A word in a notification that does something: « Annuler » after a removal. */
+export interface NoticeAction {
+  label: string
+  run: () => void
+}
+
 export interface Toasts {
-  /** « Profil mis à jour »: gone after a few seconds. */
-  success: (message: string) => void
+  /** « Profil mis à jour »: gone after a few seconds, with an action when it can be taken back. */
+  success: (message: string, action?: NoticeAction) => void
   /** « Enregistrement impossible. »: stays until closed or retried. */
   failure: (notice: FailureNotice) => void
 }
@@ -19,7 +25,7 @@ export interface Notice {
   tone: 'success' | 'error'
   message: string
   detail?: string | undefined
-  retry?: (() => void) | undefined
+  action?: NoticeAction | undefined
 }
 
 export const ToastsContext = createContext<Toasts | null>(null)

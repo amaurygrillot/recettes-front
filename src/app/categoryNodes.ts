@@ -1,5 +1,5 @@
-import type { components } from '../../api/schema'
-import type { ComboboxOption } from '../../components/Combobox/Combobox'
+import type { components } from '../api/schema'
+import type { ComboboxOption } from '../components/Combobox/Combobox'
 
 type CategoryTree = components['schemas']['CategoryTreeResponse']
 

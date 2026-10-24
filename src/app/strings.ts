@@ -43,8 +43,6 @@ export const strings = {
     myRecipes: 'Mes recettes',
     recipe: 'Recette',
     cooking: 'Pas à pas',
-    newRecipe: 'Nouvelle recette',
-    editRecipe: 'Modifier la recette',
   },
 
   // The stack of notifications.

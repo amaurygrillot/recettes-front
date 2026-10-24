@@ -28,6 +28,20 @@ function Trigger({ retry }: { retry?: () => void }) {
   )
 }
 
+function Remover({ undo }: { undo: () => void }) {
+  const toasts = useToasts()
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        toasts.success('Ingrédient retiré.', { label: 'Annuler', run: undo })
+      }}
+    >
+      retirer
+    </button>
+  )
+}
+
 function renderTrigger(retry?: () => void) {
   render(
     <ToastsProvider>
@@ -105,6 +119,23 @@ describe('ToastsProvider', () => {
     await user.click(first)
 
     expect(screen.getAllByRole('alert')).toHaveLength(1)
+  })
+
+  it('lets a success be taken back, and then takes it away', async () => {
+    const undo = vi.fn()
+    render(
+      <ToastsProvider>
+        <Remover undo={undo} />
+      </ToastsProvider>,
+    )
+    const user = userEvent.setup({ advanceTimers: (ms) => vi.advanceTimersByTime(ms) })
+
+    await user.click(screen.getByRole('button', { name: 'retirer' }))
+    expect(screen.getByRole('status')).toHaveTextContent('Ingrédient retiré.')
+    await user.click(screen.getByRole('button', { name: 'Annuler' }))
+
+    expect(undo).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
   it('has its own named region, always on the page', () => {

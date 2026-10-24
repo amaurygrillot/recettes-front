@@ -1,17 +1,16 @@
 import type { ReactNode } from 'react'
 import { useSession } from '../../../../api/session'
 import { canManageRecipe } from '../../../../app/navigation'
-import { ErrorBanner } from '../../../../components/ErrorBanner/ErrorBanner'
-import { Button } from '../../../../components/Button/Button'
+import { useRecipeDeletion } from '../../../../app/useRecipeDeletion'
+import { DeleteRecipeDialog } from '../../../../components/DeleteRecipeDialog/DeleteRecipeDialog'
+import { DeletionFailureBanner } from '../../../../components/DeletionFailureBanner/DeletionFailureBanner'
 import { PhotoSlider } from '../../../../components/PhotoSlider/PhotoSlider'
 import { DESKTOP_QUERY } from '../../../../lib/breakpoints'
 import { useMediaQuery } from '../../../../lib/useMediaQuery'
 import type { RecipeView } from '../../recipeView'
 import { strings } from '../../strings'
-import { useRecipeDeletion } from '../../useRecipeDeletion'
 import { AdviceNote } from '../AdviceNote/AdviceNote'
 import { CookingEntry } from '../CookingEntry/CookingEntry'
-import { DeleteDialog } from '../DeleteDialog/DeleteDialog'
 import { IngredientsSection } from '../IngredientsSection/IngredientsSection'
 import { ManageButtons } from '../ManageRecipe/ManageButtons'
 import { ManageMenu } from '../ManageRecipe/ManageMenu'
@@ -38,11 +37,7 @@ export function ReadyRecipe({ recipe, backButton }: ReadyRecipeProps) {
     <>
       {deletion.failure !== undefined && (
         <div className="mb-5.5">
-          <ErrorBanner message={`${strings.deletion.failed} ${deletion.failure}`}>
-            <Button variant="secondary" size="medium" onClick={deletion.confirm}>
-              {strings.deletion.retry}
-            </Button>
-          </ErrorBanner>
+          <DeletionFailureBanner cause={deletion.failure} onRetry={deletion.confirm} />
         </div>
       )}
       <div className="flex flex-col gap-5.5 desktop:gap-9">
@@ -83,7 +78,7 @@ export function ReadyRecipe({ recipe, backButton }: ReadyRecipeProps) {
           </div>
         </div>
       </div>
-      <DeleteDialog
+      <DeleteRecipeDialog
         open={deletion.dialogOpen}
         recipeTitle={recipe.title}
         busy={deletion.pending}

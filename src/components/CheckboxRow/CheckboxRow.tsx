@@ -5,10 +5,12 @@ import { Icon } from '../Icon/Icon'
 export type CheckboxRowProps = Omit<ComponentProps<'input'>, 'className' | 'type' | 'children'> & {
   /** The label: the whole row is touchable, as the box is. */
   label: string
+  /** A quieter line under the label (the path of a category: « Desserts › Tartes »). It is part of the name. */
+  hint?: string | undefined
 }
 
 /** One thing to tick: a 32 px square in a row of 60 px at least. Ticked = yellow and a tick, two signs. */
-export function CheckboxRow({ label, disabled, ...rest }: CheckboxRowProps) {
+export function CheckboxRow({ label, hint, disabled, ...rest }: CheckboxRowProps) {
   return (
     <label
       className={classNames(
@@ -23,7 +25,15 @@ export function CheckboxRow({ label, disabled, ...rest }: CheckboxRowProps) {
       >
         <Icon name="check" size={22} strokeWidth={3} />
       </span>
-      {label}
+      <span className="flex min-w-0 flex-col">
+        {label}
+        {hint && (
+          <>
+            {' '}
+            <span className="text-detail text-ink-700">{hint}</span>
+          </>
+        )}
+      </span>
     </label>
   )
 }

@@ -26,14 +26,19 @@ export function ToastsProvider({ children }: { children: ReactNode }) {
       return id
     }
     return {
-      success: (message) => {
-        const id = add({ tone: 'success', message })
+      success: (message, action) => {
+        const id = add({ tone: 'success', message, action })
         setTimeout(() => {
           dismiss(id)
         }, SUCCESS_DURATION_MS)
       },
-      failure: (notice) => {
-        add({ tone: 'error', ...notice })
+      failure: ({ message, detail, retry }) => {
+        add({
+          tone: 'error',
+          message,
+          detail,
+          action: retry === undefined ? undefined : { label: strings.retry, run: retry },
+        })
       },
     }
   }, [dismiss])
@@ -53,13 +58,13 @@ export function ToastsProvider({ children }: { children: ReactNode }) {
               message={notice.message}
               detail={notice.detail}
               action={
-                notice.retry === undefined
+                notice.action === undefined
                   ? undefined
                   : {
-                      label: strings.retry,
+                      label: notice.action.label,
                       onAction: () => {
                         dismiss(notice.id)
-                        notice.retry?.()
+                        notice.action?.run()
                       },
                     }
               }

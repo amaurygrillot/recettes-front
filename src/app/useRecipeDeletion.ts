@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { useDeleteRecipe } from '../../api/recipes'
-import { failureMessage } from '../../app/failureMessage'
-import { paths } from '../../app/paths'
-import { logger } from '../../lib/logger'
+import { useDeleteRecipe } from '../api/recipes'
+import { failureMessage } from './failureMessage'
+import { paths } from './paths'
+import { logger } from '../lib/logger'
 
 /**
  * Deleting a recipe: ask first, then delete, then leave the page that no longer has anything to

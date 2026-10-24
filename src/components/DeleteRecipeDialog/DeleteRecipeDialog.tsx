@@ -1,8 +1,8 @@
-import { AlertDialog } from '../../../../components/AlertDialog/AlertDialog'
-import { Button } from '../../../../components/Button/Button'
-import { strings } from '../../strings'
+import { AlertDialog } from '../AlertDialog/AlertDialog'
+import { Button } from '../Button/Button'
+import { strings } from './strings'
 
-export interface DeleteDialogProps {
+export interface DeleteRecipeDialogProps {
   open: boolean
   /** Named in the text, so nobody deletes the wrong recipe. */
   recipeTitle: string
@@ -17,19 +17,25 @@ export interface DeleteDialogProps {
  * on a dialog that just opened never deletes anything; « Supprimer la recette » is the brick button
  * that only a confirmation uses.
  */
-export function DeleteDialog({ open, recipeTitle, busy, onCancel, onConfirm }: DeleteDialogProps) {
+export function DeleteRecipeDialog({
+  open,
+  recipeTitle,
+  busy,
+  onCancel,
+  onConfirm,
+}: DeleteRecipeDialogProps) {
   return (
     <AlertDialog
       open={open}
       icon="trash"
-      title={strings.deletion.title}
-      description={strings.deletion.description(recipeTitle)}
+      title={strings.title}
+      description={strings.description(recipeTitle)}
     >
       <Button variant="secondary" fullWidth disabled={busy} onClick={onCancel}>
-        {strings.deletion.cancel}
+        {strings.cancel}
       </Button>
       <Button variant="danger" fullWidth busy={busy} onClick={onConfirm}>
-        {strings.deletion.confirm}
+        {strings.confirm}
       </Button>
     </AlertDialog>
   )
