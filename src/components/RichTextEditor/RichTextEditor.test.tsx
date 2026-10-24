@@ -317,6 +317,64 @@ describe('RichTextEditor', () => {
     })
   })
 
+  describe('while it is locked', () => {
+    it('cannot be written in, and can again once unlocked', () => {
+      const { rerender } = renderEditor({ locked: true })
+      expect(textbox()).toHaveAttribute('contenteditable', 'false')
+
+      rerender(
+        <RichTextEditor
+          variant="introduction"
+          label="Introduction"
+          placeholder="Présente ta recette en quelques phrases"
+          initialHtml=""
+          onChange={vi.fn()}
+          locked={false}
+        />,
+      )
+
+      expect(textbox()).toHaveAttribute('contenteditable', 'true')
+    })
+  })
+
+  describe('as the cook’s tip', () => {
+    const tip = () => screen.getByRole('textbox', { name: /^le petit conseil/ })
+
+    function renderTip() {
+      return renderEditor({ variant: 'advice', label: 'le petit conseil' })
+    }
+
+    it('is a field like the others, labelled by its handwritten title', () => {
+      renderTip()
+
+      expect(tip()).toHaveAttribute('aria-multiline', 'true')
+      expect(screen.getByText('le petit conseil')).toBeVisible()
+    })
+
+    it('keeps its tools inside its frame from a tablet', () => {
+      renderTip()
+
+      expect(screen.getByRole('toolbar')).toBeVisible()
+    })
+
+    it('has no tools at rest on a phone, and brings them above the keyboard with the focus', async () => {
+      installMatchMedia(390)
+      const user = userEvent.setup()
+      renderTip()
+      expect(screen.queryByRole('toolbar')).not.toBeInTheDocument()
+
+      await user.click(tip())
+
+      expect(screen.getByRole('toolbar')).toHaveClass('fixed')
+    })
+
+    it('has no accessibility violation', async () => {
+      const { container } = renderTip()
+
+      await expectNoAccessibilityViolations(container)
+    })
+  })
+
   describe('on a phone', () => {
     beforeEach(() => {
       installMatchMedia(390)

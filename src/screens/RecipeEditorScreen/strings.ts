@@ -1,6 +1,6 @@
 export const strings = {
   titles: { create: 'Nouvelle recette', edit: 'Modifier la recette' },
-  close: "Fermer l'éditeur",
+  close: 'Fermer l’éditeur',
   cancel: 'Annuler',
   save: 'Enregistrer',
   saving: 'Enregistrement…',
@@ -148,6 +148,36 @@ export const strings = {
     undo: 'Annuler',
   },
 
+  // The steps, one card each: the number is the rank, so reordering renumbers.
+  steps: {
+    step: (position: number) => `Étape ${position}`,
+    textLabel: 'Texte de l’étape',
+    textPlaceholder: 'Ex. Fais fondre le beurre à feu doux.',
+    photosLabel: 'Photos de l’étape',
+    add: 'Ajouter une étape',
+    grip: (position: number) => `Déplacer l’étape ${position}`,
+    gripRole: 'étape à déplacer',
+    moveUp: (position: number) => `Monter l’étape ${position}`,
+    moveDown: (position: number) => `Descendre l’étape ${position}`,
+    remove: (position: number) => `Retirer l’étape ${position}`,
+    removed: 'Étape retirée.',
+    undo: 'Annuler',
+    moved: (position: number, newPosition: number, total: number) =>
+      `Étape ${position} déplacée en position ${newPosition} sur ${total}`,
+    lifted: (position: number, total: number) =>
+      `Étape ${position} prise, sur ${total}. Utilise les flèches pour la déplacer.`,
+    dropped: (position: number, total: number) => `Étape ${position} déposée, sur ${total}`,
+    dragInstructions:
+      'Pour déplacer une étape : appuie sur espace, utilise les flèches, puis espace pour la déposer.',
+    dropHint: 'Relâche la carte pour la déposer. Les numéros se mettent à jour en direct.',
+  },
+
+  // « Recommandations »: one rich text field, the cook's tip.
+  advice: {
+    label: 'le petit conseil',
+    placeholder: 'Un geste, une astuce, ce que tu referais la prochaine fois.',
+  },
+
   // What the two choice fields and their sheets say.
   choice: {
     category: {
@@ -229,7 +259,7 @@ export const strings = {
   saved: 'Recette enregistrée.',
   saveFailure: 'Enregistrement impossible.',
 
-  loading: "Chargement de l'éditeur…",
+  loading: 'Chargement de l’éditeur…',
   loadFailed: 'Impossible d’ouvrir l’éditeur',
   referencesFailed: 'Les catégories, les tags et les unités n’ont pas pu être chargés.',
   retry: 'Réessayer',
@@ -244,16 +274,16 @@ export const strings = {
 
   // A whole page instead of a form that could not be saved.
   forbidden: {
-    title: "Tu n'as pas le droit de modifier cette recette.",
+    title: 'Tu n’as pas le droit de modifier cette recette.',
     text: 'Seuls son auteur et les administrateurs peuvent la modifier. Tu peux la lire, comme tout le monde.',
     toRecipe: 'Retour à la recette',
     toRecipes: 'Voir les recettes',
   },
   gone: {
-    title: "Cette recette n'existe plus.",
+    title: 'Cette recette n’existe plus.',
     text: 'Elle a été supprimée, ou le lien est ancien. Si tu y écrivais, ton brouillon reste sur cet appareil.',
     toRecipes: 'Voir les recettes',
-    toHome: "Retour à l'accueil",
+    toHome: 'Retour à l’accueil',
   },
 
   deleteLink: 'Supprimer la recette',

@@ -55,7 +55,8 @@ const NO_INLINE_TEXT = restrictSyntax(
 )
 
 const UI_FILES = ['src/components/**/*.tsx', 'src/screens/**/*.tsx', 'src/app/**/*.tsx']
-const TEST_FILES = ['**/*.test.{ts,tsx}', 'src/test/**']
+// `*.testkit.tsx` is the shared helper of a screen's tests: part of the tests, never shipped.
+const TEST_FILES = ['**/*.test.{ts,tsx}', '**/*.testkit.{ts,tsx}', 'src/test/**']
 
 // Dependencies point one way: screens -> components -> lib. `api` is used by screens and the app
 // shell only. See "Architecture rules" in docs/engineering-standards.md.
@@ -129,6 +130,11 @@ export default defineConfig([
   {
     files: ['src/**/*.tsx'],
     extends: [jsxA11y.flatConfigs.strict, reactRefresh.configs.vite],
+  },
+  {
+    // A test helper exports functions and constants beside its components: nothing hot-reloads it.
+    files: ['**/*.testkit.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 
   {

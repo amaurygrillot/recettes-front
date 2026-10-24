@@ -54,6 +54,12 @@ export function useIngredientChoice({ chosen, onChange }: IngredientChoiceOption
             : [],
         )
   const exists = suggestions.some(({ label }) => normalizeText(label) === wanted)
+  // Creating is only offered once what exists is known for what is typed: it must not be pressed too soon.
+  const known =
+    searched === typed &&
+    search.data !== undefined &&
+    !search.isPlaceholderData &&
+    !search.isFetching
 
   function pick(choice: Choice): void {
     setText(choice.label)
@@ -114,7 +120,9 @@ export function useIngredientChoice({ chosen, onChange }: IngredientChoiceOption
       pick(suggestion)
     },
     create:
-      typed === '' || exists ? undefined : { label: ingredients.create(typed), onCreate: create },
+      typed === '' || exists || !known
+        ? undefined
+        : { label: ingredients.create(typed), onCreate: create },
     busyText: createIngredient.isPending ? ingredients.creating(typed) : undefined,
     locked: createIngredient.isPending,
     outcome,

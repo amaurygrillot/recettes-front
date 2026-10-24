@@ -40,11 +40,16 @@ export interface RichTextEditorProps {
   hint?: string | undefined
   /** Replaces the hint and puts the field in its brick frame. */
   error?: string | undefined
+  /** The text cannot be changed for now (a recipe being saved): it keeps its look and says nothing. */
+  locked?: boolean
 }
 
 const FRAMES = {
   idle: 'border-2 border-ink-500 bg-paper-50 focus-within:border-ink-900 focus-within:outline-3 focus-within:outline-offset-3 focus-within:outline-ink-900',
   error: 'border-3 border-brick bg-brick-wash',
+  // The recipe page's stitched frame at rest, a plain ink one with the ring while it is being written in.
+  advice:
+    'border-2 border-dashed border-ink-500 bg-paper-50 focus-within:border-solid focus-within:border-ink-900 focus-within:outline-3 focus-within:outline-offset-3 focus-within:outline-ink-900',
 }
 
 /**
@@ -63,7 +68,16 @@ export function RichTextEditor(props: RichTextEditorProps) {
   )
 }
 
-function Field({ variant, label, note, placeholder, onChange, hint, error }: RichTextEditorProps) {
+function Field({
+  variant,
+  label,
+  note,
+  placeholder,
+  onChange,
+  hint,
+  error,
+  locked = false,
+}: RichTextEditorProps) {
   const [editor] = useLexicalComposerContext()
   const toolbar = useToolbarState()
   const labelId = useId()
@@ -73,6 +87,10 @@ function Field({ variant, label, note, placeholder, onChange, hint, error }: Ric
   const tabletOrMore = useMediaQuery(TABLET_QUERY)
   const docked = !tabletOrMore && focused
   const keyboardInset = useKeyboardInset(docked)
+
+  useEffect(() => {
+    editor.setEditable(!locked)
+  }, [editor, locked])
 
   // The latest listener, without registering the editor again each time the page re-renders.
   const onChangeRef = useRef(onChange)
@@ -112,55 +130,92 @@ function Field({ variant, label, note, placeholder, onChange, hint, error }: Ric
   }, [])
 
   const message = error ?? hint
+  const advice = variant === 'advice'
+  // The tip has no bar of its own at rest: it is the stitched frame of the recipe page, and its tools
+  // come with the keyboard (on a phone), or sit inside the frame (from a tablet).
+  const showToolbar = !advice || tabletOrMore || docked
+
+  const labelNode = (
+    <div
+      id={labelId}
+      className={advice ? 'font-hand text-annotation text-mustard-700' : 'text-body font-bold'}
+    >
+      {label}
+      {note && (
+        <>
+          {' '}
+          <span className="ml-1 font-body text-detail font-normal text-ink-700">{note}</span>
+        </>
+      )}
+    </div>
+  )
+
+  const toolbarNode = showToolbar && (
+    // The tools keep their place in the field even when they sit above the keyboard: the text does not jump.
+    <div className={advice ? 'min-h-15' : 'min-h-15 border-b-2 border-paper-300 bg-paper-100'}>
+      <Toolbar
+        editor={editor}
+        state={toolbar}
+        {...(docked ? { dockedAbove: keyboardInset } : {})}
+      />
+    </div>
+  )
+
+  const textNode = (
+    <div className="relative">
+      <ContentEditable
+        aria-labelledby={labelId}
+        aria-multiline
+        aria-invalid={error ? true : undefined}
+        aria-describedby={message ? messageId : undefined}
+        aria-placeholder={placeholder}
+        placeholder={
+          <div
+            aria-hidden="true"
+            className={classNames(
+              'pointer-events-none absolute top-0 left-0 text-ink-700',
+              advice ? 'px-0.5 py-0.5' : 'px-4 py-3.5',
+              VARIANTS[variant],
+            )}
+          >
+            {placeholder}
+          </div>
+        }
+        className={classNames(
+          'rich-text text-ink-900 outline-none',
+          advice ? 'px-0.5 pt-0.5 pb-2.5' : 'px-4 py-3.5',
+          VARIANTS[variant],
+        )}
+      />
+    </div>
+  )
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div id={labelId} className="text-body font-bold">
-        {label}
-        {note && (
-          <>
-            {' '}
-            <span className="ml-1 text-detail font-normal text-ink-700">{note}</span>
-          </>
-        )}
-      </div>
-      <div
-        ref={frame}
-        className={classNames('overflow-hidden rounded-m', error ? FRAMES.error : FRAMES.idle)}
-      >
-        {/* The tools keep their place in the field even when they sit above the keyboard: the text does not jump. */}
-        <div className="min-h-15 border-b-2 border-paper-300 bg-paper-100">
-          <Toolbar
-            editor={editor}
-            state={toolbar}
-            {...(docked ? { dockedAbove: keyboardInset } : {})}
-          />
+      {advice ? (
+        <div
+          ref={frame}
+          className={classNames(
+            'flex flex-col gap-1.5 rounded-frame px-3.5 pt-3.5 pb-1',
+            error ? FRAMES.error : FRAMES.advice,
+          )}
+        >
+          {labelNode}
+          {toolbarNode}
+          {textNode}
         </div>
-        <div className="relative">
-          <ContentEditable
-            aria-labelledby={labelId}
-            aria-multiline
-            aria-invalid={error ? true : undefined}
-            aria-describedby={message ? messageId : undefined}
-            aria-placeholder={placeholder}
-            placeholder={
-              <div
-                aria-hidden="true"
-                className={classNames(
-                  'pointer-events-none absolute top-0 left-0 px-4 py-3.5 text-ink-700',
-                  VARIANTS[variant],
-                )}
-              >
-                {placeholder}
-              </div>
-            }
-            className={classNames(
-              'rich-text px-4 py-3.5 text-ink-900 outline-none',
-              VARIANTS[variant],
-            )}
-          />
-        </div>
-      </div>
+      ) : (
+        <>
+          {labelNode}
+          <div
+            ref={frame}
+            className={classNames('overflow-hidden rounded-m', error ? FRAMES.error : FRAMES.idle)}
+          >
+            {toolbarNode}
+            {textNode}
+          </div>
+        </>
+      )}
       {message && (
         <p
           id={messageId}

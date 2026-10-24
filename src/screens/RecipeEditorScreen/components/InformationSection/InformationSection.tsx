@@ -7,6 +7,7 @@ import type { EditorValues } from '../../editorModel'
 import { LIMITS } from '../../editorSchema'
 import { messageOf } from '../../fieldError'
 import { useReferences } from '../../references'
+import { useSaving } from '../../savingContext'
 import { strings } from '../../strings'
 import { CategorySheet } from '../CategorySheet/CategorySheet'
 import { EditorSection } from '../EditorSection/EditorSection'
@@ -21,6 +22,7 @@ export function InformationSection() {
   const { control, register, formState } = useFormContext<EditorValues>()
   const references = useReferences()
   const [sheet, setSheet] = useState<Sheet | null>(null)
+  const saving = useSaving()
   const typedTitle = useWatch({ control, name: 'title' }).length
 
   return (
@@ -44,6 +46,7 @@ export function InformationSection() {
             placeholder={information.introductionPlaceholder}
             initialHtml={field.value}
             onChange={field.onChange}
+            locked={saving}
           />
         )}
       />

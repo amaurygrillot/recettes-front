@@ -177,6 +177,9 @@ describe('AutocompleteField', () => {
     )
 
     expect(field()).toBeDisabled()
+    expect(screen.getByRole('listbox', { name: 'Ingrédients existants' })).toHaveTextContent(
+      'Création de « kiwi »…',
+    )
   })
 
   it('marks the field as invalid and ties it to what says why', () => {

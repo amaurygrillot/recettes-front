@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { classNames } from '../../../../lib/classNames'
+import { NumberBadge } from '../NumberBadge/NumberBadge'
 
 export interface EditorSectionProps {
   /** The `id` of the section: the index and the summary scroll to it, and its title is `<id>-title`. */
@@ -34,12 +35,7 @@ export function EditorSection({
         tabIndex={-1}
         className="flex items-center gap-3 font-title text-section-title outline-none"
       >
-        <span
-          aria-hidden="true"
-          className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-ink-900 bg-butter-200 text-body font-extrabold"
-        >
-          {number}
-        </span>
+        <NumberBadge number={number} />
         {title}
       </h2>
       {children}

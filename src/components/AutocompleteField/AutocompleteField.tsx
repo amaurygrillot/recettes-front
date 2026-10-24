@@ -92,7 +92,8 @@ export function AutocompleteField({
   const lit = activeIndex < choices.length ? activeIndex : -1
   const typed = text.trim()
   const busy = busyText !== undefined
-  const open = focused && !dismissed && typed !== '' && (choices.length > 0 || busy)
+  // What is being made is said in the list even though the field no longer has the focus (it is locked).
+  const open = busy || (focused && !dismissed && typed !== '' && choices.length > 0)
   const optionId = (index: number) => `${listboxId}-${index}`
 
   function choose(index: number): void {
