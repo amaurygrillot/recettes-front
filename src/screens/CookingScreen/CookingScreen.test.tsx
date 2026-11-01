@@ -184,28 +184,34 @@ describe('CookingScreen', () => {
       expect(screen.getByRole('button', { name: 'Ingrédients' })).toBeVisible()
     })
 
-    it.each([390, 599])(
-      'has no stamp of the step on a phone (%i px): the bar says the number',
-      async (width) => {
-        installMatchMedia(width)
-        renderCooking()
-        await screen.findByText('Préchauffe le four à 200 °C.')
+    it.each([
+      { width: 390, stamped: false },
+      { width: 599, stamped: false },
+      { width: 600, stamped: true },
+      { width: 768, stamped: true },
+      { width: 1280, stamped: true },
+    ])('has the stamp of the step at $width px: $stamped', async ({ width, stamped }) => {
+      installMatchMedia(width)
+      renderCooking()
+      await screen.findByText('Préchauffe le four à 200 °C.')
 
-        expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
-        expect(screen.getByText('Étape 1 sur 3')).toBeVisible()
-      },
-    )
+      expect(screen.queryByText('ÉTAPE') !== null).toBe(stamped)
+      // The bar says the number, with the stamp or without it.
+      expect(screen.getByText('Étape 1 sur 3')).toBeVisible()
+    })
 
-    it.each([600, 768, 1280])(
-      'keeps the stamp of the step from a tablet on (%i px)',
-      async (width) => {
-        installMatchMedia(width)
-        renderCooking()
-        await screen.findByText('Préchauffe le four à 200 °C.')
+    it('puts the stamp back, or takes it away, as the screen is turned across the tablet width', async () => {
+      const screenWidth = installMatchMedia(599)
+      renderCooking()
+      await screen.findByText('Préchauffe le four à 200 °C.')
+      expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
 
-        expect(screen.getByText('ÉTAPE')).toBeInTheDocument()
-      },
-    )
+      screenWidth.resizeTo(600)
+      expect(screen.getByText('ÉTAPE')).toBeInTheDocument()
+
+      screenWidth.resizeTo(599)
+      expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
+    })
 
     it('goes forward and back with the buttons, the first having no way back', async () => {
       const user = userEvent.setup()

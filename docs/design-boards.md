@@ -18,7 +18,7 @@ values are in [design-tokens.md](design-tokens.md); the canvas remains the sourc
 | Retouches (the canvas page « Retouches ») | R1 `Retouche-1-principe` · `Retouche-1-mobile` · `Retouche-1-grands-ecrans` · `Retouche-1-resultats`; R2 `Retouche-2-cocotte`; R3 `Retouche-3-texte-riche-mobile` · `Retouche-3-texte-riche-grands-ecrans`; R4 `Retouche-4-mascotte` · `Retouche-4-situations` · `Retouche-4-logo-en-situation`; R5 `Retouche-5-etape-sans-badge` |
 
 The **Retouches** boards are design changes applied on top of the screens above; where they name an older board (« ce qui change »),
-the newer board wins, and the older one is marked below with « replaced by R… » (see [Retouches](#retouches)).
+the newer board wins, and the older one is marked with « replaced by R… » as each retouche is built (see [Retouches](#retouches)).
 
 The boards contain sample data (recipe names, « 35 min · 4 personnes · facile ») that the API cannot provide. Treat it as
 illustration, never as a requirement.
@@ -353,7 +353,7 @@ photos move up by the 118 px (104 + the 14 px gap) the stamp took. **Tablet and 
 
 - **Nothing else moves**: the bar, the 22/34 instruction, the photos (one 4:3 frame or a row of thumbnails), « Ingrédients », « Précédent »,
   « Suivant » and the swipe hint keep their sizes and places. The padding under the bar stays 14 px, as the board draws it.
-- **Built in `StepContent`**: it takes `stamped`, which `Cooking` gives from the media query it already uses to tell a phone from a
+- **Built in `StepContent`**: it takes `showStamp`, which `Cooking` gives from the media query it already uses to tell a phone from a
   tablet (`tabletOrMore`), so there is one place that decides what a phone looks like, and a phone does not render a stamp it hides. The
   stamp is decorative (`aria-hidden`), so nothing is lost for a screen reader: the step is named by the `section` label and the live
   « Étape 3 sur 8 ».

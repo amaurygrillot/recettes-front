@@ -151,7 +151,7 @@ export function Cooking({ recipe }: CookingProps) {
             {tabletOrMore && <div className="mb-7">{progressBlock}</div>}
             <StepContent
               step={step}
-              stamped={tabletOrMore}
+              showStamp={tabletOrMore}
               onOpenPhoto={(position) => {
                 setViewing(position)
               }}

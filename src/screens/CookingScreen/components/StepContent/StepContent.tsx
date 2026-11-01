@@ -6,8 +6,8 @@ import { strings } from '../../strings'
 
 export interface StepContentProps {
   step: StepView
-  /** The brick stamp above (or beside) the instruction: from a tablet on, a phone's bar already says the number. */
-  stamped: boolean
+  /** Whether to show the brick stamp of the step: a phone's bar already says the number, so the screen passes `false` there. */
+  showStamp: boolean
   /** A photo of the step was touched: the viewer opens on it. */
   onOpenPhoto: (position: number) => void
 }
@@ -17,13 +17,13 @@ export interface StepContentProps {
  * then its photos. One photo is a 4:3 frame under the text, several are a row of thumbnails (they do not
  * scroll: sliding is how the step changes); a touch opens the photo at the size of the screen.
  */
-export function StepContent({ step, stamped, onOpenPhoto }: StepContentProps) {
+export function StepContent({ step, showStamp, onOpenPhoto }: StepContentProps) {
   const { photos } = step
 
   return (
     <div className="flex flex-col gap-3.5 tablet:gap-7">
       <div className="flex flex-col gap-3.5 tablet:flex-row tablet:items-start tablet:gap-6">
-        {stamped && <StepNumber number={step.number} word={strings.stamp} />}
+        {showStamp && <StepNumber number={step.number} word={strings.stamp} />}
         <div className="min-w-0 tablet:max-w-140 tablet:pt-1.5">
           <RichTextView html={step.html} size="step" />
         </div>
