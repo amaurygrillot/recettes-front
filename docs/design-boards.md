@@ -74,7 +74,7 @@ Built from `Accueil-mobile`, `Accueil-etats`, `Carte-accueil`, `Accueil-tablette
 - **Cards in a row have the same height**, the extra space at the bottom of the shorter ones (the board reserves 60 px for the
   title for the same purpose).
 - **Compact state blocks**: the home states board draws the empty and error blocks smaller than `Retours-chargement`
-  (140 px bowl, 64 px badge, tighter padding): `size="compact"` on `EmptyState`, `ErrorState` and `BowlIllustration`.
+  (64 px badge, tighter padding; the 140 px bowl is now the 160 px mascot, see R4): `size="compact"` on `EmptyState` and `ErrorState`.
 - **Dev database**: the local database holds 51 leftover test categories (`dessert-…`, `gouter-…`), so the real home page shows
   a long row of tiles. They are data, not a bug; the front shows every `MAIN` category.
 
@@ -414,3 +414,11 @@ The logo's cocotte, grown, with a name (Mijotine), seven moods and four sizes, p
 - **The logo in situation** (`Retouche-4-logo-en-situation`): the desktop bar's lockup goes from 40 to 52 px; the mobile header keeps the 44 px
   lockup but shows the compact mark (no name) under 360 px; the entry pages (sign-in, registration, password screens) show the large logo with
   its cocotte at 190 px; the favicon and icons are R2's.
+
+R4, as built: empty and error blocks of a page (`regular`) hold the `xl` mascot, the blocks among others (`compact`) the `large` one. `ErrorState` takes an
+`illustration` in place of its badge (the sleeping mascot for « no connection », through `app/failureIllustration`), `AlertDialog` an
+`illustration` in place of its icon badge (the celebration), and `AuthFrame` an `emblem` (`logo` or `mascot`). A recipe card or gallery with no photo is
+the shared `NoPhoto` (dejected mascot, « Pas encore de photo », on paper stripes); a photo that exists but cannot be loaded keeps the butter stripes
+and the cutlery. The words of the **lost** states and of an empty « Mes recettes » are the board's (« Je n'ai rien trouvé… », « Ajoute ta première
+recette »); the sentence under « Je n'ai rien trouvé… » names the text searched, and says to remove a filter only when there is one. **À valider**:
+on the sign-in the happy mascot and « Qu'est-ce qu'on mijote aujourd'hui ? » replace the name of the application (as the board draws it).

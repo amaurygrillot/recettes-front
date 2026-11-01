@@ -15,7 +15,7 @@ export interface EditorRefusalProps {
 
 /**
  * Instead of a form that could not be saved: the person may not change this recipe (a padlock,
- * and the way back to reading it), or it is not there any more (the empty bowl, a finding rather
+ * and the way back to reading it), or it is not there any more (the lost mascot, a finding rather
  * than a fault). One cause, one message, one main way out.
  */
 export function EditorRefusal({ kind, recipeId }: EditorRefusalProps) {

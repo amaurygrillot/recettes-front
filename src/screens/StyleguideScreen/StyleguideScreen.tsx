@@ -5,6 +5,7 @@ import { RichTextSection } from './components/RichTextSection'
 import { IconsSection } from './components/IconsSection'
 import { LoadingSection } from './components/LoadingSection'
 import { LogoSection } from './components/LogoSection'
+import { MascotSection } from './components/MascotSection'
 import { StatesSection } from './components/StatesSection'
 import { TagsSection } from './components/TagsSection'
 import { strings } from './strings'
@@ -18,6 +19,7 @@ export function StyleguideScreen() {
         <p className="max-w-reading text-body text-ink-800">{strings.intro}</p>
       </header>
       <LogoSection />
+      <MascotSection />
       <IconsSection />
       <ButtonsSection />
       <TagsSection />
