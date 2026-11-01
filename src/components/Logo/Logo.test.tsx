@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
-import { Logo, type LogoTone, type LogoVariant } from './Logo'
+import { Logo, type LogoVariant } from './Logo'
+import type { LogoTone } from './logoTones'
 import { strings } from './strings'
 
 const VARIANTS: readonly LogoVariant[] = ['large', 'lockup', 'mark']
