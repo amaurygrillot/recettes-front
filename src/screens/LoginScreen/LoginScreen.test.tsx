@@ -49,10 +49,10 @@ describe('LoginScreen', () => {
     )
   })
 
-  it('is a task of its own: the logo, and neither tabs nor a top bar', () => {
+  it('is a task of its own: the mascot welcomes, and there are neither tabs nor a top bar', () => {
     renderLogin()
 
-    expect(screen.getByRole('img', { name: 'Il en reste un peu' })).toBeVisible()
+    expect(screen.getByText("Qu'est-ce qu'on mijote aujourd'hui ?")).toBeVisible()
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
   })
 

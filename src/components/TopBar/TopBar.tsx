@@ -63,7 +63,7 @@ export function TopBar({ label, homeLabel, items, search }: TopBarProps) {
     >
       <div className="page-margins flex h-full items-center gap-2">
         <Link to="/" aria-label={homeLabel} className="flex items-center rounded-m">
-          <Logo variant="lockup" size={40} decorative />
+          <Logo variant="lockup" size={52} decorative />
         </Link>
         <div className="flex flex-1 justify-center gap-1">
           {pageItems.map((item) => (

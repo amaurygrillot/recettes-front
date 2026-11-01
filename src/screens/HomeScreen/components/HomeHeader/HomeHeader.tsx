@@ -3,6 +3,8 @@ import { paths, searchPath } from '../../../../app/paths'
 import { strings as appStrings } from '../../../../app/strings'
 import { Icon } from '../../../../components/Icon/Icon'
 import { Logo } from '../../../../components/Logo/Logo'
+import { NAMED_LOGO_QUERY } from '../../../../lib/breakpoints'
+import { useMediaQuery } from '../../../../lib/useMediaQuery'
 import { strings } from '../../strings'
 
 /**
@@ -11,6 +13,8 @@ import { strings } from '../../strings'
  * desktop, in the bar).
  */
 export function HomeHeader() {
+  const named = useMediaQuery(NAMED_LOGO_QUERY)
+
   return (
     <div className="flex flex-col gap-3 tablet:gap-3.5">
       <Link
@@ -18,7 +22,7 @@ export function HomeHeader() {
         aria-label={appStrings.navigation.homeLink}
         className="inline-flex self-start rounded-m"
       >
-        <Logo variant="lockup" size={44} decorative />
+        <Logo variant={named ? 'lockup' : 'mark'} size={44} decorative />
       </Link>
       <Link
         to={searchPath()}

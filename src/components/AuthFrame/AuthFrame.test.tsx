@@ -28,6 +28,13 @@ describe('AuthFrame', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Créer un compte' })).toBeVisible()
   })
 
+  it('welcomes with the mascot and her sentence instead of the named logo, when asked to', () => {
+    renderFrame({ emblem: 'mascot' })
+
+    expect(screen.getByText("Qu'est-ce qu'on mijote aujourd'hui ?")).toBeVisible()
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
   it('has no navigation around it: neither tabs nor a top bar', () => {
     renderFrame()
 
