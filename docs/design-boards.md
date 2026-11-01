@@ -15,6 +15,10 @@ values are in [design-tokens.md](design-tokens.md); the canvas remains the sourc
 | RecipeEditorScreen | `Editeur-cadre` · `Editeur-texte-riche` · `Editeur-categories-tags` · `Editeur-photos` · `Editeur-ingredients` · `Editeur-etapes-conseil` · `Editeur-validation` · `Editeur-session-droits` · `Editeur-grands-ecrans` |
 | Auth screens | `Marque-ecrans` (sign-in) · `Compte-inscription` · `Compte-mot-de-passe-oublie` · `Compte-nouveau-mot-de-passe` · `Compte-public-grands-ecrans` |
 | AccountScreen | `Compte-page` · `Compte-etats` · `Compte-grands-ecrans` |
+| Retouches (the canvas page « Retouches ») | R1 `Retouche-1-principe` · `Retouche-1-mobile` · `Retouche-1-grands-ecrans` · `Retouche-1-resultats`; R2 `Retouche-2-cocotte`; R3 `Retouche-3-texte-riche-mobile` · `Retouche-3-texte-riche-grands-ecrans`; R4 `Retouche-4-mascotte` · `Retouche-4-situations` · `Retouche-4-logo-en-situation`; R5 `Retouche-5-etape-sans-badge` |
+
+The **Retouches** boards are design changes applied on top of the screens above; where they name an older board (« ce qui change »),
+the newer board wins, and the older one is marked below with « replaced by R… » (see [Retouches](#retouches)).
 
 The boards contain sample data (recipe names, « 35 min · 4 personnes · facile ») that the API cannot provide. Treat it as
 illustration, never as a requirement.
@@ -311,7 +315,7 @@ link (like the recipe, no login). Checked in the browser pane at 390, 768 and 12
   moved to `app/` for the same reason, with its « Réessayer ») or that has **no step** is said on a page of its own: the mode is never opened empty
   (the entry button does not exist for such a recipe, this is for a typed address).
 - **A step** (`Cooking`): the top (« Quitter », the title on up to two lines, « Étape 3 sur 8 » and the progress), the stamp (`StepNumber` with its word: brick,
-  104 px, tilted), the instruction in the 22/34 text (`RichTextView`, sanitised like everywhere), the photos, a full-width « Ingrédients » row, and the
+  104 px, tilted; **replaced by R5 on a phone: no stamp under 600 px**), the instruction in the 22/34 text (`RichTextView`, sanitised like everywhere), the photos, a full-width « Ingrédients » row, and the
   foot with « Précédent » and « Suivant » (64 px, the second twice as wide, « Terminer » with a tick on the last step). Only the instruction scrolls, from its
   top for each step; a fade at the foot says when there is more below. A recipe of one step has no progress and no « Précédent ».
 - **Progress** (`StepProgress`): a segment per step up to twelve (done in ink, current in yellow with an ink outline, to come in cream with a lighter outline: three signs, not
@@ -334,3 +338,25 @@ link (like the recipe, no login). Checked in the browser pane at 390, 768 and 12
 - **Differences from the boards**: the title may take two lines (at 390 px a long title would otherwise be cut by the large « Quitter »); there is no key for « Ingrédients » (none is drawn); « Ingrédients » uses the
   « Couverts » icon the board suggests; the board's photo « Agrandir la photo » is a button, not a link.
 - **Tests**: `CookingScreen.test.tsx` goes through every state and gesture at the three widths; the hooks that need a browser API (`useSwipe`, `useWakeLock`, `useCanScrollMore`) have their own tests.
+
+## Retouches
+
+The canvas page « Retouches » holds five design changes applied on top of the screens above. Each one is written here before it is
+built; the newest board wins over an older one, and the API contract wins over any board. Where a board is ambiguous the most
+conservative reading is taken (it changes the least, invents no data and keeps the existing behaviour) and written down.
+
+### R5 · the cooking step without the stamp (`Retouche-5-etape-sans-badge`)
+
+Replaces, **on a phone only** (under 600 px, the `tablet` breakpoint), the stamp of `Pas-a-pas-etape`: the brick « ÉTAPE n » seal of
+104 px that sat above the instruction. The number is already in the bar (« Étape 3 sur 8 » and the segment), so the instruction and the
+photos move up by the 118 px (104 + the 14 px gap) the stamp took. **Tablet and desktop keep the stamp.**
+
+- **Nothing else moves**: the bar, the 22/34 instruction, the photos (one 4:3 frame or a row of thumbnails), « Ingrédients », « Précédent »,
+  « Suivant » and the swipe hint keep their sizes and places. The padding under the bar stays 14 px, as the board draws it.
+- **Built in `StepContent`**: it takes `stamped`, which `Cooking` gives from the media query it already uses to tell a phone from a
+  tablet (`tabletOrMore`), so there is one place that decides what a phone looks like, and a phone does not render a stamp it hides. The
+  stamp is decorative (`aria-hidden`), so nothing is lost for a screen reader: the step is named by the `section` label and the live
+  « Étape 3 sur 8 ».
+- **The six states of the board** (no photo, one photo, several, first with its swipe hint, last with « Terminer », very long step) are the
+  existing states of the screen; no new string, no new token. The board's fourth « ce qui change » (a 32 px « ÉTAPE 3 » pill, « si tu
+  préfères le garder ») is an alternative offered to the user, not a decision: not built.
