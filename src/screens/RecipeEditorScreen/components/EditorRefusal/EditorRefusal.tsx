@@ -1,5 +1,5 @@
 import { paths } from '../../../../app/paths'
-import { BowlIllustration } from '../../../../components/BowlIllustration/BowlIllustration'
+import { Mascot } from '../../../../components/Mascot/Mascot'
 import { EmptyState } from '../../../../components/EmptyState/EmptyState'
 import { ErrorState } from '../../../../components/ErrorState/ErrorState'
 import { LinkButton } from '../../../../components/LinkButton/LinkButton'
@@ -38,7 +38,7 @@ export function EditorRefusal({ kind, recipeId }: EditorRefusalProps) {
   const { gone } = strings
   return (
     <EmptyState
-      illustration={<BowlIllustration variant="no-result" size="compact" />}
+      illustration={<Mascot mood="lost" size="large" />}
       title={gone.title}
       description={gone.text}
       size="compact"

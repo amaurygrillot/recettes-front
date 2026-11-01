@@ -1,4 +1,4 @@
-import { BowlIllustration } from '../../../components/BowlIllustration/BowlIllustration'
+import { Mascot } from '../../../components/Mascot/Mascot'
 import { Button } from '../../../components/Button/Button'
 import { EmptyState } from '../../../components/EmptyState/EmptyState'
 import { ErrorBanner } from '../../../components/ErrorBanner/ErrorBanner'
@@ -15,7 +15,7 @@ export function StatesSection() {
       <div className="grid gap-x-6 gap-y-8 tablet:grid-cols-2">
         <StyleguideSpecimen label={states.firstVisit}>
           <EmptyState
-            illustration={<BowlIllustration variant="first-visit" />}
+            illustration={<Mascot mood="happy" size="xl" />}
             title={states.emptyBook}
             description={states.emptyBookText}
           >
@@ -24,7 +24,7 @@ export function StatesSection() {
         </StyleguideSpecimen>
         <StyleguideSpecimen label={states.noResult}>
           <EmptyState
-            illustration={<BowlIllustration variant="no-result" />}
+            illustration={<Mascot mood="lost" size="xl" />}
             title={states.nothingMatches}
             description={states.nothingMatchesText}
           >
@@ -41,7 +41,7 @@ export function StatesSection() {
         </StyleguideSpecimen>
         <StyleguideSpecimen label={states.compactEmpty}>
           <EmptyState
-            illustration={<BowlIllustration variant="first-visit" size="compact" />}
+            illustration={<Mascot mood="happy" size="large" />}
             title={states.emptyBook}
             description={states.emptyBookText}
             size="compact"

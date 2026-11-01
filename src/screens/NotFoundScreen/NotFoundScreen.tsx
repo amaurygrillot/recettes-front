@@ -1,5 +1,5 @@
 import { paths } from '../../app/paths'
-import { BowlIllustration } from '../../components/BowlIllustration/BowlIllustration'
+import { Mascot } from '../../components/Mascot/Mascot'
 import { EmptyState } from '../../components/EmptyState/EmptyState'
 import { LinkButton } from '../../components/LinkButton/LinkButton'
 import { strings } from './strings'
@@ -9,7 +9,7 @@ export function NotFoundScreen() {
   return (
     <main className="mx-auto flex max-w-reading flex-col py-12">
       <EmptyState
-        illustration={<BowlIllustration variant="no-result" />}
+        illustration={<Mascot mood="lost" size="xl" />}
         title={strings.title}
         description={strings.description}
       >

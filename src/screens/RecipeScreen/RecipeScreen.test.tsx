@@ -513,7 +513,7 @@ describe('RecipeScreen', () => {
       const user = userEvent.setup()
 
       expect(
-        await screen.findByRole('heading', { level: 1, name: 'Pas de connexion pour le moment' }),
+        await screen.findByRole('heading', { level: 1, name: 'Je fais une petite sieste' }),
       ).toBeVisible()
       up = true
       await user.click(screen.getByRole('button', { name: 'Réessayer' }))

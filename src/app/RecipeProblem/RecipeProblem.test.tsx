@@ -35,7 +35,7 @@ describe('RecipeProblem', () => {
   it('says that the connection is lost, and tries again', async () => {
     const { retry } = renderProblem({ kind: 'network' })
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Pas de connexion pour le moment')
+    expect(screen.getByRole('alert')).toHaveTextContent('Je fais une petite sieste')
     await userEvent.setup().click(screen.getByRole('button', { name: 'Réessayer' }))
 
     expect(retry).toHaveBeenCalledOnce()

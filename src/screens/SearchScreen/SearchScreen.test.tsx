@@ -360,7 +360,7 @@ describe('SearchScreen on a phone', () => {
 
       const alert = await screen.findByRole('alert')
       expect(
-        within(alert).getByRole('heading', { name: 'Pas de connexion pour le moment' }),
+        within(alert).getByRole('heading', { name: 'Je fais une petite sieste' }),
       ).toBeVisible()
       expect(field()).toHaveValue('tarte')
       expect(screen.getByRole('button', { name: 'Retirer le filtre Fruits' })).toBeVisible()

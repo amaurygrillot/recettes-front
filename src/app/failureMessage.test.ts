@@ -40,8 +40,9 @@ describe('failureMessage', () => {
 describe('feedFailureText', () => {
   it('words a missing connection in its own way', () => {
     expect(feedFailureText({ kind: 'network' })).toEqual({
-      title: 'Pas de connexion pour le moment',
-      description: "Vérifie ta connexion internet, puis réessaie. Tes recettes t'attendent.",
+      title: 'Je fais une petite sieste',
+      description:
+        "Pas de connexion pour le moment. Vérifie ta connexion internet, puis réessaie. Tes recettes t'attendent.",
     })
   })
 

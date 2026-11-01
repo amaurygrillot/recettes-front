@@ -1,8 +1,9 @@
 import { feedFailureText } from '../../../../app/failureMessage'
+import { failureIllustration } from '../../../../app/failureIllustration'
 import { paths } from '../../../../app/paths'
 import { isNarrowed, type SearchCriteria } from '../../../../app/searchCriteria'
 import type { RecipeFeed } from '../../../../app/useRecipeFeed'
-import { BowlIllustration } from '../../../../components/BowlIllustration/BowlIllustration'
+import { Mascot } from '../../../../components/Mascot/Mascot'
 import { Button } from '../../../../components/Button/Button'
 import { EmptyState } from '../../../../components/EmptyState/EmptyState'
 import { ErrorState } from '../../../../components/ErrorState/ErrorState'
@@ -37,7 +38,7 @@ function EmptyResults({
   if (!isNarrowed(criteria)) {
     return scope.kind === 'mine' ? (
       <EmptyState
-        illustration={<BowlIllustration variant="first-visit" size="compact" />}
+        illustration={<Mascot mood="happy" size="large" />}
         title={states.emptyMine.title}
         description={states.emptyMine.description}
         size="compact"
@@ -48,7 +49,7 @@ function EmptyResults({
       </EmptyState>
     ) : (
       <EmptyState
-        illustration={<BowlIllustration variant="first-visit" size="compact" />}
+        illustration={<Mascot mood="happy" size="large" />}
         title={states.emptyBase.title}
         description={states.emptyBase.description}
         size="compact"
@@ -59,7 +60,7 @@ function EmptyResults({
   const query = criteria.query.trim()
   return (
     <EmptyState
-      illustration={<BowlIllustration variant="no-result" size="compact" />}
+      illustration={<Mascot mood="lost" size="large" />}
       title={query === '' ? states.emptySearch.titleFilters : states.emptySearch.titleFor(query)}
       description={
         hasFilters ? states.emptySearch.description : states.emptySearch.descriptionNoFilter
@@ -95,7 +96,12 @@ export function SearchResults({
     case 'failed': {
       const { title, description } = feedFailureText(feed.failure)
       return (
-        <ErrorState title={title} description={description} size="compact">
+        <ErrorState
+          title={title}
+          description={description}
+          size="compact"
+          illustration={failureIllustration(feed.failure)}
+        >
           <Button icon="refresh" fullWidth onClick={feed.retry}>
             {states.failedRetry}
           </Button>
