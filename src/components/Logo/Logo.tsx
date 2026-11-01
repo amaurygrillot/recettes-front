@@ -26,7 +26,7 @@ const TONES: Record<LogoTone, string> = {
 }
 
 const VIEW_BOXES: Record<LogoVariant, { x: number; width: number; height: number }> = {
-  large: { x: -19, width: 238, height: 234 },
+  large: { x: -19, width: 238, height: 240 },
   lockup: { x: 0, width: 1229, height: 200 },
   mark: { x: 0, width: 200, height: 200 },
 }

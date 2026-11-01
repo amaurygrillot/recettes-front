@@ -31,8 +31,8 @@ const PHONE_LOGO: Record<AuthLayout, number> = { form: 160, login: 196, welcome:
 
 const LOGO_SHRINKS: Record<AuthLayout, string> = {
   form: '',
-  login: 'tablet:[&>svg]:size-40 desktop:[&>svg]:size-75',
-  welcome: 'tablet:[&>svg]:size-40',
+  login: 'tablet:[&>svg]:h-40 tablet:[&>svg]:w-auto desktop:[&>svg]:h-75',
+  welcome: 'tablet:[&>svg]:h-40 tablet:[&>svg]:w-auto',
 }
 
 interface SideBySide {
@@ -97,7 +97,7 @@ export function AuthFrame({ layout, back, onSubmit, children }: AuthFrameProps) 
       )}
       <div
         className={classNames(
-          'flex flex-1 flex-col tablet:w-full tablet:max-w-130 tablet:flex-none tablet:gap-2',
+          'flex flex-1 flex-col tablet:w-full tablet:max-w-130 tablet:flex-none tablet:gap-5',
           side.card,
         )}
       >

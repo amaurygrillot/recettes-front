@@ -9,7 +9,7 @@ import { strings } from './strings'
  * that size (297 px at 36, 241 px at 29) so a fallback font cannot make the logo overflow.
  */
 
-/** The cocotte with its name under it, centred (238 x 234, from x = -19). */
+/** The cocotte with its name under it, centred (238 x 240, from x = -19). */
 export const LARGE_SHAPE = (
   <>
     {COCOTTE_LARGE}

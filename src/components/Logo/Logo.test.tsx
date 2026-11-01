@@ -21,7 +21,7 @@ describe('Logo', () => {
   })
 
   it.each([
-    ['large', 234, 238],
+    ['large', 240, 238],
     ['mark', 44, 44],
     ['lockup', 40, (40 * 1229) / 200],
   ] as const)('keeps the proportions of the %s at %d px high', (variant, height, width) => {
@@ -49,6 +49,28 @@ describe('Logo', () => {
     expect(icon.querySelectorAll('path').length).toBeLessThan(
       compact.querySelectorAll('path').length,
     )
+  })
+
+  it('paints the body of the cocotte differently on paper, on butter and in one colour', () => {
+    const bodies = TONES.map((tone) => {
+      const { container } = render(<Logo variant="mark" tone={tone} size={64} />)
+      return /--logo-gold:var\(([^)]+)\)/.exec(
+        container.querySelector('svg')?.getAttribute('class') ?? '',
+      )?.[1]
+    })
+
+    expect(bodies).toEqual(['--color-butter-300', '--color-paper-50', '--color-paper-50'])
+  })
+
+  it('hides a decorative large logo or lockup too', () => {
+    render(
+      <>
+        <Logo variant="large" size={160} decorative />
+        <Logo variant="lockup" size={40} decorative />
+      </>,
+    )
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
   it('has no accessibility violation in any form or tone', async () => {
