@@ -6,22 +6,24 @@ import { strings } from '../../strings'
 
 export interface StepContentProps {
   step: StepView
+  /** Whether to show the brick stamp of the step: a phone's bar already says the number, so the screen passes `false` there. */
+  showStamp: boolean
   /** A photo of the step was touched: the viewer opens on it. */
   onOpenPhoto: (position: number) => void
 }
 
 /**
- * What the cook reads: the stamp of the step, its instruction in the biggest text of the app (22/34),
+ * What the cook reads: the stamp of the step (not on a phone), its instruction in the biggest text of the app (22/34),
  * then its photos. One photo is a 4:3 frame under the text, several are a row of thumbnails (they do not
  * scroll: sliding is how the step changes); a touch opens the photo at the size of the screen.
  */
-export function StepContent({ step, onOpenPhoto }: StepContentProps) {
+export function StepContent({ step, showStamp, onOpenPhoto }: StepContentProps) {
   const { photos } = step
 
   return (
     <div className="flex flex-col gap-3.5 tablet:gap-7">
       <div className="flex flex-col gap-3.5 tablet:flex-row tablet:items-start tablet:gap-6">
-        <StepNumber number={step.number} word={strings.stamp} />
+        {showStamp && <StepNumber number={step.number} word={strings.stamp} />}
         <div className="min-w-0 tablet:max-w-140 tablet:pt-1.5">
           <RichTextView html={step.html} size="step" />
         </div>

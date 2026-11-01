@@ -140,17 +140,18 @@ export function Cooking({ recipe }: CookingProps) {
           ref={reading}
           aria-label={total > 1 ? strings.stepOf(progress.step, total) : undefined}
           {...swipe}
-          className="relative min-h-0 flex-1 touch-pan-y overflow-y-auto"
+          className="relative flex min-h-0 flex-1 touch-pan-y flex-col overflow-y-auto"
         >
           <div
             className={classNames(
-              'mx-auto flex max-w-140 flex-col px-4 pt-3.5 pb-4 tablet:px-7 tablet:pt-9 desktop:max-w-170',
+              'mx-auto flex w-full max-w-140 flex-1 flex-col px-4 pt-3.5 pb-4 tablet:px-7 tablet:pt-9 desktop:max-w-170',
               ingredientsPanelOpen && 'tablet:ml-4',
             )}
           >
             {tabletOrMore && <div className="mb-7">{progressBlock}</div>}
             <StepContent
               step={step}
+              showStamp={tabletOrMore}
               onOpenPhoto={(position) => {
                 setViewing(position)
               }}

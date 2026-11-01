@@ -168,7 +168,7 @@ describe('CookingScreen', () => {
   })
 
   describe('a step', () => {
-    it('is the whole screen: the title, where the cook is, the stamp, the instruction and the buttons', async () => {
+    it('is the whole screen: the title, where the cook is, the instruction and the buttons', async () => {
       renderCooking()
 
       expect(
@@ -179,10 +179,42 @@ describe('CookingScreen', () => {
         'aria-valuenow',
         '1',
       )
-      expect(screen.getByText('ÉTAPE')).toBeInTheDocument()
       expect(instruction('Préchauffe le four à 200 °C.')).toBeVisible()
       expect(screen.getByRole('button', { name: 'Quitter' })).toBeVisible()
       expect(screen.getByRole('button', { name: 'Ingrédients' })).toBeVisible()
+    })
+
+    it.each([390, 599])(
+      'has no stamp of the step at $width px: the bar says the number',
+      async (width) => {
+        installMatchMedia(width)
+        renderCooking()
+        await screen.findByText('Préchauffe le four à 200 °C.')
+
+        expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
+        expect(screen.getByText('Étape 1 sur 3')).toBeVisible()
+      },
+    )
+
+    it.each([600, 768, 1280])('keeps the stamp of the step at $width px', async (width) => {
+      installMatchMedia(width)
+      renderCooking()
+      await screen.findByText('Préchauffe le four à 200 °C.')
+
+      expect(screen.getByText('ÉTAPE')).toBeInTheDocument()
+    })
+
+    it('puts the stamp back, or takes it away, as the screen is turned across the tablet width', async () => {
+      const screenWidth = installMatchMedia(599)
+      renderCooking()
+      await screen.findByText('Préchauffe le four à 200 °C.')
+      expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
+
+      screenWidth.resizeTo(600)
+      expect(screen.getByText('ÉTAPE')).toBeInTheDocument()
+
+      screenWidth.resizeTo(599)
+      expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
     })
 
     it('goes forward and back with the buttons, the first having no way back', async () => {
