@@ -82,7 +82,7 @@ function groupOf(group: Schemas['RecipeIngredientGroupResponse']): IngredientGro
           ingredientLine({
             name: line.ingredient.name,
             quantity: line.quantity,
-            unit: line.unit?.abbreviation ?? line.unit?.name,
+            unit: line.unit?.hidden ? undefined : (line.unit?.abbreviation ?? line.unit?.name),
             note: line.note,
           }),
         ]

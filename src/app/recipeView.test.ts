@@ -183,6 +183,29 @@ describe('toRecipeView', () => {
     expect(view?.ingredientGroups[0]?.lines[0]?.unit).toBe('pincée de ')
   })
 
+  it('leaves a hidden unit out of the line', () => {
+    const view = toRecipeView({
+      ...FULL,
+      ingredientGroups: [
+        {
+          ingredients: [
+            {
+              ingredient: { id: 'x', name: 'Oeuf' },
+              quantity: 3,
+              unit: { id: 'p', name: 'pièce', hidden: true },
+            },
+          ],
+        },
+      ],
+    })
+
+    expect(view?.ingredientGroups[0]?.lines[0]).toMatchObject({
+      quantity: '3',
+      unit: undefined,
+      name: 'Oeuf',
+    })
+  })
+
   it.each([
     ['an id', { title: 'Tarte' }],
     ['a title', { id: 'r-1' }],
