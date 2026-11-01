@@ -352,7 +352,8 @@ Replaces, **on a phone only** (under 600 px, the `tablet` breakpoint), the stamp
 photos move up by the 118 px (104 + the 14 px gap) the stamp took. **Tablet and desktop keep the stamp.**
 
 - **Nothing else moves**: the bar, the 22/34 instruction, the photos (one 4:3 frame or a row of thumbnails), « Ingrédients », « Précédent »,
-  « Suivant » and the swipe hint keep their sizes and places. The padding under the bar stays 14 px, as the board draws it.
+  « Suivant » and the swipe hint keep their sizes and places. The padding under the bar stays 14 px, as the board draws it. The swipe hint stays at the foot of the reading area, just above
+  « Ingrédients », also when the instruction is short (the reading area is a column whose text fills it, so the hint's sticky row ends at the bottom).
 - **Built in `StepContent`**: it takes `showStamp`, which `Cooking` gives from the media query it already uses to tell a phone from a
   tablet (`tabletOrMore`), so there is one place that decides what a phone looks like, and a phone does not render a stamp it hides. The
   stamp is decorative (`aria-hidden`), so nothing is lost for a screen reader: the step is named by the `section` label and the live
