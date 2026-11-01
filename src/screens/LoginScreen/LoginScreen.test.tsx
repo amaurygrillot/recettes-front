@@ -49,7 +49,7 @@ describe('LoginScreen', () => {
     )
   })
 
-  it('is a task of its own: the seal, and neither tabs nor a top bar', () => {
+  it('is a task of its own: the logo, and neither tabs nor a top bar', () => {
     renderLogin()
 
     expect(screen.getByRole('img', { name: 'Il en reste un peu' })).toBeVisible()

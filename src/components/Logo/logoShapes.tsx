@@ -1,108 +1,47 @@
-import type { ReactElement } from 'react'
+import { COCOTTE_LARGE, COCOTTE_LOCKUP } from './cocotteShapes'
 import { strings } from './strings'
 
 /**
- * The drawings of the « Sceau et bol » logo, copied from the canvas symbols (`Logo-bol` board).
- * Ink is always ink-900; what changes with the tone (--stamp, --bowl, --rice, --band) is painted
- * through CSS variables that Logo sets, so one drawing serves every colourway.
+ * The logos that carry the name, in the units of the cocotte's own 200 x 200 box (`Retouche-2-cocotte`): the name is
+ * Fraunces 800 at the size and place the board gives it. The board sets it in CSS pixels, where the font picks its
+ * optical size (`opsz`) from the font size: inside a scaled SVG that size would be the unit's, so it is pinned to the
+ * board's (36 under the large logo, 29 beside the lockup), and `textLength` pins the width Fraunces measures at
+ * that size (297 px at 36, 241 px at 29) so a fallback font cannot make the logo overflow.
  */
 
-/** The mound of rice in its bowl: the compact mark, favicon and app icon (64 x 64). */
-export const BOWL_SHAPE = (
+/** The cocotte with its name under it, centred (238 x 234, from x = -19). */
+export const LARGE_SHAPE = (
   <>
-    <path
-      d="M12 36 C12 22 22 14 32 14 C42 14 52 22 52 36 Z"
-      className="fill-(--rice) stroke-ink-900"
-      strokeWidth={4}
-      strokeLinejoin="round"
-    />
-    <path
-      d="M7 36 H57 C57 50 47 59 32 59 C17 59 7 50 7 36 Z"
-      className="fill-(--bowl) stroke-ink-900"
-      strokeWidth={4}
-      strokeLinejoin="round"
-    />
-    <path
-      d="M13 45 C23 50 41 50 51 45"
-      className="stroke-(--band)"
-      fill="none"
-      strokeWidth={3}
-      strokeLinecap="round"
-    />
-  </>
-)
-
-/** The bowl with its chopsticks and a few grains of rice (64 x 64). */
-export const FULL_BOWL_SHAPE = (
-  <>
-    <g className="stroke-ink-900" fill="none" strokeWidth={3.6} strokeLinecap="round">
-      <path d="M58 5 L41 33" />
-      <path d="M62 11 L47 34" />
-    </g>
-    {BOWL_SHAPE}
-    <g className="fill-ink-900">
-      <ellipse cx="27" cy="26" rx="2.6" ry="1.2" transform="rotate(-25 27 26)" />
-      <ellipse cx="36" cy="22" rx="2.6" ry="1.2" transform="rotate(20 36 22)" />
-      <ellipse cx="41" cy="29" rx="2.6" ry="1.2" transform="rotate(-10 41 29)" />
-      <ellipse cx="22" cy="31" rx="2.6" ry="1.2" transform="rotate(15 22 31)" />
-    </g>
-  </>
-)
-
-/** The bowl and the name on one line (420 x 72). */
-export const LOCKUP_SHAPE = (
-  <>
-    <g transform="translate(0 4)">{BOWL_SHAPE}</g>
+    {COCOTTE_LARGE}
     <text
-      x="80"
-      y="51"
+      x="100"
+      y="229.5"
+      textAnchor="middle"
       className="fill-ink-900 font-title"
       fontWeight={800}
-      fontSize={38}
-      textLength={336}
+      fontSize={28.8}
+      textLength={237.4}
+      style={{ fontVariationSettings: "'opsz' 36" }}
     >
       {strings.name}
     </text>
   </>
 )
 
-/** The round seal: the name in a crown around the full bowl (320 x 320). `arcId` makes the ids of its text paths unique. */
-export function sealShape(arcId: string): ReactElement {
-  return (
-    <g transform="rotate(-3 160 160)">
-      <defs>
-        <path id={`${arcId}-top`} d="M62 160 A98 98 0 0 1 258 160" fill="none" />
-        <path id={`${arcId}-bottom`} d="M32 160 A128 128 0 0 0 288 160" fill="none" />
-      </defs>
-      <circle cx="160" cy="160" r="150" className="fill-(--stamp) stroke-ink-900" strokeWidth={5} />
-      <g className="stroke-ink-900" fill="none" strokeWidth={1.8}>
-        <circle cx="160" cy="160" r="138" />
-        <circle cx="160" cy="160" r="93" />
-      </g>
-      <g className="fill-ink-900 font-title" fontWeight={800} fontSize={34} letterSpacing={3}>
-        <text>
-          <textPath href={`#${arcId}-top`} startOffset="50%" textAnchor="middle">
-            {strings.sealTop}
-          </textPath>
-        </text>
-        <text>
-          <textPath href={`#${arcId}-bottom`} startOffset="50%" textAnchor="middle">
-            {strings.sealBottom}
-          </textPath>
-        </text>
-      </g>
-      <g className="fill-ink-900">
-        <ellipse cx="46" cy="160" rx="4.5" ry="9" transform="rotate(-20 46 160)" />
-        <ellipse cx="274" cy="160" rx="4.5" ry="9" transform="rotate(20 274 160)" />
-      </g>
-      <g transform="translate(94 80) scale(2.0625)">{FULL_BOWL_SHAPE}</g>
-      <path
-        d="M118 232 C132 224 144 238 160 231 S188 224 202 232"
-        className="stroke-ink-900"
-        fill="none"
-        strokeWidth={4.5}
-        strokeLinecap="round"
-      />
-    </g>
-  )
-}
+/** The cocotte with its name on its right, one line (1229 x 200). */
+export const LOCKUP_SHAPE = (
+  <>
+    {COCOTTE_LOCKUP}
+    <text
+      x="225"
+      y="143.7"
+      className="fill-ink-900 font-title"
+      fontWeight={800}
+      fontSize={120.8}
+      textLength={1003.5}
+      style={{ fontVariationSettings: "'opsz' 29" }}
+    >
+      {strings.name}
+    </text>
+  </>
+)

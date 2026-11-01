@@ -21,7 +21,7 @@ function renderFrame(props: Partial<AuthFrameProps> = {}) {
 }
 
 describe('AuthFrame', () => {
-  it('shows the seal once, named, with the content under it', () => {
+  it('shows the logo once, named, with the content under it', () => {
     renderFrame()
 
     expect(screen.getAllByRole('img', { name: 'Il en reste un peu' })).toHaveLength(1)

@@ -5,7 +5,7 @@ import { Icon } from '../Icon/Icon'
 import { Logo } from '../Logo/Logo'
 
 /**
- * `form`: the seal on a 232 px butter band, the way back in its corner. `login`: the seal larger
+ * `form`: the logo on a 232 px butter band, the way back in its corner. `login`: the logo larger
  * on a 250 px band, no way back (it is a task of its own), and beside the form on a desktop.
  * `welcome`: the largest band, for the first words a new member reads.
  */
@@ -26,10 +26,10 @@ const BAND_HEIGHTS: Record<AuthLayout, string> = {
   welcome: 'h-70',
 }
 
-/** The seal's size on a phone; from a tablet it is 160 px everywhere (300 px beside the sign-in form). */
-const PHONE_SEAL: Record<AuthLayout, number> = { form: 160, login: 196, welcome: 196 }
+/** The logo's size on a phone; from a tablet it is 160 px everywhere (300 px beside the sign-in form). */
+const PHONE_LOGO: Record<AuthLayout, number> = { form: 160, login: 196, welcome: 196 }
 
-const SEAL_SHRINKS: Record<AuthLayout, string> = {
+const LOGO_SHRINKS: Record<AuthLayout, string> = {
   form: '',
   login: 'tablet:[&>svg]:size-40 desktop:[&>svg]:size-75',
   welcome: 'tablet:[&>svg]:size-40',
@@ -58,7 +58,7 @@ const SIDE_BY_SIDE: Record<AuthLayout, SideBySide> = {
 
 /**
  * The frame of the entry screens (sign-in, registration, forgotten password…): a butter band with
- * the seal on a phone; on a tablet and a desktop the seal above a centred 520 px card on calm
+ * the logo on a phone; on a tablet and a desktop the logo above a centred 520 px card on calm
  * stripes. No tabs and no top bar: these are tasks of their own, the screen has the whole page.
  */
 export function AuthFrame({ layout, back, onSubmit, children }: AuthFrameProps) {
@@ -105,11 +105,11 @@ export function AuthFrame({ layout, back, onSubmit, children }: AuthFrameProps) 
           className={classNames(
             'flex shrink-0 items-center justify-center border-b-2 border-ink-900 bg-butter-300 tablet:h-auto tablet:border-b-0 tablet:bg-transparent',
             BAND_HEIGHTS[layout],
-            SEAL_SHRINKS[layout],
+            LOGO_SHRINKS[layout],
             side.band,
           )}
         >
-          <Logo variant="seal" tone="on-butter" size={PHONE_SEAL[layout]} />
+          <Logo variant="large" tone="on-butter" size={PHONE_LOGO[layout]} />
         </div>
         {onSubmit === undefined ? (
           <div className={bodyClassName}>{content}</div>

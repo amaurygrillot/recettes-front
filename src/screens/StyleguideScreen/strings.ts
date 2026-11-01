@@ -4,11 +4,12 @@ export const strings = {
     "Les composants de base du design system, tels qu'ils sont dessinés. Cet écran n'existe qu'en développement.",
   logo: {
     title: 'Logo',
-    seal: 'Sceau, 160 px',
-    sealOnButter: 'Sceau sur beurre',
-    sealMono: 'Sceau, une couleur',
-    lockup: 'En ligne, 43 px',
-    bowl: 'Bol seul',
+    large: 'Grand logo, 160 px',
+    largeOnButter: 'Grand logo sur beurre',
+    largeMono: 'Grand logo, une couleur',
+    lockup: 'En ligne, 40 px',
+    mark: 'Marque compacte, 96 à 40 px',
+    icon: 'Icône, 32 et 16 px',
   },
   icons: {
     title: 'Icônes',
