@@ -547,11 +547,15 @@ export interface components {
         UnitRequest: {
             name: string;
             abbreviation?: string;
+            /** @description Leave the unit out of a rendered recipe line ("3 oeufs"). False when omitted. */
+            hidden?: boolean;
         };
         UnitResponse: {
             id?: string;
             name?: string;
             abbreviation?: string | null;
+            /** @description When true, a recipe line must not render the unit ("3 oeufs", not "3 pièces d'oeufs"). */
+            hidden?: boolean;
         };
         IngredientRequest: {
             name: string;
