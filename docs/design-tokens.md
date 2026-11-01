@@ -159,8 +159,8 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   and a quiet button. **Error banner**: brick on brick-bg, radius 16, alert icon, bold message, optional 56 px action.
 - **Avatar**: 40 / 56 / 64 / 72 / 96 px circle, Fraunces 800 initials at 40 % of the size, 2 px ink outline (3 px and a stamp
   shadow from 96 px). Six color pairs picked from the name; no name = dashed circle with the user icon.
-- **Logo**: seal (≥ 160 px), lockup (bowl and name, 32–48 px high), bowl (the plain mound under 40 px, with chopsticks and grains
-  above). Tones: color on paper, on-butter, mono. Brick only on paper.
+- **Logo** (replaced by R2): large (the cocotte with the name under it, from 160 px), lockup (cocotte and name, 32–48 px high), mark (compact, from
+  40 px; the icon's simpler drawing under 40 px). Tones: color on paper, on-butter, mono.
 
 ## Hand-made details (one per screen, not ten)
 
@@ -215,12 +215,11 @@ The paths are copied from the canvas's `Icones` board into `src/components/Icon/
 
 ## Logo
 
-« Sceau et bol »: a round yellow seal with the text « IL EN RESTE · UN PEU » on arcs and a bowl of rice with chopsticks
-at the center, plus a horizontal lock-up (bowl + « Il en reste un peu » in Fraunces 800) and a compact mark for the app
-icon and favicon. Colors: ink `#2B1D12`, seal `#F6D45A`, bowl and rice `#FFFDF7`, band `#A8321F`. The SVG symbols are in
-the canvas (`Main` and `Logo-bol` boards); they were copied into `src/components/Logo/logoShapes.tsx`; ink is always ink-900 and the
-parts that change with the tone are painted through CSS variables (`--stamp`, `--bowl`, `--rice`, `--band`) that the `Logo`
-component sets. The
-favicon is `public/favicon.svg` (the bowl on a butter tile).
+**The cocotte** (R2, validated; it replaces the « Sceau et bol » logo of the `Logo-bol` board): a pot with its lid open, three steam lines,
+bright eyes and a real mouth, in four drawings (`Retouche-2-cocotte`): large, lockup, compact mark and favicon / icon. Colors: ink `#2B1D12`,
+body `#F6D45A` (butter-300), lid and handles `#EDBE2F` (butter-400), mouth `#A8321F`, highlights `#FFFDF7`, cheeks `#FBE3DC`. The drawings are
+copied from the board into `src/components/Logo/cocotteShapes.tsx`; every colour is a `--logo-*` variable that the `Logo` component sets from
+the tokens for each tone. The favicon is `public/favicon.svg` (the icon drawing on a butter-100 tile), with `favicon.ico` and
+`apple-touch-icon.png` rasterized from it.
 
 - **Recipe editor** (`Editeur-*`): `text-editor-title` (26 / 32, 800) for the title of a phone's top bar (a desktop uses `text-auth-state-title`); the section headings use `text-section-title`; `animate-progress` is the bar of a wait whose length is not known (`ProgressBar` without a value; static under `prefers-reduced-motion`). A photo tile is 173 px wide on a phone (two columns, three from 600 px, four from 1024 px), its picture in the 4:3 frame; the editor's index entries are 52 px pills with a 32 px numbered badge and a brick count; `TextField` has a `compact` option (12 px sides, body size, still 56 px high) for the three fields of an ingredient line and the description of a photo.
