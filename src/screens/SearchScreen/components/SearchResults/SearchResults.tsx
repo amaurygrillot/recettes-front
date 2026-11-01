@@ -61,9 +61,11 @@ function EmptyResults({
   return (
     <EmptyState
       illustration={<Mascot mood="lost" size="large" />}
-      title={query === '' ? states.emptySearch.titleFilters : states.emptySearch.titleFor(query)}
+      title={states.emptySearch.title}
       description={
-        hasFilters ? states.emptySearch.description : states.emptySearch.descriptionNoFilter
+        query === ''
+          ? states.emptySearch.descriptionFilters
+          : states.emptySearch.descriptionFor(query, hasFilters)
       }
       size="compact"
     >

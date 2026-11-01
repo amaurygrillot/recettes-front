@@ -94,15 +94,18 @@ export const strings = {
       description: 'Les premières recettes arrivent bientôt. Reviens nous voir dans un moment.',
     },
     emptyMine: {
-      title: "Tu n'as pas encore de recette",
-      description: 'Ajoute ta première recette : une photo, les ingrédients, quelques étapes.',
+      title: 'Ajoute ta première recette',
+      description: "Ici s'afficheront les recettes que tu écris, avec ou sans photo.",
       create: 'Créer ma première recette',
     },
     emptySearch: {
-      titleFor: (query: string) => `Aucune recette pour « ${query} »`,
-      titleFilters: 'Aucune recette avec ces filtres',
-      description: "Vérifie l'orthographe ou retire un filtre pour en voir davantage.",
-      descriptionNoFilter: "Vérifie l'orthographe ou cherche un autre mot.",
+      title: "Je n'ai rien trouvé…",
+      descriptionFor: (query: string, hasFilters: boolean) =>
+        hasFilters
+          ? `Aucune recette ne contient « ${query} ». Essaie un seul mot, ou enlève un filtre.`
+          : `Aucune recette ne contient « ${query} ». Essaie un seul mot.`,
+      descriptionFilters:
+        'Aucune recette ne correspond à ces filtres. Enlève-en un pour en voir davantage.',
       clearFilters: 'Effacer les filtres',
     },
   },

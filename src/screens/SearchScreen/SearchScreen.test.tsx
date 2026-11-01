@@ -313,8 +313,11 @@ describe('SearchScreen on a phone', () => {
       const { router } = renderSearch('/rechercher?q=tarte%20aux%20poires&categorie=desserts')
       const user = userEvent.setup()
 
+      expect(await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })).toBeVisible()
       expect(
-        await screen.findByRole('heading', { name: 'Aucune recette pour « tarte aux poires »' }),
+        screen.getByText(
+          'Aucune recette ne contient « tarte aux poires ». Essaie un seul mot, ou enlève un filtre.',
+        ),
       ).toBeVisible()
       expect(screen.getByText('0 recette')).toBeVisible()
       await user.click(screen.getByRole('button', { name: 'Effacer les filtres' }))
@@ -327,16 +330,15 @@ describe('SearchScreen on a phone', () => {
       serveBackend(() => HttpResponse.json(page(0, [], { last: true, total: 0 })))
       renderSearch('/rechercher?tag=t-fruits')
 
-      expect(
-        await screen.findByRole('heading', { name: 'Aucune recette avec ces filtres' }),
-      ).toBeVisible()
+      expect(await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })).toBeVisible()
+      expect(screen.getByText(/Aucune recette ne correspond à ces filtres/)).toBeVisible()
     })
 
     it('offers no filters to drop when only the text found nothing', async () => {
       serveBackend(() => HttpResponse.json(page(0, [], { last: true, total: 0 })))
       renderSearch('/rechercher?q=zzz')
 
-      await screen.findByRole('heading', { name: 'Aucune recette pour « zzz »' })
+      await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })
 
       expect(screen.queryByRole('button', { name: 'Effacer les filtres' })).not.toBeInTheDocument()
     })
@@ -386,7 +388,7 @@ describe('SearchScreen on a phone', () => {
     it('has no accessibility violation when nothing is found or when it failed', async () => {
       serveBackend(() => HttpResponse.json(page(0, [], { last: true, total: 0 })))
       const empty = renderSearch('/rechercher?q=zzz&tag=t-fruits')
-      await screen.findByRole('heading', { name: 'Aucune recette pour « zzz »' })
+      await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })
       await expectNoAccessibilityViolations(empty.container)
       empty.unmount()
 
@@ -697,9 +699,7 @@ describe('MyRecipesScreen', () => {
     signInAs()
     const { router } = renderSearch('/mes-recettes')
 
-    expect(
-      await screen.findByRole('heading', { name: "Tu n'as pas encore de recette" }),
-    ).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'Ajoute ta première recette' })).toBeVisible()
     await userEvent.setup().click(screen.getByRole('link', { name: 'Créer ma première recette' }))
 
     expect(router.state.location.pathname).toBe('/recettes/nouvelle')
@@ -710,9 +710,7 @@ describe('MyRecipesScreen', () => {
     signInAs()
     renderSearch('/mes-recettes?q=zzz')
 
-    expect(
-      await screen.findByRole('heading', { name: 'Aucune recette pour « zzz »' }),
-    ).toBeVisible()
+    expect(await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })).toBeVisible()
   })
 
   it("shows nothing without a member, rather than everybody's recipes under this title", () => {
