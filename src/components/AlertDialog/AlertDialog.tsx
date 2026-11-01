@@ -3,10 +3,12 @@ import type { ReactNode } from 'react'
 import { Icon } from '../Icon/Icon'
 import type { IconName } from '../Icon/iconShapes'
 
-export interface AlertDialogProps {
+/** What sits above the title: a round butter badge with an icon, or (a moment that is hers) the Mascot. */
+type Emblem =
+  { icon: IconName; illustration?: undefined } | { illustration: ReactNode; icon?: undefined }
+
+export type AlertDialogProps = Emblem & {
   open: boolean
-  /** In the round butter badge above the title. */
-  icon: IconName
   /** What happened, in a few words: « Ta session a expiré. » */
   title: string
   /** Why, and what happens next. */
@@ -18,11 +20,20 @@ export interface AlertDialogProps {
   children: ReactNode
 }
 
+function EmblemView({ icon, illustration }: Emblem) {
+  if (icon === undefined) return <div className="flex justify-center">{illustration}</div>
+  return (
+    <div className="grid size-14 shrink-0 place-items-center self-center rounded-full border-3 border-ink-900 bg-butter-200 text-ink-900">
+      <Icon name={icon} size={28} strokeWidth={2.4} />
+    </div>
+  )
+}
+
 /**
  * A dialog the user must answer: no close cross, and neither a click beside it nor Escape closes
  * it (`open` is the caller's alone). Announced as an alert dialog, focus kept inside.
  */
-export function AlertDialog({ open, icon, title, description, children }: AlertDialogProps) {
+export function AlertDialog({ open, title, description, children, ...emblem }: AlertDialogProps) {
   return (
     <Primitive.Root open={open}>
       <Primitive.Portal>
@@ -37,9 +48,7 @@ export function AlertDialog({ open, icon, title, description, children }: AlertD
             }}
             className="flex w-full max-w-reading flex-col gap-3.5 rounded-xl border-2 border-ink-900 bg-paper-50 px-5 pt-6 pb-5 shadow-sheet"
           >
-            <div className="grid size-14 shrink-0 place-items-center self-center rounded-full border-3 border-ink-900 bg-butter-200 text-ink-900">
-              <Icon name={icon} size={28} strokeWidth={2.4} />
-            </div>
+            <EmblemView {...emblem} />
             <Primitive.Title className="text-center font-title text-dialog-title text-ink-900">
               {title}
             </Primitive.Title>

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { API_BASE_URL } from '../../api/apiConfig'
 import { sessionStore } from '../../api/sessionStore'
 import { saveCookingStep } from '../../app/cookingProgress'
+import { JUST_PUBLISHED_STATE } from '../../app/justPublished'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { fakeToken } from '../../test/fakeToken'
 import { installMatchMedia, removeMatchMedia } from '../../test/matchMedia'
@@ -89,6 +90,16 @@ function renderRecipe() {
       { path: '/', element: <p>Page d’accueil</p> },
     ],
     '/recettes/r-1',
+  )
+}
+
+function renderJustPublished() {
+  return renderRoutes(
+    [
+      { path: '/recettes/:id', element: <RecipeScreen /> },
+      { path: '/recettes/nouvelle', element: <p>Page de création</p> },
+    ],
+    { pathname: '/recettes/r-1', state: JUST_PUBLISHED_STATE },
   )
 }
 
@@ -587,6 +598,64 @@ describe('RecipeScreen', () => {
       const failed = renderRecipe()
       await screen.findByRole('alert')
       await expectNoAccessibilityViolations(failed.container)
+    })
+  })
+
+  describe('a recipe that was just created', () => {
+    it('is celebrated by the mascot, with the two things to do next', async () => {
+      serveRecipe()
+      renderJustPublished()
+
+      const dialog = await screen.findByRole('alertdialog', { name: 'Ta recette est publiée !' })
+
+      expect(dialog).toHaveAccessibleDescription('Toute la famille peut la lire et la cuisiner.')
+      expect(within(dialog).getByRole('button', { name: 'Voir la recette' })).toHaveFocus()
+      expect(
+        within(dialog).getByRole('link', { name: 'Écrire une autre recette' }),
+      ).toHaveAttribute('href', '/recettes/nouvelle')
+    })
+
+    it('goes back to the recipe, and does not celebrate again, when the recipe is seen', async () => {
+      serveRecipe()
+      const { router } = renderJustPublished()
+      const user = userEvent.setup()
+      await screen.findByRole('alertdialog')
+
+      await user.click(screen.getByRole('button', { name: 'Voir la recette' }))
+
+      await waitFor(() => {
+        expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+      })
+      expect(router.state.location.state).toBeNull()
+      expect(router.state.historyAction).toBe('REPLACE')
+      expect(screen.getByRole('heading', { level: 1, name: 'Tarte fine aux pommes' })).toBeVisible()
+    })
+
+    it('leads to a new recipe when another is to be written', async () => {
+      serveRecipe()
+      const { router } = renderJustPublished()
+
+      await userEvent
+        .setup()
+        .click(await screen.findByRole('link', { name: 'Écrire une autre recette' }))
+
+      expect(router.state.location.pathname).toBe('/recettes/nouvelle')
+    })
+
+    it('is not celebrated on an ordinary visit', async () => {
+      serveRecipe()
+      renderRecipe()
+      await screen.findByRole('heading', { level: 1, name: 'Tarte fine aux pommes' })
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    })
+
+    it('has no accessibility violation while it celebrates', async () => {
+      serveRecipe()
+      renderJustPublished()
+      await screen.findByRole('alertdialog')
+
+      await expectNoAccessibilityViolations(document.body)
     })
   })
 
