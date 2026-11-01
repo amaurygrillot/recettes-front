@@ -412,8 +412,8 @@ The logo's cocotte, grown, with a name (Mijotine), seven moods and four sizes, p
     itself says so), *asleep for a very long loading* (the app has no slow-loading state to attach it to).
 - **`BowlIllustration` is deleted** (the mascot replaces it everywhere it was used).
 - **The logo in situation** (`Retouche-4-logo-en-situation`): the desktop bar's lockup goes from 40 to 52 px; the mobile header keeps the 44 px
-  lockup but shows the compact mark (no name) under 360 px; the entry pages (sign-in, registration, password screens) show the large logo with
-  its cocotte at 190 px; the favicon and icons are R2's.
+  lockup but shows the compact mark (no name) under 360 px; the entry pages show the large logo with its cocotte at 190 px, except the
+  screens that have a « Retour » pill (registration, forgotten password), which keep 160 px since the pill would cover the steam of a larger logo; the favicon and icons are R2's.
 
 R4, as built: empty and error blocks of a page (`regular`) hold the `xl` mascot, the blocks among others (`compact`) the `large` one. `ErrorState` takes an
 `illustration` in place of its badge (the sleeping mascot for « no connection », through `app/failureIllustration`), `AlertDialog` an

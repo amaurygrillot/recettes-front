@@ -31,10 +31,11 @@ const BAND_HEIGHTS: Record<AuthLayout, string> = {
 }
 
 /**
- * The logo's height on a phone (its cocotte is 190 px, as the board says: the name under it makes the whole 228); from a tablet
- * it is 160 px everywhere (300 px beside the sign-in form).
+ * The logo's height on a phone, name included. The board gives the cocotte 190 px (228 with the name): the sign-in and the welcome
+ * have it. The screens with a way back keep 160, since the « Retour » pill in the corner would cover the steam of a larger one.
+ * From a tablet it is 160 px everywhere (300 px beside the sign-in form).
  */
-const PHONE_LOGO = 228
+const PHONE_LOGO: Record<AuthLayout, number> = { form: 160, login: 228, welcome: 228 }
 
 const LOGO_SHRINKS: Record<AuthLayout, string> = {
   form: '',
@@ -117,11 +118,13 @@ export function AuthFrame({ layout, back, onSubmit, emblem = 'logo', children }:
           )}
         >
           {emblem === 'logo' ? (
-            <Logo variant="large" tone="on-butter" size={PHONE_LOGO} />
+            <Logo variant="large" tone="on-butter" size={PHONE_LOGO[layout]} />
           ) : (
             <div className="flex flex-col items-center gap-2 px-4 text-center">
               <Mascot mood="happy" size="large" />
-              <p className="font-title text-dialog-title text-ink-900">{strings.welcome}</p>
+              <p className="font-title text-label font-extrabold text-balance text-ink-900">
+                {strings.welcome}
+              </p>
             </div>
           )}
         </div>
