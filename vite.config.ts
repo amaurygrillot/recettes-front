@@ -2,6 +2,16 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
+// The browser only talks to the front's own origin; `/api/...` is forwarded to the back end with the
+// prefix removed. That keeps the app usable from another device on the Wi-Fi (no CORS, and
+// `localhost` never has to mean the phone) — see docs/frontend-stack.md.
+const apiProxy = {
+  '/api': {
+    target: 'http://localhost:8080',
+    rewrite: (path: string) => path.replace(/^\/api/, ''),
+  },
+}
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
@@ -9,7 +19,11 @@ export default defineConfig({
     // fail loudly instead of silently moving to 5174.
     port: 5173,
     strictPort: true,
+    // Listen on every interface so that devices on the local network can open the app.
+    host: true,
+    proxy: apiProxy,
   },
+  preview: { proxy: apiProxy },
   build: {
     rolldownOptions: {
       output: {

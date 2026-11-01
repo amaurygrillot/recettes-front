@@ -260,6 +260,14 @@ lifetime is the better default. The real defences are the sanitiser above and a 
 deployment. An `HttpOnly` cookie would hide the token but needs CSRF handling and a back-end change, since the API reads
 an `Authorization` header.
 
+## Local network access
+
+The dev server listens on every interface (`server.host: true`) and forwards `/api/*` to the back end on
+`localhost:8080` with the prefix removed (`server.proxy`, also set for `preview`). `API_BASE_URL` is the front's own
+origin plus `/api`, so a phone on the same Wi-Fi opens `http://<PC IP>:5173` and no CORS rule or API address changes.
+Limits: plain HTTP on a LAN is not a secure context, so `useWakeLock` does nothing there; the password-reset e-mail link
+still points at `localhost:5173`; the Windows firewall must allow port 5173 on the private network.
+
 ## Open items
 
 - **Session length.** An hour with no refresh will sign users out in the middle of a recipe. To be solved on the back
