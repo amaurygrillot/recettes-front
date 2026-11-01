@@ -4,7 +4,7 @@ import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilit
 import { Logo, type LogoTone, type LogoVariant } from './Logo'
 import { strings } from './strings'
 
-const VARIANTS: readonly LogoVariant[] = ['seal', 'lockup', 'bowl']
+const VARIANTS: readonly LogoVariant[] = ['large', 'lockup', 'mark']
 const TONES: readonly LogoTone[] = ['color', 'on-butter', 'mono']
 
 describe('Logo', () => {
@@ -15,15 +15,15 @@ describe('Logo', () => {
   })
 
   it('can be hidden from assistive technology when the name is already given', () => {
-    render(<Logo variant="bowl" size={44} decorative />)
+    render(<Logo variant="mark" size={44} decorative />)
 
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
   it.each([
-    ['seal', 196, 196],
-    ['bowl', 44, 44],
-    ['lockup', 43, (43 * 420) / 72],
+    ['large', 240, 238],
+    ['mark', 44, 44],
+    ['lockup', 40, (40 * 1229) / 200],
   ] as const)('keeps the proportions of the %s at %d px high', (variant, height, width) => {
     render(<Logo variant={variant} size={height} />)
 
@@ -32,24 +32,45 @@ describe('Logo', () => {
     expect(Number(logo.getAttribute('width'))).toBeCloseTo(width, 3)
   })
 
-  it('draws chopsticks and grains from 40 px, and the plain mound below', () => {
-    const { container: large } = render(<Logo variant="bowl" size={48} />)
-    const { container: small } = render(<Logo variant="bowl" size={32} />)
+  it('writes the name under the large logo and beside the lockup, never in the mark', () => {
+    const { container: large } = render(<Logo variant="large" size={160} />)
+    const { container: lockup } = render(<Logo variant="lockup" size={40} />)
+    const { container: mark } = render(<Logo variant="mark" size={64} />)
 
-    expect(large.querySelectorAll('ellipse')).toHaveLength(4)
-    expect(small.querySelectorAll('ellipse')).toHaveLength(0)
+    expect(large.querySelector('text')).toHaveTextContent(strings.name)
+    expect(lockup.querySelector('text')).toHaveTextContent(strings.name)
+    expect(mark.querySelector('text')).toBeNull()
   })
 
-  it('gives each seal its own text paths so that several can share a page', () => {
-    const { container } = render(
+  it('draws the simpler icon below 40 px and the compact mark from 40 px', () => {
+    const { container: compact } = render(<Logo variant="mark" size={40} />)
+    const { container: icon } = render(<Logo variant="mark" size={32} />)
+
+    expect(icon.querySelectorAll('path').length).toBeLessThan(
+      compact.querySelectorAll('path').length,
+    )
+  })
+
+  it('paints the body of the cocotte differently on paper, on butter and in one colour', () => {
+    const bodies = TONES.map((tone) => {
+      const { container } = render(<Logo variant="mark" tone={tone} size={64} />)
+      return /--logo-gold:var\(([^)]+)\)/.exec(
+        container.querySelector('svg')?.getAttribute('class') ?? '',
+      )?.[1]
+    })
+
+    expect(bodies).toEqual(['--color-butter-300', '--color-paper-50', '--color-paper-50'])
+  })
+
+  it('hides a decorative large logo or lockup too', () => {
+    render(
       <>
-        <Logo variant="seal" size={160} />
-        <Logo variant="seal" size={160} />
+        <Logo variant="large" size={160} decorative />
+        <Logo variant="lockup" size={40} decorative />
       </>,
     )
 
-    const ids = Array.from(container.querySelectorAll('path[id]'), (path) => path.id)
-    expect(new Set(ids).size).toBe(4)
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
   it('has no accessibility violation in any form or tone', async () => {

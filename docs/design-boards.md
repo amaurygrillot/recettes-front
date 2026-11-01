@@ -7,7 +7,7 @@ values are in [design-tokens.md](design-tokens.md); the canvas remains the sourc
 | Screen | Boards (files under `project/`) |
 |---|---|
 | Foundations | `Main` (colors) · `Typographie` · `Fondations` · `Boutons-champs` · `Champs-avances` · `Grille` · `Icones` |
-| Shell and components | `Navigation` · `Bouton-flottant-feuille` · `Retours-chargement` · `Avatar-voir-plus` · `Carte-navigation` · `Logo-bol` · `Marque-ecrans` |
+| Shell and components | `Navigation` · `Bouton-flottant-feuille` · `Retours-chargement` · `Avatar-voir-plus` · `Carte-navigation` · `Logo-bol` (replaced by R2) · `Marque-ecrans` |
 | HomeScreen | `Accueil-mobile` · `Accueil-etats` · `Carte-accueil` · `Accueil-tablette` · `Accueil-ordinateur` |
 | SearchScreen | `Rechercher-entrees` · `Rechercher-filtres` · `Rechercher-etats` · `Rechercher-mes-recettes` · `Rechercher-tablette` · `Rechercher-ordinateur` |
 | RecipeScreen | `Fiche-haut` · `Fiche-corps` · `Fiche-audiences` · `Fiche-etats` · `Fiche-grands-ecrans` |
@@ -148,10 +148,10 @@ Public: the content is the same for a visitor, a member and the author; only the
 
 Built from `Marque-ecrans` (sign-in), `Compte-inscription`, `Compte-mot-de-passe-oublie`, `Compte-nouveau-mot-de-passe` and
 `Compte-public-grands-ecrans` (the tablet and desktop versions of the three last), checked at 390, 768 and 1280 px. They are
-full-screen pages (no tabs, no top bar) built on one `AuthFrame`: a butter band with the seal (232 px high, 160 px seal; the sign-in
+full-screen pages (no tabs, no top bar) built on one `AuthFrame`: a butter band with the logo (232 px high, 160 px logo; the sign-in
 250 / 196; the welcome 280 / 196) and the way back, « Retour », as a 52 px pill in its corner. From 600 px the band disappears into a
-calm striped background (`bg-calm-stripes`, the two palest butters), the seal sits above a centred 520 px card (radius 24, 28 / 32
-padding). **The sign-in is the exception from 1024 px**: a 960 px card with the butter panel (300 px seal) beside the form, on the plain
+calm striped background (`bg-calm-stripes`, the two palest butters), the logo sits above a centred 520 px card (radius 24, 28 / 32
+padding). **The sign-in is the exception from 1024 px**: a 960 px card with the butter panel (300 px logo) beside the form, on the plain
 page, as `Marque-ecrans` draws it. The routes are lazy: an entry screen costs nothing to the pages everybody opens.
 
 - **Sign-in (`/connexion`)**: the field stays « Nom d'utilisateur » (the API logs in by username; the board says « Adresse e-mail »).
@@ -361,3 +361,26 @@ photos move up by the 118 px (104 + the 14 px gap) the stamp took. **Tablet and 
 - **The six states of the board** (no photo, one photo, several, first with its swipe hint, last with « Terminer », very long step) are the
   existing states of the screen; no new string, no new token. The board's fourth « ce qui change » (a 32 px « ÉTAPE 3 » pill, « si tu
   préfères le garder ») is an alternative offered to the user, not a decision: not built.
+
+### R2 · the cocotte logo (`Retouche-2-cocotte`)
+
+Replaces the « Sceau et bol » logo (`Logo-bol`, and the seal of `Marque-ecrans`) everywhere. The board's proposal B is the validated one: lid open
+at 18° on the right edge of the pot, three thin steam lines, thin highlights, a real mouth.
+
+- **Four drawings, one per format** (the board's table of what each size keeps and drops): large (`pb-L`: everything), lockup (`pb-M`: no
+  rivets, cheeks, tongue, lid band or foot; thicker line), compact mark (`pb-S`: silhouette, lid with its knob, steam, eyes, small mouth,
+  highlights), icon (`pb-XS`: no steam, lid opened to 24°). They are copied into `cocotteShapes.tsx` as they are on the board, with their
+  colours turned into `--logo-*` variables.
+- **`Logo` API**: `variant` is now `large` | `lockup` | `mark` (it was `seal` | `lockup` | `bowl`: the old names no longer describe anything).
+  `size` is still the rendered height. The large logo and the lockup **carry the name** (Fraunces 800 in the SVG: the board sets it in HTML, so
+  the optical size of the font is pinned to the board's, 36 under the large logo and 29 beside the lockup, and the widths measured there are
+  fixed with `textLength`); the mark under 40 px draws the icon. Tones as before; the board's one-colour version is cream fills with ink lines
+  (not transparent). The accessible name is unchanged (« Il en reste un peu »).
+- **The large logo is taller than the old seal was for the same `size`**, because the name is part of it (the board draws the cocotte alone with
+  the name under it): in `AuthFrame` the same box now holds the cocotte and its name. Where the logo sits and how big is the work of R4
+  (« logo en situation »).
+- **Favicon and icons**: `public/favicon.svg` is the icon drawing on a butter-100 tile (128 px, radius 32, 2 px ink line), as the board draws it;
+  `favicon.ico` (16 and 32 px) and `apple-touch-icon.png` (180 px, full-bleed butter-100, cocotte at 64 %) are rasterized from it in the
+  browser (canvas), since the project has no image tooling. **The 192 and 512 px icons are not made**: the repository has no web app manifest
+  (only `favicon.svg` existed), so they would be used by nothing, and a manifest would make the site installable, which no board asks for. They
+  go with a manifest if one is wanted (« à valider »).

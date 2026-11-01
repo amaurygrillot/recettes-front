@@ -1,14 +1,14 @@
-import { useId } from 'react'
 import { classNames } from '../../lib/classNames'
-import { BOWL_SHAPE, FULL_BOWL_SHAPE, LOCKUP_SHAPE, sealShape } from './logoShapes'
+import { COCOTTE_COMPACT, COCOTTE_ICON } from './cocotteShapes'
+import { LARGE_SHAPE, LOCKUP_SHAPE } from './logoShapes'
 import { strings } from './strings'
 
-export type LogoVariant = 'seal' | 'lockup' | 'bowl'
+export type LogoVariant = 'large' | 'lockup' | 'mark'
 /** `color` on paper, `on-butter` on a yellow background, `mono` for one ink colour. */
 export type LogoTone = 'color' | 'on-butter' | 'mono'
 
 export interface LogoProps {
-  /** `seal` from 160 px up, `lockup` (bowl and name) in the desktop bar, `bowl` below 160 px. */
+  /** `large` with the name under the cocotte, `lockup` with it on the right, `mark` without a name (below 40 px: the icon's simpler drawing). */
   variant: LogoVariant
   tone?: LogoTone
   /** Rendered height in px: the width follows the shape of the variant. */
@@ -17,56 +17,43 @@ export interface LogoProps {
   decorative?: boolean
 }
 
-// What changes with the tone is painted through CSS variables; ink is always ink-900.
-const SEAL_TONES: Record<LogoTone, string> = {
-  color:
-    '[--stamp:var(--color-butter-300)] [--bowl:var(--color-paper-50)] [--rice:var(--color-paper-50)] [--band:var(--color-brick)]',
-  'on-butter':
-    '[--stamp:var(--color-paper-50)] [--bowl:var(--color-butter-300)] [--rice:var(--color-paper-50)] [--band:var(--color-ink-900)]',
-  mono: '[--stamp:none] [--bowl:none] [--rice:none] [--band:var(--color-ink-900)]',
+// What changes with the tone is painted through CSS variables; ink is always ink-900, brick is brick but for the one-colour tone.
+const INK = '[--logo-ink:var(--color-ink-900)]'
+const TONES: Record<LogoTone, string> = {
+  color: `${INK} [--logo-gold:var(--color-butter-300)] [--logo-gold-deep:var(--color-butter-400)] [--logo-cream:var(--color-paper-50)] [--logo-blush:var(--color-brick-bg)] [--logo-brick:var(--color-brick)]`,
+  'on-butter': `${INK} [--logo-gold:var(--color-paper-50)] [--logo-gold-deep:var(--color-butter-200)] [--logo-cream:var(--color-paper-50)] [--logo-blush:var(--color-brick-bg)] [--logo-brick:var(--color-brick)]`,
+  mono: `${INK} [--logo-gold:var(--color-paper-50)] [--logo-gold-deep:var(--color-paper-50)] [--logo-cream:var(--color-paper-50)] [--logo-blush:var(--color-paper-50)] [--logo-brick:var(--color-ink-900)]`,
 }
 
-// The lockup and the bowl share their colourways.
-const MARK_TONES: Record<LogoTone, string> = {
-  color:
-    '[--bowl:var(--color-butter-300)] [--rice:var(--color-paper-50)] [--band:var(--color-ink-900)]',
-  'on-butter':
-    '[--bowl:var(--color-paper-50)] [--rice:var(--color-paper-50)] [--band:var(--color-ink-900)]',
-  mono: '[--bowl:none] [--rice:none] [--band:var(--color-ink-900)]',
+const VIEW_BOXES: Record<LogoVariant, { x: number; width: number; height: number }> = {
+  large: { x: -19, width: 238, height: 240 },
+  lockup: { x: 0, width: 1229, height: 200 },
+  mark: { x: 0, width: 200, height: 200 },
 }
 
-const TONES: Record<LogoVariant, Record<LogoTone, string>> = {
-  seal: SEAL_TONES,
-  lockup: MARK_TONES,
-  bowl: MARK_TONES,
-}
+// Below this height the compact mark loses its steam and its lid band, which would only become a smudge.
+const COMPACT_FROM = 40
 
-const VIEW_BOXES: Record<LogoVariant, { width: number; height: number }> = {
-  seal: { width: 320, height: 320 },
-  lockup: { width: 420, height: 72 },
-  bowl: { width: 64, height: 64 },
+function shapeOf(variant: LogoVariant, size: number) {
+  if (variant === 'large') return LARGE_SHAPE
+  if (variant === 'lockup') return LOCKUP_SHAPE
+  return size >= COMPACT_FROM ? COCOTTE_COMPACT : COCOTTE_ICON
 }
-
-// Below this height the bowl loses its chopsticks and grains, which would only become a smudge.
-const FULL_BOWL_FROM = 40
 
 export function Logo({ variant, tone = 'color', size, decorative = false }: LogoProps) {
-  const arcId = useId()
-  const { width, height } = VIEW_BOXES[variant]
+  const { x, width, height } = VIEW_BOXES[variant]
 
   return (
     <svg
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox={`${x} 0 ${width} ${height}`}
       width={(size * width) / height}
       height={size}
       role={decorative ? undefined : 'img'}
       aria-label={decorative ? undefined : strings.name}
       aria-hidden={decorative ? 'true' : undefined}
-      className={classNames('shrink-0', TONES[variant][tone])}
+      className={classNames('shrink-0', TONES[tone])}
     >
-      {variant === 'seal' && sealShape(arcId)}
-      {variant === 'lockup' && LOCKUP_SHAPE}
-      {variant === 'bowl' && (size >= FULL_BOWL_FROM ? FULL_BOWL_SHAPE : BOWL_SHAPE)}
+      {shapeOf(variant, size)}
     </svg>
   )
 }

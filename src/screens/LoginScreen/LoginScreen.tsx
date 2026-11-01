@@ -12,7 +12,7 @@ import { useLoginForm } from './useLoginForm'
 const { auth } = appStrings
 
 /**
- * Logs in, then returns to the page that asked for it. A task of its own: the seal on a butter
+ * Logs in, then returns to the page that asked for it. A task of its own: the logo on a butter
  * band (beside the form on a desktop), no tabs, and one message on top when the login is refused.
  */
 export function LoginScreen() {
