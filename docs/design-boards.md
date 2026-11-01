@@ -384,3 +384,33 @@ at 18° on the right edge of the pot, three thin steam lines, thin highlights, a
   browser (canvas), since the project has no image tooling. **The 192 and 512 px icons are not made**: the repository has no web app manifest
   (only `favicon.svg` existed), so they would be used by nothing, and a manifest would make the site installable, which no board asks for. They
   go with a manifest if one is wanted (« à valider »).
+
+### R4 · the mascot « Mijotine » and the logo in situation (`Retouche-4-mascotte`, `-situations`, `-logo-en-situation`)
+
+The logo's cocotte, grown, with a name (Mijotine), seven moods and four sizes, put in the places where the app says something dry.
+
+- **`Mascot`** (`src/components/Mascot`): `mood` is `happy` (contente) · `dejected` (dépitée) · `smitten` (coup de cœur) · `surprised` · `lost`
+  (perdue) · `asleep` (endormie) · `celebrating` (en fête); `size` is `xl` (240 px wide: empty states and error pages) · `large` (160: cards
+  without a photo) · `medium` (96: messages and dialogs) · `small` (64: stamp, avatar). The seven drawings are the board's symbols (`ms-*`),
+  copied as they are into `mascotShapes.tsx` with their colours as `--logo-*` variables (plus `--logo-herb` for the party hat). It is
+  **decorative** (`aria-hidden`): every place that shows it also says what it means in words, and the mood is never the only signal.
+- **Small sizes**: the board's prose says the steam and the accessories disappear at 64 px and under, but its own drawings at 64 and 40 px are
+  the same symbols simply scaled. No smaller drawings exist, so the same drawing is scaled (the most conservative reading: nothing is invented).
+- **Where each mood is used** (the situations of `Retouche-4-situations` that exist in the app):
+  - **happy**: the sign-in (instead of the logo, with the board's welcome sentence instead of the name), the first-visit empty feed, an empty
+    « Mes recettes » (and the empty member feed).
+  - **dejected**: a recipe card and a recipe page with no photo (« Pas encore de photo »); for the author the page adds « Ajouter une photo »,
+    which leads to the editor.
+  - **lost**: a search with no result, a page or a recipe that does not exist, and the other « nothing there » pages (editor refusals).
+  - **asleep**: no connection (the board's « Je fais une petite sieste »; the board's second sentence promises an automatic wake-up and says
+    drafts are kept, which is not true of a plain « Réessayer » page, so the existing sentence stays).
+  - **celebrating**: right after a recipe is created (a dialog on the recipe page: « Ta recette est publiée ! », « Voir la recette », « Écrire
+    une autre recette »). Only for a creation, not for a change; the « toute la première fois » reinforcement is not built (the app cannot tell
+    cheaply whether it is the member's first recipe).
+  - **Left out, with the reason**: *coup de cœur* (a favourites mark: the API has no favourites, so the mood exists but nothing uses it, and the
+    words « mettre en favori » of the published screen are dropped), *surprised* (the end of a timer: the cooking mode has no timer, the board
+    itself says so), *asleep for a very long loading* (the app has no slow-loading state to attach it to).
+- **`BowlIllustration` is deleted** (the mascot replaces it everywhere it was used).
+- **The logo in situation** (`Retouche-4-logo-en-situation`): the desktop bar's lockup goes from 40 to 52 px; the mobile header keeps the 44 px
+  lockup but shows the compact mark (no name) under 360 px; the entry pages (sign-in, registration, password screens) show the large logo with
+  its cocotte at 190 px; the favicon and icons are R2's.
