@@ -89,14 +89,14 @@ describe('RecipeCard', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
-  it('shows the cutlery stand-in, not a gap, for a recipe without a photo', () => {
+  it('shows the mascot and says so, not a gap, for a recipe without a photo', () => {
     const { container } = renderCard({ ...RECIPE, coverUrl: undefined })
 
     expect(container.querySelector('img')).not.toBeInTheDocument()
-    expect(container.querySelector('svg')).toBeInTheDocument()
+    expect(screen.getByText('Pas encore de photo')).toBeVisible()
   })
 
-  it('falls back to the same stand-in when the photo cannot be loaded', () => {
+  it('falls back to the cutlery stand-in, without saying there is no photo, when the photo cannot be loaded', () => {
     const { container } = renderCard()
 
     const photo = container.querySelector('img')
@@ -105,6 +105,7 @@ describe('RecipeCard', () => {
 
     expect(container.querySelector('img')).not.toBeInTheDocument()
     expect(container.querySelector('svg')).toBeInTheDocument()
+    expect(screen.queryByText('Pas encore de photo')).not.toBeInTheDocument()
   })
 
   it('leaves out the rows it has nothing for', () => {

@@ -118,11 +118,11 @@ describe('PhotoSlider', () => {
     expect(screen.queryByText(/\//)).not.toBeInTheDocument()
   })
 
-  it('shows the butter stand-in, not an empty square, for no photo', () => {
+  it('shows the mascot and says so, not an empty square, for no photo', () => {
     const { container } = renderSlider([])
 
     expect(container.querySelector('img')).not.toBeInTheDocument()
-    expect(container.querySelector('svg')).toBeInTheDocument()
+    expect(screen.getByText('Pas encore de photo')).toBeVisible()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 

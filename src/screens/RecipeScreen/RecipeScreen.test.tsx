@@ -216,7 +216,7 @@ describe('RecipeScreen', () => {
       expect(within(gallery).getByRole('button', { name: 'Photo suivante' })).toBeVisible()
     })
 
-    it('shows the butter stand-in for a recipe without photos', async () => {
+    it('shows the mascot saying there is no photo yet, for a recipe without photos', async () => {
       serveRecipe({ ...RECIPE, coverPictures: [] })
       renderRecipe()
 
@@ -224,6 +224,37 @@ describe('RecipeScreen', () => {
 
       expect(within(gallery).queryByRole('img')).not.toBeInTheDocument()
       expect(within(gallery).queryByText(/\//)).not.toBeInTheDocument()
+      expect(within(gallery).getByText('Pas encore de photo')).toBeVisible()
+      expect(screen.queryByRole('link', { name: 'Ajouter une photo' })).not.toBeInTheDocument()
+    })
+
+    it('leads the author to add the photo', async () => {
+      signInAs({ userId: 'u-hugo' })
+      serveRecipe({ ...RECIPE, coverPictures: [] })
+      renderRecipe()
+
+      expect(await screen.findByRole('link', { name: 'Ajouter une photo' })).toHaveAttribute(
+        'href',
+        '/recettes/r-1/modifier',
+      )
+    })
+
+    it('does not offer a photo to add to a member who is not the author', async () => {
+      signInAs({ userId: 'u-other' })
+      serveRecipe({ ...RECIPE, coverPictures: [] })
+      renderRecipe()
+      await screen.findByRole('heading', { level: 1 })
+
+      expect(screen.queryByRole('link', { name: 'Ajouter une photo' })).not.toBeInTheDocument()
+    })
+
+    it('does not offer a photo to add when the recipe has one', async () => {
+      signInAs({ userId: 'u-hugo' })
+      serveRecipe()
+      renderRecipe()
+      await screen.findByRole('heading', { level: 1 })
+
+      expect(screen.queryByRole('link', { name: 'Ajouter une photo' })).not.toBeInTheDocument()
     })
 
     it('opens a step photo at the size of the screen, and closes it', async () => {

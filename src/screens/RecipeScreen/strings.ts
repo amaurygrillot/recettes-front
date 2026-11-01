@@ -1,6 +1,7 @@
 export const strings = {
   back: 'Retour aux recettes',
   gallery: 'Photos de la recette',
+  addPhoto: 'Ajouter une photo',
   byline: 'Par',
   added: (date: string) => `ajoutée le ${date}`,
   modified: (date: string) => `modifiée le ${date}`,

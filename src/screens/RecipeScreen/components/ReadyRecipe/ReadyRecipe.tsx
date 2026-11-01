@@ -5,9 +5,11 @@ import { useRecipeDeletion } from '../../../../app/useRecipeDeletion'
 import { AdviceNote } from '../../../../components/AdviceNote/AdviceNote'
 import { DeleteRecipeDialog } from '../../../../components/DeleteRecipeDialog/DeleteRecipeDialog'
 import { DeletionFailureBanner } from '../../../../components/DeletionFailureBanner/DeletionFailureBanner'
+import { LinkButton } from '../../../../components/LinkButton/LinkButton'
 import { PhotoSlider } from '../../../../components/PhotoSlider/PhotoSlider'
 import { DESKTOP_QUERY } from '../../../../lib/breakpoints'
 import { useMediaQuery } from '../../../../lib/useMediaQuery'
+import { paths } from '../../../../app/paths'
 import type { RecipeView } from '../../../../app/recipeView'
 import { strings } from '../../strings'
 import { CookingEntry } from '../CookingEntry/CookingEntry'
@@ -53,6 +55,18 @@ export function ReadyRecipe({ recipe, backButton }: ReadyRecipeProps) {
                 ) : undefined
               }
             />
+            {mayManage && recipe.photos.length === 0 && (
+              <div className="mt-3">
+                <LinkButton
+                  to={paths.editRecipe(recipe.id)}
+                  variant="secondary"
+                  icon="camera"
+                  fullWidth
+                >
+                  {strings.addPhoto}
+                </LinkButton>
+              </div>
+            )}
           </div>
           <div className="desktop:col-span-5">
             <RecipeHeading
