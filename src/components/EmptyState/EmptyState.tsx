@@ -41,7 +41,7 @@ export function EmptyState({
     >
       {illustration}
       <Heading className={classNames('font-title text-ink-900', TITLES[size])}>{title}</Heading>
-      <p className="text-body text-ink-800">{description}</p>
+      <p className="max-w-full text-body break-words text-ink-800">{description}</p>
       {children ? <div className="mt-auto flex w-full flex-col gap-3">{children}</div> : null}
     </div>
   )

@@ -34,7 +34,7 @@ export function RecipeProblem({ failure, retry }: RecipeProblemProps) {
         size="compact"
         headingLevel={1}
       >
-        <LinkButton to={paths.search} fullWidth>
+        <LinkButton to={paths.home} fullWidth>
           {strings.notFound.action}
         </LinkButton>
       </EmptyState>

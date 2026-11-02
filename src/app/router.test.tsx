@@ -18,10 +18,9 @@ function signIn(options: Parameters<typeof fakeToken>[0] = {}) {
   expect(sessionStore.signIn(fakeToken(options))).toBe(true)
 }
 
+/** The tabs of a bar, in order: links to pages, and « Rechercher » on a phone, which is a button. */
 function labelsOf(bar: HTMLElement): (string | null)[] {
-  return within(bar)
-    .getAllByRole('link')
-    .map((link) => link.textContent)
+  return Array.from(bar.children, (tab) => tab.textContent)
 }
 
 // The home page asks the back end for its feed and its categories; these tests are about routing.
@@ -131,9 +130,19 @@ describe('the pages with navigation', () => {
     renderRoutes(routes, '/')
     await screen.findByRole('heading', { level: 1 })
 
-    await userEvent.setup().click(within(phoneBar()).getByRole('link', { name: 'Rechercher' }))
+    await userEvent.setup().click(within(phoneBar()).getByRole('link', { name: 'Se connecter' }))
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Rechercher' })).toBeVisible()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Se connecter' })).toBeVisible()
+  })
+
+  it('opens the search over the page with the « Rechercher » tab, which leads to no page', async () => {
+    const { router } = renderRoutes(routes, '/')
+    await screen.findByRole('heading', { level: 1 })
+
+    await userEvent.setup().click(within(phoneBar()).getByRole('button', { name: 'Rechercher' }))
+
+    expect(await screen.findByRole('dialog', { name: 'Rechercher' })).toBeVisible()
+    expect(router.state.location.pathname).toBe('/')
   })
 
   it('shows an unknown address as a page that does not exist, still with the navigation', async () => {

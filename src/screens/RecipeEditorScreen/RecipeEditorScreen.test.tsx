@@ -164,10 +164,7 @@ describe('RecipeEditorScreen', () => {
       expect(
         await screen.findByRole('heading', { level: 2, name: 'Cette recette n’existe plus.' }),
       ).toBeVisible()
-      expect(screen.getByRole('link', { name: 'Voir les recettes' })).toHaveAttribute(
-        'href',
-        '/rechercher',
-      )
+      expect(screen.getByRole('link', { name: 'Voir les recettes' })).toHaveAttribute('href', '/')
       expect(screen.queryByRole('heading', { name: 'Informations' })).not.toBeInTheDocument()
     })
 

@@ -1,8 +1,6 @@
 export const strings = {
   // The page's own title, for assistive technology: the design shows the logo, not a heading.
   pageTitle: 'Il en reste un peu',
-  searchPrompt: 'Chercher une recette',
-  searchPromptLabel: 'Chercher une recette : ouvrir la recherche',
 
   categories: {
     label: 'Catégories',

@@ -1,4 +1,4 @@
-import { useId, useRef } from 'react'
+import { useId, useRef, type RefObject } from 'react'
 import { classNames } from '../../lib/classNames'
 import { Icon } from '../Icon/Icon'
 import { IconButton } from '../IconButton/IconButton'
@@ -13,6 +13,8 @@ export interface SearchPillProps {
   maxLength?: number
   /** Puts the pill in its brick frame (the typing has reached its limit). */
   invalid?: boolean
+  /** For whoever must put the caret in the field (a sheet that opens on it); the pill keeps its own otherwise. */
+  inputRef?: RefObject<HTMLInputElement | null>
 }
 
 /**
@@ -26,9 +28,11 @@ export function SearchPill({
   clearLabel,
   maxLength,
   invalid = false,
+  inputRef: givenRef,
 }: SearchPillProps) {
   const inputId = useId()
-  const inputRef = useRef<HTMLInputElement>(null)
+  const ownRef = useRef<HTMLInputElement>(null)
+  const inputRef = givenRef ?? ownRef
 
   return (
     <div className="relative">

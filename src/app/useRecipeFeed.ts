@@ -28,15 +28,19 @@ export type RecipeFeed =
 /**
  * A list of recipes, a page of 20 at a time, newest first unless the filters say otherwise (home,
  * search, « Mes recettes »). When the filters change the previous answer stays on screen,
- * flagged `updating`, until the new one arrives: typing never blanks the page.
+ * flagged `updating`, until the new one arrives: typing never blanks the page. A feed that is not
+ * `enabled` asks nothing, and is not to be shown.
  */
-export function useRecipeFeed(filters: RecipeSearchFilters): RecipeFeed {
-  const query = useRecipeSearch({
-    sortBy: 'CREATED_AT',
-    direction: 'DESC',
-    ...filters,
-    size: FEED_PAGE_SIZE,
-  })
+export function useRecipeFeed(filters: RecipeSearchFilters, { enabled = true } = {}): RecipeFeed {
+  const query = useRecipeSearch(
+    {
+      sortBy: 'CREATED_AT',
+      direction: 'DESC',
+      ...filters,
+      size: FEED_PAGE_SIZE,
+    },
+    enabled,
+  )
   const [lastBatch, setLastBatch] = useState<number | undefined>()
   const { data } = query
   const updating = query.isPlaceholderData

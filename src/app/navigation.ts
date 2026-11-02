@@ -1,27 +1,31 @@
 import type { Session } from '../api/sessionStore'
-import type { NavigationItem } from '../components/TabBar/TabBar'
+import type { NavigationAction, NavigationItem, NavigationLink } from '../components/TabBar/TabBar'
 import { paths } from './paths'
 import { strings } from './strings'
 
 const { navigation } = strings
 
-const HOME: NavigationItem = { to: paths.home, label: navigation.home, icon: 'home', end: true }
-const SEARCH: NavigationItem = { to: paths.search, label: navigation.search, icon: 'search' }
-const MY_RECIPES: NavigationItem = {
+const HOME: NavigationLink = { to: paths.home, label: navigation.home, icon: 'home', end: true }
+const MY_RECIPES: NavigationLink = {
   to: paths.myRecipes,
   label: navigation.myRecipes,
   icon: 'book',
 }
-const ACCOUNT: NavigationItem = { to: paths.account, label: navigation.account, icon: 'user' }
-const LOGIN: NavigationItem = { to: paths.login, label: navigation.login, icon: 'log-in' }
+const ACCOUNT: NavigationLink = { to: paths.account, label: navigation.account, icon: 'user' }
+const LOGIN: NavigationLink = { to: paths.login, label: navigation.login, icon: 'log-in' }
 
 /**
- * The tabs, one list for the phone's bar and the desktop's: the same order, the same words, the
- * same icons. A member whose session just expired already sees the visitor's.
+ * The pages the navigation leads to, for a tablet's tabs and a desktop's bar: the search is not one of
+ * them, it is the field. A member whose session just expired already sees the visitor's.
  */
-export function navigationItems(session: Session): NavigationItem[] {
-  if (session.status !== 'member') return [HOME, SEARCH, LOGIN]
-  return [HOME, SEARCH, MY_RECIPES, { ...ACCOUNT, avatarName: session.username }]
+export function navigationLinks(session: Session): NavigationLink[] {
+  if (session.status !== 'member') return [HOME, LOGIN]
+  return [HOME, MY_RECIPES, { ...ACCOUNT, avatarName: session.username }]
+}
+
+/** The phone's tabs: the same pages, with « Rechercher » second, which opens the search over the page. */
+export function phoneNavigation(session: Session, search: NavigationAction): NavigationItem[] {
+  return [HOME, search, ...navigationLinks(session).slice(1)]
 }
 
 /** Whether to offer the « + »: only an account allowed to write recipes. The server stays the authority. */

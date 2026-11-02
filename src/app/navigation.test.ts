@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Session } from '../api/sessionStore'
-import { canCreateRecipes, canManageRecipe, navigationItems } from './navigation'
+import { canCreateRecipes, canManageRecipe, navigationLinks, phoneNavigation } from './navigation'
 
 const visitor: Session = { status: 'visitor' }
 const expired: Session = { status: 'expired' }
@@ -13,25 +13,60 @@ const admin: Session = {
 }
 const roleless: Session = { status: 'member', username: 'invite', userId: '3', roles: [] }
 
-const labels = (session: Session) => navigationItems(session).map((item) => item.label)
+const search = {
+  label: 'Rechercher',
+  icon: 'search',
+  onSelect: () => undefined,
+  current: false,
+} as const
 
-describe('navigationItems', () => {
-  it('gives a visitor three tabs, ending on the way to log in', () => {
-    expect(labels(visitor)).toEqual(['Accueil', 'Rechercher', 'Se connecter'])
+const labels = (items: readonly { label: string }[]) => items.map((item) => item.label)
+
+describe('navigationLinks', () => {
+  it('gives a visitor two links, the second to log in: the search is a field, not a page', () => {
+    expect(labels(navigationLinks(visitor))).toEqual(['Accueil', 'Se connecter'])
   })
 
-  it('gives a member four tabs, ending on the account', () => {
-    expect(labels(user)).toEqual(['Accueil', 'Rechercher', 'Mes recettes', 'Compte'])
+  it('gives a member three links, ending on the account', () => {
+    expect(labels(navigationLinks(user))).toEqual(['Accueil', 'Mes recettes', 'Compte'])
   })
 
   it('shows a member whose session expired what a visitor sees', () => {
-    expect(labels(expired)).toEqual(labels(visitor))
+    expect(labels(navigationLinks(expired))).toEqual(labels(navigationLinks(visitor)))
   })
 
-  it('sends each tab to a different page', () => {
-    const targets = navigationItems(user).map((item) => item.to)
+  it('sends each link to a different page', () => {
+    expect(navigationLinks(user).map((item) => item.to)).toEqual(['/', '/mes-recettes', '/compte'])
+  })
+})
 
-    expect(targets).toEqual(['/', '/rechercher', '/mes-recettes', '/compte'])
+describe('phoneNavigation', () => {
+  it('puts « Rechercher » second for a visitor, in the same order as the links around it', () => {
+    expect(labels(phoneNavigation(visitor, search))).toEqual([
+      'Accueil',
+      'Rechercher',
+      'Se connecter',
+    ])
+  })
+
+  it('puts « Rechercher » second for a member', () => {
+    expect(labels(phoneNavigation(user, search))).toEqual([
+      'Accueil',
+      'Rechercher',
+      'Mes recettes',
+      'Compte',
+    ])
+  })
+
+  it('brings the action it is given, not a link to a search page', () => {
+    const items = phoneNavigation(user, search)
+
+    expect(items[1]).toBe(search)
+    expect(items.filter((item) => 'to' in item).map((item) => item.to)).toEqual([
+      '/',
+      '/mes-recettes',
+      '/compte',
+    ])
   })
 })
 

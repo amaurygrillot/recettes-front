@@ -1,6 +1,8 @@
 import { Dialog } from 'radix-ui'
-import { useRef, type ReactNode, type UIEvent } from 'react'
+import type { ReactNode, RefObject, UIEvent } from 'react'
+import { classNames } from '../../lib/classNames'
 import { IconButton } from '../IconButton/IconButton'
+import { useDialogFocus } from '../../lib/useDialogFocus'
 import { strings } from './strings'
 
 export interface BottomSheetProps {
@@ -8,6 +10,12 @@ export interface BottomSheetProps {
   onOpenChange: (open: boolean) => void
   /** The sheet's name and heading: « Filtres ». The focus lands on it when the sheet opens. */
   title: string
+  /** A field of the sheet that takes the focus when it opens, in place of the title (the keyboard comes up). */
+  initialFocusRef?: RefObject<HTMLElement | null> | undefined
+  /** Almost the whole height of a phone and 600 px wide on a tablet (the search), instead of 85 % and 680 px. */
+  tall?: boolean
+  /** What gets the focus back when the sheet closes, when it is not the element focused as it opened. */
+  returnFocusTo?: HTMLElement | null | undefined
   /** Under the title and fixed: the section pills of a long sheet. */
   toolbar?: ReactNode
   /** The part that scrolls. */
@@ -26,14 +34,15 @@ export function BottomSheet({
   open,
   onOpenChange,
   title,
+  initialFocusRef,
+  returnFocusTo,
+  tall = false,
   toolbar,
   children,
   actions,
   onContentScroll,
 }: BottomSheetProps) {
-  const titleRef = useRef<HTMLHeadingElement>(null)
-  // The sheet is opened by a button elsewhere, not by a Dialog.Trigger, so Radix cannot give it back the focus.
-  const opener = useRef<HTMLElement | null>(null)
+  const { titleRef, contentProps } = useDialogFocus(initialFocusRef, returnFocusTo)
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -41,18 +50,13 @@ export function BottomSheet({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-ink-900/58" />
         <Dialog.Content
           aria-describedby={undefined}
-          onOpenAutoFocus={(event) => {
-            // Radix would focus the first control; the sheet starts at its title, as designed.
-            event.preventDefault()
-            opener.current =
-              document.activeElement instanceof HTMLElement ? document.activeElement : null
-            titleRef.current?.focus()
-          }}
-          onCloseAutoFocus={(event) => {
-            event.preventDefault()
-            opener.current?.focus()
-          }}
-          className="fixed inset-x-0 bottom-0 z-50 flex max-h-sheet flex-col overflow-hidden rounded-t-sheet border-2 border-b-0 border-ink-900 bg-paper-50 shadow-sheet tablet:inset-auto tablet:top-1/2 tablet:left-1/2 tablet:w-[calc(100%-4rem)] tablet:max-w-reading tablet:-translate-x-1/2 tablet:-translate-y-1/2 tablet:rounded-sheet tablet:border-b-2"
+          {...contentProps}
+          className={classNames(
+            'fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-hidden rounded-t-sheet border-2 border-b-0 border-ink-900 bg-paper-50 shadow-sheet tablet:inset-auto tablet:top-1/2 tablet:left-1/2 tablet:w-[calc(100%-4rem)] tablet:-translate-x-1/2 tablet:-translate-y-1/2 tablet:rounded-sheet tablet:border-b-2',
+            tall
+              ? 'max-h-sheet-tall tablet:max-h-sheet tablet:max-w-dialog'
+              : 'max-h-sheet tablet:max-w-reading',
+          )}
         >
           <Dialog.Close
             aria-label={strings.handle}
@@ -73,11 +77,14 @@ export function BottomSheet({
             </Dialog.Close>
           </div>
           {toolbar}
-          <div onScroll={onContentScroll} className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">
+          <div
+            onScroll={onContentScroll}
+            className="relative min-h-0 flex-1 overflow-y-auto px-5 pb-4"
+          >
             {children}
           </div>
           {actions && (
-            <div className="flex gap-3 border-t-2 border-ink-900 bg-paper-50 px-5 pt-3 pb-safe-bar">
+            <div className="flex gap-3 border-t-2 border-ink-900 bg-paper-50 px-5 pt-3 pb-safe">
               {actions}
             </div>
           )}

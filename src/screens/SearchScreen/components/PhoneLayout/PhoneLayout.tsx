@@ -1,4 +1,6 @@
-import { isNarrowed } from '../../../../app/searchCriteria'
+import { activeFilterCount } from '../../../../app/searchCriteria'
+import { SearchEntryField } from '../../../../app/SearchEntryField'
+import { useSearchOverlay } from '../../../../app/useSearchOverlay'
 import { TABLET_QUERY } from '../../../../lib/breakpoints'
 import { useMediaQuery } from '../../../../lib/useMediaQuery'
 import { NO_FILTERS } from '../../filterChoices'
@@ -6,9 +8,9 @@ import type { SearchScope } from '../../recipeFilters'
 import { strings } from '../../strings'
 import type { SearchPage } from '../../useSearchPage'
 import { ActiveFilters } from '../ActiveFilters/ActiveFilters'
-import { FiltersControl } from '../FiltersControl/FiltersControl'
+import { FiltersButton } from '../FiltersButton/FiltersButton'
 import { ResultsBar } from '../ResultsBar/ResultsBar'
-import { SearchField } from '../SearchField/SearchField'
+import { SearchInvitation } from '../SearchInvitation/SearchInvitation'
 import { SearchResults } from '../SearchResults/SearchResults'
 
 export interface PhoneLayoutProps {
@@ -17,14 +19,15 @@ export interface PhoneLayoutProps {
 }
 
 /**
- * The search page on a phone and a tablet: a header that stays at the top (field, « Filtres »,
- * the filters in force, the count and the sort), the results below it, the filters in a sheet.
+ * The results page on a phone and a tablet: a header that stays at the top (the field and « Filtres », which
+ * open the search over the page, the filters in force, the count and the sort), the results below it. With
+ * nothing left to search for it invites to search instead.
  */
 export function PhoneLayout({ page, scope }: PhoneLayoutProps) {
-  const { criteria, feed, options, activeFilters, hasFilters } = page
+  const { criteria, feed, activeFilters, hasFilters, searching } = page
   const labelled = useMediaQuery(TABLET_QUERY)
+  const openSearch = useSearchOverlay()
   const mine = scope.kind === 'mine'
-  const showCaption = !mine && feed.status === 'ready' && !isNarrowed(criteria)
 
   return (
     <main className="pb-8">
@@ -33,13 +36,15 @@ export function PhoneLayout({ page, scope }: PhoneLayoutProps) {
           {mine ? strings.titles.mine : strings.titles.search}
         </h1>
         <div className="flex items-start gap-3">
-          <SearchField />
-          <FiltersControl
-            criteria={criteria}
-            scope={scope}
-            options={options}
-            onApply={page.changeFilters}
+          <div className="min-w-0 flex-1">
+            <SearchEntryField />
+          </div>
+          <FiltersButton
+            count={activeFilterCount(criteria)}
             labelled={labelled}
+            onOpen={() => {
+              openSearch({ focus: 'filters' })
+            }}
           />
         </div>
         <ActiveFilters
@@ -49,27 +54,34 @@ export function PhoneLayout({ page, scope }: PhoneLayoutProps) {
             page.changeFilters(NO_FILTERS)
           }}
         />
-        <ResultsBar
-          feed={feed}
-          sort={criteria.sort}
-          onSortChange={page.changeSort}
-          sortAsList={false}
-        />
+        {searching && (
+          <ResultsBar
+            feed={feed}
+            sort={criteria.sort}
+            onSortChange={page.changeSort}
+            sortAsList={false}
+          />
+        )}
       </div>
       <div className="flex flex-col gap-4.5 pt-3.5">
-        {showCaption && (
-          <p className="text-detail text-ink-800">{strings.captions[criteria.sort]}</p>
+        {searching ? (
+          <SearchResults
+            feed={feed}
+            criteria={criteria}
+            scope={scope}
+            hasFilters={hasFilters}
+            onClearFilters={() => {
+              page.changeFilters(NO_FILTERS)
+            }}
+            desktopColumns={4}
+          />
+        ) : (
+          <SearchInvitation
+            onSearch={() => {
+              openSearch()
+            }}
+          />
         )}
-        <SearchResults
-          feed={feed}
-          criteria={criteria}
-          scope={scope}
-          hasFilters={hasFilters}
-          onClearFilters={() => {
-            page.changeFilters(NO_FILTERS)
-          }}
-          desktopColumns={4}
-        />
       </div>
     </main>
   )

@@ -72,7 +72,7 @@ function renderCooking(body: object = recipe(), path = '/recettes/42/pas-a-pas')
     [
       { path: '/recettes/:id/pas-a-pas', element: <CookingScreen /> },
       { path: '/recettes/:id', element: <p>Page de la recette</p> },
-      { path: '/rechercher', element: <p>Page de recherche</p> },
+      { path: '/', element: <p>Page de recherche</p> },
     ],
     path,
   )
@@ -119,7 +119,7 @@ describe('CookingScreen', () => {
       renderRoutes(
         [
           { path: '/recettes/:id/pas-a-pas', element: <CookingScreen /> },
-          { path: '/rechercher', element: <p>Page de recherche</p> },
+          { path: '/', element: <p>Page de recherche</p> },
         ],
         '/recettes/42/pas-a-pas',
       )
@@ -130,10 +130,7 @@ describe('CookingScreen', () => {
           name: "Cette recette n'existe pas ou a été supprimée",
         }),
       ).toBeVisible()
-      expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute(
-        'href',
-        '/rechercher',
-      )
+      expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute('href', '/')
     })
 
     it('says when the recipe cannot be loaded, and loads it again', async () => {
@@ -635,10 +632,7 @@ describe('CookingScreen', () => {
         'href',
         '/recettes/42',
       )
-      expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute(
-        'href',
-        '/rechercher',
-      )
+      expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute('href', '/')
       expect(readCookingStep('42')).toBeUndefined()
     })
 

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { useState } from 'react'
-import { describe, expect, it } from 'vitest'
+import { createRef, useState } from 'react'
+import { describe, expect, it, vi } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { SearchPill } from './SearchPill'
 
@@ -47,6 +47,21 @@ describe('SearchPill', () => {
 
     expect(screen.getByRole('searchbox')).toHaveValue('')
     expect(screen.getByRole('searchbox')).toHaveFocus()
+  })
+
+  it('gives its field to whoever asked for it, to put the caret there', () => {
+    const inputRef = createRef<HTMLInputElement>()
+    render(
+      <SearchPill
+        label="Chercher une catégorie"
+        value=""
+        onChange={vi.fn()}
+        clearLabel="Effacer la recherche"
+        inputRef={inputRef}
+      />,
+    )
+
+    expect(inputRef.current).toBe(screen.getByRole('searchbox'))
   })
 
   it('is invalid when told so, and has no accessibility violation', async () => {

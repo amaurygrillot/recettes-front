@@ -138,7 +138,6 @@ export function renderEditor(path: string) {
           { path: '/recettes/nouvelle', element: <RecipeEditorScreen /> },
           { path: '/recettes/:id/modifier', element: <RecipeEditorScreen /> },
           { path: '/recettes/:id', element: <p>Page de la recette</p> },
-          { path: '/rechercher', element: <p>Page de recherche</p> },
           { path: '/', element: <p>Page d’accueil</p> },
         ],
       },

@@ -4,7 +4,7 @@ import { classNames } from '../../lib/classNames'
 import { Avatar } from '../Avatar/Avatar'
 import { Icon } from '../Icon/Icon'
 import { Logo } from '../Logo/Logo'
-import type { NavigationItem } from '../TabBar/TabBar'
+import type { NavigationLink } from '../TabBar/TabBar'
 
 export interface TopBarProps {
   /** The accessible name of the navigation landmark. */
@@ -12,7 +12,7 @@ export interface TopBarProps {
   /** The accessible name of the logo, which links to the home page. */
   homeLabel: string
   /** The same items as the phone's tab bar, in the same order: the last one sits at the far right. */
-  items: readonly NavigationItem[]
+  items: readonly NavigationLink[]
   /** The search field, between the tabs and the account. */
   search?: ReactNode
 }
@@ -23,7 +23,7 @@ const TAB_ACTIVE = 'border-ink-900 bg-butter-300 font-bold text-ink-900'
 const TAB_IDLE =
   'border-transparent text-ink-700 hover:bg-butter-100 hover:text-ink-900 active:border-dashed active:border-ink-900 active:bg-butter-200 active:text-ink-900'
 
-function BarLink({ item }: { item: NavigationItem }) {
+function BarLink({ item }: { item: NavigationLink }) {
   const { avatarName } = item
   return (
     <NavLink
@@ -70,7 +70,7 @@ export function TopBar({ label, homeLabel, items, search }: TopBarProps) {
             <BarLink key={item.to} item={item} />
           ))}
         </div>
-        {search}
+        {search && <div className="w-72.5 flex-none">{search}</div>}
         {accountItem && <BarLink item={accountItem} />}
       </div>
     </nav>

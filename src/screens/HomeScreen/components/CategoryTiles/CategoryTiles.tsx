@@ -1,4 +1,4 @@
-import { paths, searchPath } from '../../../../app/paths'
+import { categoryResultsPath, paths } from '../../../../app/paths'
 import { strings } from '../../strings'
 import type { MainCategories } from '../../useMainCategories'
 import { CategoryTile } from './CategoryTile'
@@ -24,7 +24,7 @@ export function CategoryTiles({ categories }: CategoryTilesProps) {
       {categories.categories.map((category) => (
         <li key={category.id}>
           <CategoryTile
-            to={searchPath({ categoryId: category.id })}
+            to={categoryResultsPath(category.id)}
             label={category.name}
             icon={category.icon}
           />

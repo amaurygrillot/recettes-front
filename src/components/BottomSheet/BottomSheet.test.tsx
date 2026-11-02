@@ -1,13 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { describe, expect, it } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { Button } from '../Button/Button'
 import { BottomSheet } from './BottomSheet'
 
-function Harness() {
+function Harness({ focusField = false }: { focusField?: boolean }) {
   const [open, setOpen] = useState(false)
+  const fieldRef = useRef<HTMLInputElement>(null)
   return (
     <div>
       <Button
@@ -21,12 +22,13 @@ function Harness() {
         open={open}
         onOpenChange={setOpen}
         title="Filtres"
+        initialFocusRef={focusField ? fieldRef : undefined}
         toolbar={<p>Barre d&apos;outils</p>}
         actions={<Button>Voir les recettes</Button>}
       >
         <label>
           Nom
-          <input type="text" />
+          <input ref={fieldRef} type="text" />
         </label>
       </BottomSheet>
     </div>
@@ -48,6 +50,15 @@ describe('BottomSheet', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Filtres' })
     expect(dialog).toBeVisible()
     expect(screen.getByRole('heading', { name: 'Filtres' })).toHaveFocus()
+  })
+
+  it('puts the focus in a field of its own when it is told to, so the keyboard is ready', async () => {
+    render(<Harness focusField />)
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Ouvrir' }))
+
+    await screen.findByRole('dialog', { name: 'Filtres' })
+    expect(screen.getByLabelText('Nom')).toHaveFocus()
   })
 
   it('shows its toolbar, its body and its actions', async () => {

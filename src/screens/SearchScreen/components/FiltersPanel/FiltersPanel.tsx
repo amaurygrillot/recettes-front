@@ -22,6 +22,8 @@ export interface FiltersPanelProps {
   authorDebounceMs: number
   /** The narrow column of a desktop: search fields carry a short placeholder. */
   dense?: boolean
+  /** The category tree on the left, the tags and the author on the right: the desktop search panel. */
+  columns?: boolean
 }
 
 function Section({ id, legend, children }: { id: string; legend: string; children: ReactNode }) {
@@ -44,8 +46,8 @@ function pathTo(categories: readonly CategoryNode[], id: string | undefined): st
 
 /**
  * The filters: category (a tree and a search field), tag (chips and a search field), author.
- * The same panel is the content of the sheet on a phone and a tablet and the column of a desktop;
- * it holds no choice of its own, so whoever shows it decides when the choices count.
+ * The same panel is the content of the search overlay and the column of a desktop's results; it
+ * holds no choice of its own, so whoever shows it decides when the choices count.
  */
 export function FiltersPanel({
   choices,
@@ -54,6 +56,7 @@ export function FiltersPanel({
   showAuthor,
   authorDebounceMs,
   dense = false,
+  columns = false,
 }: FiltersPanelProps) {
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set())
   const [seeded, setSeeded] = useState(false)
@@ -81,6 +84,68 @@ export function FiltersPanel({
     })
   }
 
+  const categorySection = options.status === 'ready' && (
+    <Section id={SECTION_IDS.category} legend={filters.category.legend}>
+      <Combobox
+        label={filters.category.searchLabel}
+        placeholder={dense ? filters.searchShort : filters.category.searchLabel}
+        suggestionsLabel={filters.category.suggestions}
+        options={options.categoryOptions}
+        selectedIds={choices.categoryId === undefined ? [] : [choices.categoryId]}
+        onToggle={(option) => {
+          chooseCategory(option.id === choices.categoryId ? undefined : option.id)
+        }}
+        noResultText={filters.category.noResult}
+      />
+      <CategoryTree
+        categories={options.categories}
+        categoryId={choices.categoryId}
+        exactCategory={choices.exactCategory}
+        expandedIds={expandedIds}
+        onChoose={chooseCategory}
+        onToggleExact={(exactCategory) => {
+          onChange({ exactCategory })
+        }}
+        onToggleExpanded={toggleExpanded}
+      />
+    </Section>
+  )
+
+  const tagsSection = options.status === 'ready' && (
+    <Section id={SECTION_IDS.tags} legend={filters.tags.legend}>
+      <Combobox
+        label={filters.tags.searchLabel}
+        placeholder={dense ? filters.searchShort : filters.tags.searchLabel}
+        suggestionsLabel={filters.tags.suggestions}
+        options={options.tagOptions}
+        selectedIds={choices.tagId === undefined ? [] : [choices.tagId]}
+        onToggle={(option) => {
+          onChange({ tagId: option.id === choices.tagId ? undefined : option.id })
+        }}
+        noResultText={filters.tags.noResult}
+      />
+      <TagChips
+        tags={options.tags}
+        tagId={choices.tagId}
+        onChoose={(tagId) => {
+          onChange({ tagId })
+        }}
+      />
+    </Section>
+  )
+
+  const authorSection = showAuthor && (
+    <Section id={SECTION_IDS.author} legend={filters.author.legend}>
+      <AuthorField
+        value={choices.author}
+        onChange={(author) => {
+          onChange({ author })
+        }}
+        debounceMs={authorDebounceMs}
+      />
+    </Section>
+  )
+
   return (
     <div className="flex flex-col gap-7 pt-2">
       {options.status === 'loading' && (
@@ -95,64 +160,20 @@ export function FiltersPanel({
           </Button>
         </ErrorBanner>
       )}
-      {options.status === 'ready' && (
+      {columns ? (
+        <div className="grid grid-cols-2 items-start gap-x-10">
+          <div>{categorySection}</div>
+          <div className="flex flex-col gap-7">
+            {tagsSection}
+            {authorSection}
+          </div>
+        </div>
+      ) : (
         <>
-          <Section id={SECTION_IDS.category} legend={filters.category.legend}>
-            <Combobox
-              label={filters.category.searchLabel}
-              placeholder={dense ? filters.searchShort : filters.category.searchLabel}
-              suggestionsLabel={filters.category.suggestions}
-              options={options.categoryOptions}
-              selectedIds={choices.categoryId === undefined ? [] : [choices.categoryId]}
-              onToggle={(option) => {
-                chooseCategory(option.id === choices.categoryId ? undefined : option.id)
-              }}
-              noResultText={filters.category.noResult}
-            />
-            <CategoryTree
-              categories={options.categories}
-              categoryId={choices.categoryId}
-              exactCategory={choices.exactCategory}
-              expandedIds={expandedIds}
-              onChoose={chooseCategory}
-              onToggleExact={(exactCategory) => {
-                onChange({ exactCategory })
-              }}
-              onToggleExpanded={toggleExpanded}
-            />
-          </Section>
-          <Section id={SECTION_IDS.tags} legend={filters.tags.legend}>
-            <Combobox
-              label={filters.tags.searchLabel}
-              placeholder={dense ? filters.searchShort : filters.tags.searchLabel}
-              suggestionsLabel={filters.tags.suggestions}
-              options={options.tagOptions}
-              selectedIds={choices.tagId === undefined ? [] : [choices.tagId]}
-              onToggle={(option) => {
-                onChange({ tagId: option.id === choices.tagId ? undefined : option.id })
-              }}
-              noResultText={filters.tags.noResult}
-            />
-            <TagChips
-              tags={options.tags}
-              tagId={choices.tagId}
-              onChoose={(tagId) => {
-                onChange({ tagId })
-              }}
-            />
-          </Section>
+          {categorySection}
+          {tagsSection}
+          {authorSection}
         </>
-      )}
-      {showAuthor && (
-        <Section id={SECTION_IDS.author} legend={filters.author.legend}>
-          <AuthorField
-            value={choices.author}
-            onChange={(author) => {
-              onChange({ author })
-            }}
-            debounceMs={authorDebounceMs}
-          />
-        </Section>
       )}
     </div>
   )

@@ -268,9 +268,9 @@ describe('RecipeEditorScreen: deleting the recipe', () => {
       within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Supprimer la recette' }),
     )
 
-    expect(await screen.findByText('Page de recherche')).toBeVisible()
+    expect(await screen.findByText('Page d’accueil')).toBeVisible()
     expect(deleted).toBe(true)
-    expect(router.state.location.pathname).toBe('/rechercher')
+    expect(router.state.location.pathname).toBe('/')
   })
 
   it('says why it could not be deleted, and tries again', async () => {

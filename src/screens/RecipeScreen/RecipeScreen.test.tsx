@@ -86,7 +86,6 @@ function renderRecipe() {
       { path: '/recettes/:id', element: <RecipeScreen /> },
       { path: '/recettes/:id/modifier', element: <p>Page de modification</p> },
       { path: '/recettes/:id/pas-a-pas', element: <p>Page du pas à pas</p> },
-      { path: '/rechercher', element: <p>Page de recherche</p> },
       { path: '/', element: <p>Page d’accueil</p> },
     ],
     '/recettes/r-1',
@@ -432,7 +431,7 @@ describe('RecipeScreen', () => {
       expect(deleted).toBe(false)
     })
 
-    it('deletes the recipe once confirmed and leaves for the search', async () => {
+    it('deletes the recipe once confirmed and leaves for the home page', async () => {
       serveRecipe()
       server.use(http.delete(recipeUrl, () => new HttpResponse(null, { status: 204 })))
       const { router } = renderRecipe()
@@ -441,7 +440,7 @@ describe('RecipeScreen', () => {
       await user.click(within(dialog).getByRole('button', { name: 'Supprimer la recette' }))
 
       await waitFor(() => {
-        expect(router.state.location.pathname).toBe('/rechercher')
+        expect(router.state.location.pathname).toBe('/')
       })
     })
 
@@ -475,7 +474,7 @@ describe('RecipeScreen', () => {
       await user.click(within(dialog).getByRole('button', { name: 'Supprimer la recette' }))
 
       await waitFor(() => {
-        expect(router.state.location.pathname).toBe('/rechercher')
+        expect(router.state.location.pathname).toBe('/')
       })
     })
 
@@ -500,7 +499,7 @@ describe('RecipeScreen', () => {
       await user.click(within(alert).getByRole('button', { name: 'Réessayer' }))
 
       await waitFor(() => {
-        expect(router.state.location.pathname).toBe('/rechercher')
+        expect(router.state.location.pathname).toBe('/')
       })
     })
 
@@ -542,10 +541,7 @@ describe('RecipeScreen', () => {
           name: "Cette recette n'existe pas ou a été supprimée",
         }),
       ).toBeVisible()
-      expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute(
-        'href',
-        '/rechercher',
-      )
+      expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute('href', '/')
     })
 
     it('says there is no connection, and tries again on demand', async () => {
@@ -676,7 +672,7 @@ describe('RecipeScreen', () => {
   })
 
   describe('the way back', () => {
-    it('goes to the search when the recipe is the first page of the visit', async () => {
+    it('goes to the home page when the recipe is the first page of the visit', async () => {
       serveRecipe()
       const { router } = renderRecipe()
       // The button of the skeleton is replaced by the one over the photo: wait for the page.
@@ -685,7 +681,7 @@ describe('RecipeScreen', () => {
       await userEvent.setup().click(screen.getByRole('button', { name: 'Retour aux recettes' }))
 
       await waitFor(() => {
-        expect(router.state.location.pathname).toBe('/rechercher')
+        expect(router.state.location.pathname).toBe('/')
       })
     })
 
