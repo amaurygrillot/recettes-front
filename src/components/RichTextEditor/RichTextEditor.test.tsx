@@ -508,6 +508,17 @@ describe('RichTextEditor', () => {
       expect(within(dialog()).getByRole('button', { name: 'Terminé' })).toBeVisible()
     })
 
+    it('puts the tools under the strip, above the text', async () => {
+      const user = userEvent.setup()
+      renderEditor()
+
+      await user.click(open())
+
+      const mode = within(dialog())
+      const order = mode.getByRole('toolbar').compareDocumentPosition(mode.getByRole('textbox'))
+      expect(order & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
     it.each([
       ['Ctrl', '{Control>}{Shift>}f{/Shift}{/Control}'],
       ['Cmd', '{Meta>}{Shift>}f{/Shift}{/Meta}'],
@@ -630,6 +641,17 @@ describe('RichTextEditor', () => {
       expect(mode.getByRole('button', { name: 'Terminé' })).toBeVisible()
       expect(mode.getByRole('toolbar', { name: 'Mise en forme du texte' })).toBeVisible()
       expect(mode.getByRole('textbox')).toHaveTextContent('Un texte.')
+    })
+
+    it('puts the tools at the bottom, under the text, where the keyboard leaves room', async () => {
+      const user = userEvent.setup()
+      renderEditor()
+
+      await user.click(textbox())
+
+      const mode = within(dialog())
+      const order = mode.getByRole('toolbar').compareDocumentPosition(mode.getByRole('textbox'))
+      expect(order & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy()
     })
 
     it('is not opened by a tap when the field is locked', async () => {

@@ -8,8 +8,12 @@ export interface WritingModeProps {
   open: boolean
   /** The name of the field, in the strip at the top: « Introduction », « Texte de l'étape ». */
   title: string
+  /** Said next to the name (« facultatif »). */
+  note?: string | undefined
   /** A panel on a desktop (from 1024 px), the whole screen from a phone to a tablet. */
   desktop: boolean
+  /** From a tablet the bar sits under the strip; on a phone it sits at the bottom, above the keyboard. */
+  toolbarAtTop: boolean
   /** How many pixels of the bottom of the screen a phone's keyboard covers: the bar sits above it. */
   keyboardInset: number
   onClose: () => void
@@ -34,7 +38,9 @@ const PANELS = {
 export function WritingMode({
   open,
   title,
+  note,
   desktop,
+  toolbarAtTop,
   keyboardInset,
   onClose,
   toolbar,
@@ -74,9 +80,12 @@ export function WritingMode({
               </button>
             )}
             <div className="min-w-0 flex-1 px-1">
-              <Dialog.Title className="truncate font-title text-dialog-title text-ink-900">
-                {title}
-              </Dialog.Title>
+              <div className="flex items-baseline gap-2">
+                <Dialog.Title className="line-clamp-2 font-title text-dialog-title text-ink-900">
+                  {title}
+                </Dialog.Title>
+                {note && <span className="flex-none text-detail text-ink-700">{note}</span>}
+              </div>
               {desktop && <p className="text-detail text-ink-700">{strings.writing.escapeHint}</p>}
             </div>
             <button
@@ -88,12 +97,13 @@ export function WritingMode({
               {strings.writing.done}
             </button>
           </header>
+          {toolbarAtTop && <div className="flex-none border-b-2 border-paper-300">{toolbar}</div>}
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="mx-auto min-h-full w-full max-w-190 px-1 py-2">
               {open ? children : null}
             </div>
           </div>
-          <div className="flex-none border-t-2 border-ink-900">{toolbar}</div>
+          {!toolbarAtTop && <div className="flex-none border-t-2 border-ink-900">{toolbar}</div>}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

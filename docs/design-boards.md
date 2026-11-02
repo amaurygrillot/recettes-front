@@ -220,7 +220,7 @@ One component for the three rich texts of a recipe (`variant`: `introduction` 18
 112 px), built on Lexical **0.52.0, every package pinned to that exact version**, with the extension API (`LexicalExtensionComposer`; the
 plain `LexicalComposer` is deprecated in this release). Checked in the browser at 390, 768 and 1280 px through the development `/styleguide`.
 
-- **Six tools, in three groups, and no more**: bold, italic · bulleted list, numbered list · undo, redo. 44 px buttons, `aria-pressed` for the
+- **Six tools, in three groups, and no more** (**extended to nine, and one line that scrolls, by R3**, below): bold, italic · bulleted list, numbered list · undo, redo. 44 px buttons, `aria-pressed` for the
   tools that are on at the caret (yellow, ink outline), undo and redo dashed while there is nothing to undo or redo. Pressing a tool never takes
   the focus out of the text (`mousedown` is prevented). Ctrl + B, I, Z and Shift + Z work as in any editor.
 - **What it refuses**: no heading, quote, underline, link, image or colour. A shortcut for another format is swallowed
@@ -443,7 +443,8 @@ undo and redo stay, and **text size, underline and strikethrough** are added; th
 - **The bar** (one line, the order of the board: size, bold, italic, underline, strike, bullets, numbers, undo, redo; groups separated by a
   rule): it scrolls sideways, the size button first; a fade and a « › » at the right edge say there is more until the end of the line is
   reached; 44 px tools, the board's size. On a phone it lives in the writing mode only (the inline field of the mobile board has no bar); from
-  a tablet it sits at the top of the field, the « Écrire en plein écran » button on the label line.
+  a tablet it sits at the top of the field, the « Écrire en plein écran » button on the label line. In the writing mode it sits at the bottom
+  on a phone (above the keyboard) and under the strip from a tablet, as the boards draw it.
 - **Writing mode**: a modal (Radix `Dialog`: focus kept inside, the page behind inert, the page does not move). Phone and tablet: the whole
   screen; desktop (from 1024 px): a 920 px panel on a dimmed background, the text 760 px wide at most. A strip at the top with the way back
   (arrow), the name of the field and « Terminé »; the text fills the space down to the bar, which sits above the keyboard on a phone
@@ -456,3 +457,7 @@ undo and redo stay, and **text size, underline and strikethrough** are added; th
   - **The back gesture**: opening on a phone adds one history entry for the same address (`state.writing`); the gesture pops it and closes
     the mode; closing otherwise pops it too. The leave guard only counts a change of path or search, so it does not interfere.
 - **Left as they are**: Lexical stays pinned at 0.52.0 and everything the editor refuses (headings, quotes, colours, links, images).
+- **Not built**: the « Brouillon enregistré » indicator the tablet and desktop boards draw in the writing mode's strip (the draft state belongs
+  to the editor screen, which the field does not know; the covered editor bar keeps saying it behind the panel), and a live « Brouillon »
+  reading in the mode itself. A phone's « … mise à jour » notification is the editor screen's (`useWritingDone`), told by the field
+  (`onWritingDone`), and only after a mode that was opened on a phone.

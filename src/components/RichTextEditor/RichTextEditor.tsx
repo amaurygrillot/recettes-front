@@ -250,7 +250,9 @@ function Field({
       <WritingMode
         open={mode.writing}
         title={label}
+        note={note}
         desktop={desktop}
+        toolbarAtTop={tabletOrMore}
         keyboardInset={keyboardInset}
         onClose={mode.close}
         toolbar={<Toolbar editor={editor} state={toolbar} base={base} surface="writing" />}
