@@ -26,7 +26,7 @@ export interface WritingModeProps {
 const PANELS = {
   screen: 'fixed inset-x-0 top-0 flex flex-col bg-paper-50',
   panel:
-    'fixed inset-y-8 left-1/2 flex w-230 max-w-full -translate-x-1/2 flex-col overflow-hidden rounded-xl border-2 border-ink-900 bg-paper-50 shadow-sheet',
+    'fixed inset-y-8 left-1/2 flex w-230 max-w-full -translate-x-1/2 flex-col overflow-hidden rounded-xl border-3 border-ink-900 bg-paper-50 shadow-stamp',
 }
 
 /**
@@ -68,8 +68,8 @@ export function WritingMode({
           style={desktop ? undefined : { bottom: keyboardInset }}
           className={classNames('z-50 outline-none', desktop ? PANELS.panel : PANELS.screen)}
         >
-          <header className="flex flex-none items-center gap-2.5 border-b-2 border-paper-300 px-3 py-2.5">
-            {!desktop && (
+          <header className="flex flex-none items-center gap-2.5 border-b-2 border-paper-300 px-3 py-2.5 tablet:px-8 tablet:py-3">
+            {!toolbarAtTop && (
               <button
                 type="button"
                 aria-label={strings.writing.back}
@@ -81,17 +81,21 @@ export function WritingMode({
             )}
             <div className="min-w-0 flex-1 px-1">
               <div className="flex items-baseline gap-2">
-                <Dialog.Title className="line-clamp-2 font-title text-dialog-title text-ink-900">
+                <Dialog.Title className="line-clamp-2 font-title text-title-3 font-extrabold text-ink-900">
                   {title}
                 </Dialog.Title>
-                {note && <span className="flex-none text-detail text-ink-700">{note}</span>}
+                {note && (
+                  <span className="hidden flex-none text-detail text-ink-700 tablet:inline">
+                    {note}
+                  </span>
+                )}
               </div>
               {desktop && <p className="text-detail text-ink-700">{strings.writing.escapeHint}</p>}
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-16 w-32 flex-none cursor-pointer items-center justify-center gap-2.5 rounded-l border-2 border-ink-900 bg-butter-300 text-label font-bold text-ink-900 shadow-stamp-sm focus-visible:outline-offset-2 active:translate-y-0.5 active:bg-butter-400 active:shadow-none"
+              className="inline-flex h-16 w-32 flex-none cursor-pointer items-center justify-center gap-2.5 rounded-l border-2 border-ink-900 bg-butter-300 text-label font-bold text-ink-900 shadow-stamp-sm focus-visible:outline-offset-2 active:translate-y-0.5 active:bg-butter-400 active:shadow-none tablet:w-38"
             >
               <Icon name="check" size={24} strokeWidth={2.6} />
               {strings.writing.done}
@@ -99,7 +103,7 @@ export function WritingMode({
           </header>
           {toolbarAtTop && <div className="flex-none border-b-2 border-paper-300">{toolbar}</div>}
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto min-h-full w-full max-w-190 px-1 py-2">
+            <div className="mx-auto min-h-full w-full max-w-190 px-4 pt-4 pb-6 tablet:px-16 tablet:pt-7 desktop:px-0">
               {open ? children : null}
             </div>
           </div>

@@ -9,6 +9,20 @@ const VARIANTS: Record<RichTextVariant, { height: string; text: string }> = {
   advice: { height: 'min-h-28', text: 'text-body' },
 }
 
+/** The text's padding and its placeholder's: in the writing mode the page around the text gives the margins, so it has none. */
+const PADDINGS = {
+  field: { text: 'px-4 py-3.5', placeholder: 'px-4 py-3.5' },
+  tip: { text: 'px-0.5 pt-0.5 pb-2.5', placeholder: 'px-0.5 py-0.5' },
+  writing: { text: 'px-0 py-0', placeholder: 'px-0 py-0' },
+} as const
+
+type Place = keyof typeof PADDINGS
+
+function placeOf(fill: boolean, advice: boolean): Place {
+  if (fill) return 'writing'
+  return advice ? 'tip' : 'field'
+}
+
 export interface EditableTextProps {
   variant: RichTextVariant
   labelId: string
@@ -35,6 +49,8 @@ export function EditableText({
   onKeyDown,
 }: EditableTextProps) {
   const advice = variant === 'advice' && !fill
+  const place = placeOf(fill, advice)
+  const { text: padding, placeholder: placeholderPadding } = PADDINGS[place]
   const { height, text } = VARIANTS[variant]
   const size = classNames(text, !fill && height)
 
@@ -53,7 +69,7 @@ export function EditableText({
             aria-hidden="true"
             className={classNames(
               'pointer-events-none absolute top-0 left-0 text-ink-700',
-              advice ? 'px-0.5 py-0.5' : 'px-4 py-3.5',
+              placeholderPadding,
               size,
             )}
           >
@@ -62,7 +78,7 @@ export function EditableText({
         }
         className={classNames(
           'rich-text text-ink-900 outline-none',
-          advice ? 'px-0.5 pt-0.5 pb-2.5' : 'px-4 py-3.5',
+          padding,
           fill && 'min-h-full',
           size,
         )}

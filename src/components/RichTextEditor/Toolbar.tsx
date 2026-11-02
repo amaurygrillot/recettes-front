@@ -54,8 +54,9 @@ const SEPARATOR = <span aria-hidden="true" className="h-7 w-0.5 shrink-0 rounded
 
 /** Where the bar sits decides the colour it fades into at its edge: the cream of a field's top, or the white of the writing mode. */
 const SURFACES = {
-  field: { bar: 'bg-paper-100', fade: 'to-paper-100' },
-  writing: { bar: 'bg-paper-50', fade: 'to-paper-50' },
+  field: { bar: 'bg-paper-100', fade: 'to-paper-100', inset: 'px-2.5' },
+  // The board's bar starts 16 px from the edge on a phone, 32 px from a tablet.
+  writing: { bar: 'bg-paper-50', fade: 'to-paper-50', inset: 'px-4 tablet:px-8' },
 } as const
 
 export interface ToolbarProps {
@@ -91,7 +92,10 @@ export function Toolbar({ editor, state, base, surface }: ToolbarProps) {
         onMouseDown={(event) => {
           event.preventDefault()
         }}
-        className="scrollbar-hidden flex items-center gap-3.5 overflow-x-auto px-2.5 py-2"
+        className={classNames(
+          'scrollbar-hidden flex items-center gap-3.5 overflow-x-auto py-2',
+          look.inset,
+        )}
       >
         <SizeMenu editor={editor} base={base} size={state.size} />
         {SEPARATOR}

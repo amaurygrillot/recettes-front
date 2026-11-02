@@ -508,6 +508,17 @@ describe('RichTextEditor', () => {
       expect(within(dialog()).getByRole('button', { name: 'Terminé' })).toBeVisible()
     })
 
+    it('has « Terminé » to leave by, and no back arrow: that one is a phone’s', async () => {
+      const user = userEvent.setup()
+      renderEditor()
+
+      await user.click(open())
+
+      expect(
+        within(dialog()).queryByRole('button', { name: 'Fermer le mode écriture' }),
+      ).not.toBeInTheDocument()
+    })
+
     it('puts the tools under the strip, above the text', async () => {
       const user = userEvent.setup()
       renderEditor()

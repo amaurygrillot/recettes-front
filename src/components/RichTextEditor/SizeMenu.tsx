@@ -30,7 +30,7 @@ export function SizeMenu({ editor, base, size }: SizeMenuProps) {
         <DropdownMenu.Content
           side="top"
           align="start"
-          sideOffset={8}
+          sideOffset={16}
           collisionPadding={12}
           onCloseAutoFocus={(event) => {
             // The text keeps the caret and the keyboard: the menu only borrowed the focus.
