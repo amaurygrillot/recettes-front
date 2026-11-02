@@ -1,5 +1,5 @@
 import { generatePath } from 'react-router'
-import { criteriaToParams, EMPTY_CRITERIA } from './searchCriteria'
+import { criteriaToParams, EMPTY_CRITERIA, type SearchCriteria } from './searchCriteria'
 
 /** What the search page can be opened with, from the home page or the bar. */
 interface SearchPreset {
@@ -42,6 +42,16 @@ export function searchPath({ categoryId, query }: SearchPreset = {}): string {
     query: query ?? '',
   }).toString()
   return queryString === '' ? paths.search : `${paths.search}?${queryString}`
+}
+
+/**
+ * The results of a validated search: the plain results page, or « Mes recettes » (where the author is the member).
+ * It carries what was asked, so it is never the whole library.
+ */
+export function resultsPath(criteria: SearchCriteria, { mine }: { mine: boolean }): string {
+  const queryString = criteriaToParams(criteria).toString()
+  const base = mine ? paths.myRecipes : paths.search
+  return queryString === '' ? base : `${base}?${queryString}`
 }
 
 /** Whether a page is one of the two that search: the plain search and « Mes recettes ». */

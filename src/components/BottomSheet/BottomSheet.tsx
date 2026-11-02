@@ -1,5 +1,5 @@
 import { Dialog } from 'radix-ui'
-import { useRef, type ReactNode, type UIEvent } from 'react'
+import { useRef, type ReactNode, type RefObject, type UIEvent } from 'react'
 import { IconButton } from '../IconButton/IconButton'
 import { strings } from './strings'
 
@@ -8,6 +8,8 @@ export interface BottomSheetProps {
   onOpenChange: (open: boolean) => void
   /** The sheet's name and heading: « Filtres ». The focus lands on it when the sheet opens. */
   title: string
+  /** A field of the sheet that takes the focus when it opens, in place of the title (the keyboard comes up). */
+  initialFocusRef?: RefObject<HTMLElement | null> | undefined
   /** Under the title and fixed: the section pills of a long sheet. */
   toolbar?: ReactNode
   /** The part that scrolls. */
@@ -26,6 +28,7 @@ export function BottomSheet({
   open,
   onOpenChange,
   title,
+  initialFocusRef,
   toolbar,
   children,
   actions,
@@ -42,11 +45,12 @@ export function BottomSheet({
         <Dialog.Content
           aria-describedby={undefined}
           onOpenAutoFocus={(event) => {
-            // Radix would focus the first control; the sheet starts at its title, as designed.
+            // Radix would focus the first control; the sheet starts at its title, as designed, or at its field.
             event.preventDefault()
             opener.current =
               document.activeElement instanceof HTMLElement ? document.activeElement : null
-            titleRef.current?.focus()
+            const target = initialFocusRef?.current ?? titleRef.current
+            target?.focus()
           }}
           onCloseAutoFocus={(event) => {
             event.preventDefault()

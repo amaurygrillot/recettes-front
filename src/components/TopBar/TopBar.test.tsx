@@ -3,17 +3,15 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
-import type { NavigationItem } from '../TabBar/TabBar'
+import type { NavigationLink } from '../TabBar/TabBar'
 import { TopBar } from './TopBar'
 
-const VISITOR_TABS: readonly NavigationItem[] = [
+const VISITOR_TABS: readonly NavigationLink[] = [
   { to: '/', label: 'Accueil', icon: 'home', end: true },
-  { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/connexion', label: 'Se connecter', icon: 'log-in' },
 ]
-const MEMBER_TABS: readonly NavigationItem[] = [
+const MEMBER_TABS: readonly NavigationLink[] = [
   { to: '/', label: 'Accueil', icon: 'home', end: true },
-  { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/mes-recettes', label: 'Mes recettes', icon: 'book' },
   { to: '/compte', label: 'Compte', icon: 'user', avatarName: 'Camille Durand' },
 ]
@@ -24,7 +22,7 @@ interface BarOptions {
 }
 
 function renderBar(
-  items: readonly NavigationItem[],
+  items: readonly NavigationLink[],
   { path = '/', withSearch = false }: BarOptions = {},
 ) {
   const router = createMemoryRouter(
@@ -82,10 +80,16 @@ describe('TopBar', () => {
   })
 
   it('marks the page you are on, and only it, with aria-current', () => {
-    renderBar(MEMBER_TABS, { path: '/rechercher' })
+    renderBar(MEMBER_TABS, { path: '/mes-recettes' })
 
     const current = screen.getAllByRole('link').filter((link) => link.ariaCurrent === 'page')
-    expect(current.map((link) => link.textContent)).toEqual(['Rechercher'])
+    expect(current.map((link) => link.textContent)).toEqual(['Mes recettes'])
+  })
+
+  it('has no link to a search page: the search is the field', () => {
+    renderBar(MEMBER_TABS, { withSearch: true })
+
+    expect(screen.queryByRole('link', { name: 'Rechercher' })).not.toBeInTheDocument()
   })
 
   it('puts the search field between the tabs and the account', () => {
@@ -129,9 +133,9 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('link', { name: 'Compte' }))
     expect(router.state.location.pathname).toBe('/compte')
 
-    screen.getByRole('link', { name: 'Rechercher' }).focus()
+    screen.getByRole('link', { name: 'Mes recettes' }).focus()
     await user.keyboard('{Enter}')
-    expect(router.state.location.pathname).toBe('/rechercher')
+    expect(router.state.location.pathname).toBe('/mes-recettes')
   })
 
   it.each([

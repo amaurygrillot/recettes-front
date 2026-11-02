@@ -5,15 +5,28 @@ import { CreateLink } from '../CreateLink/CreateLink'
 import { Icon } from '../Icon/Icon'
 import type { IconName } from '../Icon/iconShapes'
 
-export interface NavigationItem {
-  to: string
+interface NavigationEntry {
   label: string
   icon: IconName
+}
+
+/** A tab that leads to a page. */
+export interface NavigationLink extends NavigationEntry {
+  to: string
   /** Active only on exactly this path (the home page), not on the pages beneath it. */
   end?: boolean | undefined
   /** The member's name: the top bar shows their avatar in place of the icon. The tab bar keeps the icon. */
   avatarName?: string | undefined
 }
+
+/** A tab that does something over the page instead of leading to another (« Rechercher » opens the search). */
+export interface NavigationAction extends NavigationEntry {
+  onSelect: () => void
+  /** The page being shown is what the action leads to: the tab is the yellow one. */
+  current: boolean
+}
+
+export type NavigationItem = NavigationLink | NavigationAction
 
 /** The one action that creates something; it is never a tab. */
 export interface CreateAction {
@@ -46,6 +59,17 @@ const PILL_ACTIVE = 'border-ink-900 bg-butter-300'
 const PILL_IDLE =
   'border-transparent group-active:border-dashed group-active:border-ink-900 group-active:bg-butter-200'
 
+function TabFace({ item, active }: { item: NavigationEntry; active: boolean }) {
+  return (
+    <>
+      <span className={classNames(PILL, active ? PILL_ACTIVE : PILL_IDLE)}>
+        <Icon name={item.icon} strokeWidth={active ? 2.5 : 2.2} />
+      </span>
+      {item.label}
+    </>
+  )
+}
+
 /**
  * The phone's navigation: tabs fixed at the bottom of the screen, up to 1023 px (the top bar takes
  * over from there). It sits at the end of the page and sticks to the bottom of the screen, so the
@@ -71,23 +95,29 @@ export function TabBar({
         aria-label={label}
         className="flex gap-0.5 border-t-2 border-ink-900 bg-paper-50 pt-2 pb-safe-bar"
       >
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end ?? false}
-            className={({ isActive }) => classNames(TAB, isActive ? TAB_ACTIVE : TAB_IDLE)}
-          >
-            {({ isActive }) => (
-              <>
-                <span className={classNames(PILL, isActive ? PILL_ACTIVE : PILL_IDLE)}>
-                  <Icon name={item.icon} strokeWidth={isActive ? 2.5 : 2.2} />
-                </span>
-                {item.label}
-              </>
-            )}
-          </NavLink>
-        ))}
+        {items.map((item) =>
+          'to' in item ? (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end ?? false}
+              className={({ isActive }) => classNames(TAB, isActive ? TAB_ACTIVE : TAB_IDLE)}
+            >
+              {({ isActive }) => <TabFace item={item} active={isActive} />}
+            </NavLink>
+          ) : (
+            <button
+              key={item.label}
+              type="button"
+              aria-haspopup="dialog"
+              aria-current={item.current ? 'page' : undefined}
+              onClick={item.onSelect}
+              className={classNames(TAB, 'cursor-pointer', item.current ? TAB_ACTIVE : TAB_IDLE)}
+            >
+              <TabFace item={item} active={item.current} />
+            </button>
+          ),
+        )}
       </nav>
     </div>
   )

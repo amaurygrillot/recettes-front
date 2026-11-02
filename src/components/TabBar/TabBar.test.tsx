@@ -1,21 +1,29 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
-import { TabBar, type CreateAction, type NavigationItem } from './TabBar'
+import { TabBar, type CreateAction, type NavigationItem, type NavigationLink } from './TabBar'
 
-const VISITOR_TABS: readonly NavigationItem[] = [
+const VISITOR_TABS: readonly NavigationLink[] = [
   { to: '/', label: 'Accueil', icon: 'home', end: true },
   { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/connexion', label: 'Se connecter', icon: 'log-in' },
 ]
-const MEMBER_TABS: readonly NavigationItem[] = [
+const MEMBER_TABS: readonly NavigationLink[] = [
   { to: '/', label: 'Accueil', icon: 'home', end: true },
   { to: '/rechercher', label: 'Rechercher', icon: 'search' },
   { to: '/mes-recettes', label: 'Mes recettes', icon: 'book' },
   { to: '/compte', label: 'Compte', icon: 'user' },
 ]
+/** The phone's bar: « Rechercher » is not a page but a button that opens the search over the page. */
+function tabsWithSearchAction(onSelect: () => void, current = false): readonly NavigationItem[] {
+  return [
+    { to: '/', label: 'Accueil', icon: 'home', end: true },
+    { label: 'Rechercher', icon: 'search', onSelect, current },
+    { to: '/compte', label: 'Compte', icon: 'user' },
+  ]
+}
 const CREATE: CreateAction = { to: '/recettes/nouvelle', label: 'Nouvelle recette' }
 
 interface BarOptions {
@@ -96,6 +104,46 @@ describe('TabBar', () => {
     await user.tab()
 
     expect(screen.getByRole('link', { name: 'Rechercher' })).toHaveFocus()
+  })
+
+  describe('a tab that does something instead of leading to a page', () => {
+    it('is a button that opens a dialog, in its place among the tabs', () => {
+      renderBar(tabsWithSearchAction(vi.fn()))
+
+      const navigation = within(screen.getByRole('navigation'))
+      const search = navigation.getByRole('button', { name: 'Rechercher' })
+      expect(search).toHaveAttribute('aria-haspopup', 'dialog')
+      expect(navigation.getAllByRole('link').map((link) => link.textContent)).toEqual([
+        'Accueil',
+        'Compte',
+      ])
+    })
+
+    it('does what it is for when pressed, and leaves the page where it is', async () => {
+      const onSelect = vi.fn()
+      const { router } = renderBar(tabsWithSearchAction(onSelect))
+
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Rechercher' }))
+
+      expect(onSelect).toHaveBeenCalledOnce()
+      expect(router.state.location.pathname).toBe('/')
+    })
+
+    it('is the current tab when told that its page is the one shown', () => {
+      renderBar(tabsWithSearchAction(vi.fn(), true), { path: '/rechercher' })
+
+      expect(screen.getByRole('button', { name: 'Rechercher' })).toHaveAttribute(
+        'aria-current',
+        'page',
+      )
+      expect(screen.getByRole('link', { name: 'Accueil' })).not.toHaveAttribute('aria-current')
+    })
+
+    it('is not the current tab otherwise', () => {
+      renderBar(tabsWithSearchAction(vi.fn()))
+
+      expect(screen.getByRole('button', { name: 'Rechercher' })).not.toHaveAttribute('aria-current')
+    })
   })
 
   describe('the « + »', () => {

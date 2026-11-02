@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { loginPath, paths, returnPathFrom, searchPath } from './paths'
+import { loginPath, paths, resultsPath, returnPathFrom, searchPath } from './paths'
+import { EMPTY_CRITERIA } from './searchCriteria'
 
 describe('paths', () => {
   it('builds the URLs that take an id', () => {
@@ -35,6 +36,30 @@ describe('searchPath', () => {
 
   it('is the plain search page when called with no argument', () => {
     expect(searchPath()).toBe(paths.search)
+  })
+})
+
+describe('resultsPath', () => {
+  it.each([
+    ['a word', { query: 'tarte' }, false, '/rechercher?q=tarte'],
+    [
+      'every criterion, the order included',
+      {
+        query: 'tarte',
+        categoryId: 'c-1',
+        exactCategory: true,
+        tagId: 't-1',
+        author: 'Odile',
+        sort: 'title-asc' as const,
+      },
+      false,
+      '/rechercher?q=tarte&categorie=c-1&exacte=1&tag=t-1&auteur=Odile&tri=titre-az',
+    ],
+    ['a filter alone', { categoryId: 'c-1' }, false, '/rechercher?categorie=c-1'],
+    ['a word in « Mes recettes »', { query: 'tarte' }, true, '/mes-recettes?q=tarte'],
+    ['nothing in « Mes recettes »', {}, true, '/mes-recettes'],
+  ])('leads to the results of %s', (_what, criteria, mine, expected) => {
+    expect(resultsPath({ ...EMPTY_CRITERIA, ...criteria }, { mine })).toBe(expected)
   })
 })
 
