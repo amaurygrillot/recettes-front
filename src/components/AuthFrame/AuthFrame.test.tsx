@@ -31,7 +31,7 @@ describe('AuthFrame', () => {
   it('welcomes with the mascot and her sentence instead of the named logo, when asked to', () => {
     renderFrame({ emblem: 'mascot' })
 
-    expect(screen.getByText("Qu'est-ce qu'on mijote aujourd'hui ?")).toBeVisible()
+    expect(screen.getByText('Qu’est-ce qu’on mijote aujourd’hui ?')).toBeVisible()
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 

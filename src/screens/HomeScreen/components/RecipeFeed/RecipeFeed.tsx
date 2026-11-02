@@ -49,7 +49,7 @@ export function RecipeFeed({ feed, mayCreate }: RecipeFeedProps) {
     case 'empty':
       return mayCreate ? (
         <EmptyState
-          illustration={<Mascot mood="happy" size="large" />}
+          illustration={<Mascot mood="happy" size="xl" />}
           title={strings.empty.member.title}
           description={strings.empty.member.description}
           size="compact"
@@ -60,7 +60,7 @@ export function RecipeFeed({ feed, mayCreate }: RecipeFeedProps) {
         </EmptyState>
       ) : (
         <EmptyState
-          illustration={<Mascot mood="happy" size="large" />}
+          illustration={<Mascot mood="happy" size="xl" />}
           title={strings.empty.visitor.title}
           description={strings.empty.visitor.description}
           size="compact"

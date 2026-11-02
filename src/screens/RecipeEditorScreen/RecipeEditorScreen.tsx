@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react'
 import { useParams } from 'react-router'
 import { useRecipe } from '../../api/recipes'
 import { useSession } from '../../api/session'
+import { failureIllustration } from '../../app/failureIllustration'
 import { failureMessage } from '../../app/failureMessage'
 import { canManageRecipe } from '../../app/navigation'
 import { paths } from '../../app/paths'
@@ -30,9 +32,21 @@ function EditorLoading() {
   )
 }
 
-function EditorFailure({ cause, retry }: { cause: string; retry: () => void }) {
+interface EditorFailureProps {
+  cause: string
+  retry: () => void
+  /** The sleeping mascot, when the cause is a missing connection. */
+  illustration?: ReactNode
+}
+
+function EditorFailure({ cause, retry, illustration }: EditorFailureProps) {
   return (
-    <ErrorState title={strings.loadFailed} description={cause} headingLevel={2}>
+    <ErrorState
+      title={strings.loadFailed}
+      description={cause}
+      headingLevel={2}
+      illustration={illustration}
+    >
       <Button icon="refresh" fullWidth onClick={retry}>
         {strings.retry}
       </Button>
@@ -63,6 +77,7 @@ function RecipeToChange({ id, references }: { id: string; references: References
         {failure.kind !== 'not-found' && failure.kind !== 'forbidden' && (
           <EditorFailure
             cause={failureMessage(failure)}
+            illustration={failureIllustration(failure)}
             retry={() => {
               void recipe.refetch()
             }}

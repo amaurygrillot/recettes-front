@@ -28,7 +28,7 @@ export function RecipeProblem({ failure, retry }: RecipeProblemProps) {
   if (failure.kind === 'not-found') {
     return (
       <EmptyState
-        illustration={<Mascot mood="lost" size="large" />}
+        illustration={<Mascot mood="lost" size="xl" />}
         title={strings.notFound.title}
         description={strings.notFound.description}
         size="compact"

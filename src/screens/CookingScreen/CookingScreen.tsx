@@ -75,7 +75,7 @@ export function CookingScreen() {
     return (
       <Plain>
         <EmptyState
-          illustration={<Mascot mood="lost" size="large" />}
+          illustration={<Mascot mood="lost" size="xl" />}
           title={strings.noSteps.title}
           description={strings.noSteps.description}
           size="compact"

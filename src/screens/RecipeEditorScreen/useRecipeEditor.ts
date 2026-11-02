@@ -113,13 +113,16 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
   const leaveForRecipe = useEffectEvent((id: string) => {
     draft.discard()
     // A recipe that was just created is celebrated by the page it lands on; a change is not.
-    const state = recipeId === undefined ? JUST_PUBLISHED_STATE : undefined
+    const created = recipeId === undefined
     logger.info(
-      recipeId === undefined
+      created
         ? 'A recipe was created: leaving for its page'
         : 'A recipe was changed: leaving for its page',
     )
-    void navigate(paths.recipe(id), { replace: true, state })
+    void navigate(paths.recipe(id), {
+      replace: true,
+      state: created ? JUST_PUBLISHED_STATE : undefined,
+    })
   })
   useEffect(() => {
     if (saving.savedId !== undefined) leaveForRecipe(saving.savedId)

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { classNames } from '../../lib/classNames'
-import { LOGO_TONES } from '../Logo/logoTones'
+import { LOGO_TONES, type LogoTone } from '../Logo/logoTones'
 import { ASLEEP, CELEBRATING, DEJECTED, HAPPY, LOST, SMITTEN, SURPRISED } from './mascotShapes'
 
 /** Contente, dépitée, coup de cœur, surprise, perdue, endormie, en fête. */
@@ -13,6 +13,8 @@ export type MascotSize = 'xl' | 'large' | 'medium' | 'small'
 export interface MascotProps {
   mood: MascotMood
   size: MascotSize
+  /** `on-butter` on a yellow background, where her yellow body would melt into it. */
+  tone?: LogoTone
 }
 
 const DRAWINGS: Record<MascotMood, ReactElement> = {
@@ -34,7 +36,7 @@ const HEIGHT_RATIO = 1.1
  * Mijotine, the cocotte of the logo grown up: its lid, its steam and its face change with the mood. Always
  * decorative: the place that shows her also says in words what happened, so the mood is never the only signal.
  */
-export function Mascot({ mood, size }: MascotProps) {
+export function Mascot({ mood, size, tone = 'color' }: MascotProps) {
   const width = WIDTHS[size]
 
   return (
@@ -43,7 +45,7 @@ export function Mascot({ mood, size }: MascotProps) {
       width={width}
       height={width * HEIGHT_RATIO}
       aria-hidden="true"
-      className={classNames('shrink-0', LOGO_TONES.color, '[--logo-herb:var(--color-herb)]')}
+      className={classNames('shrink-0', LOGO_TONES[tone], '[--logo-herb:var(--color-herb)]')}
     >
       {DRAWINGS[mood]}
     </svg>

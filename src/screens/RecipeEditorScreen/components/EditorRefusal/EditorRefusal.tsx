@@ -38,7 +38,7 @@ export function EditorRefusal({ kind, recipeId }: EditorRefusalProps) {
   const { gone } = strings
   return (
     <EmptyState
-      illustration={<Mascot mood="lost" size="large" />}
+      illustration={<Mascot mood="lost" size="xl" />}
       title={gone.title}
       description={gone.text}
       size="compact"

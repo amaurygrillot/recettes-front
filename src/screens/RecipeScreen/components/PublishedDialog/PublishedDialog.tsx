@@ -24,7 +24,7 @@ export function PublishedDialog({ open, onClose }: PublishedDialogProps) {
       description={strings.published.description}
     >
       <Button onClick={onClose}>{strings.published.see}</Button>
-      <LinkButton to={paths.newRecipe} variant="secondary" icon="plus">
+      <LinkButton to={paths.newRecipe} variant="secondary">
         {strings.published.another}
       </LinkButton>
     </AlertDialog>

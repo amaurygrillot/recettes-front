@@ -121,7 +121,7 @@ export function AuthFrame({ layout, back, onSubmit, emblem = 'logo', children }:
             <Logo variant="large" tone="on-butter" size={PHONE_LOGO[layout]} />
           ) : (
             <div className="flex flex-col items-center gap-2 px-4 text-center">
-              <Mascot mood="happy" size="large" />
+              <Mascot mood="happy" size="large" tone="on-butter" />
               <p className="font-title text-label font-extrabold text-balance text-ink-900">
                 {strings.welcome}
               </p>

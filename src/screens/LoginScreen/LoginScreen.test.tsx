@@ -52,7 +52,7 @@ describe('LoginScreen', () => {
   it('is a task of its own: the mascot welcomes, and there are neither tabs nor a top bar', () => {
     renderLogin()
 
-    expect(screen.getByText("Qu'est-ce qu'on mijote aujourd'hui ?")).toBeVisible()
+    expect(screen.getByText('Qu’est-ce qu’on mijote aujourd’hui ?')).toBeVisible()
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
   })
 

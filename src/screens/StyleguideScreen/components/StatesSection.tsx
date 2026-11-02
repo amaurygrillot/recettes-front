@@ -41,7 +41,7 @@ export function StatesSection() {
         </StyleguideSpecimen>
         <StyleguideSpecimen label={states.compactEmpty}>
           <EmptyState
-            illustration={<Mascot mood="happy" size="large" />}
+            illustration={<Mascot mood="happy" size="xl" />}
             title={states.emptyBook}
             description={states.emptyBookText}
             size="compact"

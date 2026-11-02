@@ -118,7 +118,7 @@ Public: the content is the same for a visitor, a member and the author; only the
   arrows, the « 1 / 4 » counter bottom-right, dots and thumbnails under it), then the title block, the ingredients, « Cuisiner pas à pas »,
   the preparation and the cook's tip. A tablet is the same in a 640 px column. A desktop is a 12-column grid: gallery (7) beside the title
   block (5, with « Modifier » and « Supprimer » for who may), then the ingredients (5, sticky at 24 px, with the cooking button) beside the
-  steps (7, 653 px of text at most). `PhotoSlider` is the shared gallery: one photo shows no controls, none shows the butter stand-in.
+  steps (7, 653 px of text at most). `PhotoSlider` is the shared gallery: one photo shows no controls, none shows the « no photo yet » mascot (R4).
 - **Ingredients**: groups with their title, quantity in bold, `ingredientLine` adds « de » or « d' » between the unit and the name (silent
   or aspirated h: the short list of aspirated words is in `lib/ingredientLine.ts`) and writes quantities with the French comma.
 - **Steps**: numbered consecutively (`StepNumber`, the brick stamp), text in `RichTextView`; one photo shows large, several as a row of
@@ -246,7 +246,7 @@ task (no tab bar), behind `requireMember`. Checked in the browser pane at 390, 7
 endpoint it calls, including `POST /media` and `POST /ingredients`).
 
 - **It opens when it can be used**: the vocabulary (category tree, tags, units: three public calls) is loaded first, then, to change a recipe, the
-  recipe itself. Loading, a failure (« Impossible d'ouvrir l'éditeur » with « Réessayer »), a recipe that is not there (`404`, the bowl) and a recipe
+  recipe itself. Loading, a failure (« Impossible d'ouvrir l'éditeur » with « Réessayer »), a recipe that is not there (`404`, the lost mascot) and a recipe
   the member may not change (`403` from the server, or `canManageRecipe` false: the padlock, « Retour à la recette ») are whole pages, never a
   form that could not be saved. The editor is keyed by the recipe: going from one recipe to another starts again from the new one.
 - **One form, one model** (`editorModel.ts`): `EditorValues` is the whole recipe in the shape the form needs (a category is `{ id, label }`, a
@@ -415,10 +415,10 @@ The logo's cocotte, grown, with a name (Mijotine), seven moods and four sizes, p
   lockup but shows the compact mark (no name) under 360 px; the entry pages show the large logo with its cocotte at 190 px, except the
   screens that have a « Retour » pill (registration, forgotten password), which keep 160 px since the pill would cover the steam of a larger logo; the favicon and icons are R2's.
 
-R4, as built: empty and error blocks of a page (`regular`) hold the `xl` mascot, the blocks among others (`compact`) the `large` one. `ErrorState` takes an
+R4, as built: every empty and error block, `regular` or `compact`, holds the `xl` mascot (the board draws 215 to 260 px: snapped to the four sizes); the sign-in band holds the `large` one (the band is 250 px high, the board draws it on a paper page instead); a cover without a photo the `large` one too, with its caption pulled into the drawing's empty margin so both stay whole in the narrowest cards. On the yellow band the mascot takes the `on-butter` tone, like the logo. The recipe page forgets `justPublished` from its history entry at once (`useJustPublished`), so going back to it never celebrates twice. `ErrorState` takes an
 `illustration` in place of its badge (the sleeping mascot for « no connection », through `app/failureIllustration`), `AlertDialog` an
 `illustration` in place of its icon badge (the celebration), and `AuthFrame` an `emblem` (`logo` or `mascot`). A recipe card or gallery with no photo is
 the shared `NoPhoto` (dejected mascot, « Pas encore de photo », on paper stripes); a photo that exists but cannot be loaded keeps the butter stripes
-and the cutlery. The words of the **lost** states and of an empty « Mes recettes » are the board's (« Je n'ai rien trouvé… », « Ajoute ta première
-recette »); the sentence under « Je n'ai rien trouvé… » names the text searched, and says to remove a filter only when there is one. **À valider**:
-on the sign-in the happy mascot and « Qu'est-ce qu'on mijote aujourd'hui ? » replace the name of the application (as the board draws it).
+and the cutlery. The words of the **lost** states and of an empty « Mes recettes » are the board's (« Je n’ai rien trouvé… », « Ajoute ta première
+recette »); the sentence under « Je n’ai rien trouvé… » names the text searched, and says to remove a filter only when there is one. **À valider**:
+on the sign-in the happy mascot and « Qu’est-ce qu’on mijote aujourd’hui ? » replace the name of the application (as the board draws it).

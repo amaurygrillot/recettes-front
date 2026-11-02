@@ -8,8 +8,11 @@ import { strings } from './strings'
 export function NoPhoto() {
   return (
     <div className="flex size-full flex-col items-center justify-center gap-0.5 overflow-hidden bg-paper-stripes">
-      <Mascot mood="dejected" size="large" />
-      <p className="font-hand text-annotation-sm text-mustard-700">{strings.message}</p>
+      {/* Her drawing has an empty margin below: pulling the words into it keeps both whole in the smallest cards. */}
+      <div className="-mb-3">
+        <Mascot mood="dejected" size="large" />
+      </div>
+      <p className="font-hand text-annotation text-mustard-700">{strings.message}</p>
     </div>
   )
 }

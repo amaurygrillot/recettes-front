@@ -99,7 +99,7 @@ export const strings = {
       create: 'Créer ma première recette',
     },
     emptySearch: {
-      title: "Je n'ai rien trouvé…",
+      title: 'Je n’ai rien trouvé…',
       descriptionFor: (query: string, hasFilters: boolean) =>
         hasFilters
           ? `Aucune recette ne contient « ${query} ». Essaie un seul mot, ou enlève un filtre.`

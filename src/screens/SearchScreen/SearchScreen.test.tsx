@@ -313,7 +313,7 @@ describe('SearchScreen on a phone', () => {
       const { router } = renderSearch('/rechercher?q=tarte%20aux%20poires&categorie=desserts')
       const user = userEvent.setup()
 
-      expect(await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })).toBeVisible()
+      expect(await screen.findByRole('heading', { name: 'Je n’ai rien trouvé…' })).toBeVisible()
       expect(
         screen.getByText(
           'Aucune recette ne contient « tarte aux poires ». Essaie un seul mot, ou enlève un filtre.',
@@ -330,7 +330,7 @@ describe('SearchScreen on a phone', () => {
       serveBackend(() => HttpResponse.json(page(0, [], { last: true, total: 0 })))
       renderSearch('/rechercher?tag=t-fruits')
 
-      expect(await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })).toBeVisible()
+      expect(await screen.findByRole('heading', { name: 'Je n’ai rien trouvé…' })).toBeVisible()
       expect(screen.getByText(/Aucune recette ne correspond à ces filtres/)).toBeVisible()
     })
 
@@ -338,7 +338,7 @@ describe('SearchScreen on a phone', () => {
       serveBackend(() => HttpResponse.json(page(0, [], { last: true, total: 0 })))
       renderSearch('/rechercher?q=zzz')
 
-      await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })
+      await screen.findByRole('heading', { name: 'Je n’ai rien trouvé…' })
 
       expect(screen.queryByRole('button', { name: 'Effacer les filtres' })).not.toBeInTheDocument()
     })
@@ -388,7 +388,7 @@ describe('SearchScreen on a phone', () => {
     it('has no accessibility violation when nothing is found or when it failed', async () => {
       serveBackend(() => HttpResponse.json(page(0, [], { last: true, total: 0 })))
       const empty = renderSearch('/rechercher?q=zzz&tag=t-fruits')
-      await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })
+      await screen.findByRole('heading', { name: 'Je n’ai rien trouvé…' })
       await expectNoAccessibilityViolations(empty.container)
       empty.unmount()
 
@@ -710,7 +710,7 @@ describe('MyRecipesScreen', () => {
     signInAs()
     renderSearch('/mes-recettes?q=zzz')
 
-    expect(await screen.findByRole('heading', { name: "Je n'ai rien trouvé…" })).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'Je n’ai rien trouvé…' })).toBeVisible()
   })
 
   it("shows nothing without a member, rather than everybody's recipes under this title", () => {

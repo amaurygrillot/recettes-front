@@ -38,7 +38,7 @@ function EmptyResults({
   if (!isNarrowed(criteria)) {
     return scope.kind === 'mine' ? (
       <EmptyState
-        illustration={<Mascot mood="happy" size="large" />}
+        illustration={<Mascot mood="happy" size="xl" />}
         title={states.emptyMine.title}
         description={states.emptyMine.description}
         size="compact"
@@ -49,7 +49,7 @@ function EmptyResults({
       </EmptyState>
     ) : (
       <EmptyState
-        illustration={<Mascot mood="happy" size="large" />}
+        illustration={<Mascot mood="happy" size="xl" />}
         title={states.emptyBase.title}
         description={states.emptyBase.description}
         size="compact"
@@ -60,7 +60,7 @@ function EmptyResults({
   const query = criteria.query.trim()
   return (
     <EmptyState
-      illustration={<Mascot mood="lost" size="large" />}
+      illustration={<Mascot mood="lost" size="xl" />}
       title={states.emptySearch.title}
       description={
         query === ''

@@ -136,7 +136,7 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   (16, ink-700; bold brick with an alert icon for an error; bold herb for a success). The password toggle, the textarea with
   counter, the select, the checkbox row and the search pill live on the `Champs-avances` board and come with their screens.
 - **Recipe card** (`Carte-accueil`, local to HomeScreen until a second screen needs it): radius 24, 2 px ink, `card` shadow, 4:3
-  photo (butter stripes and a cutlery in a cream disc without one), body padding 14 / 18 / 16 and gap 10; category pills 32 px
+  photo (without one: the dejected mascot on paper stripes, `NoPhoto`; butter stripes and a cutlery in a cream disc when the photo cannot be loaded), body padding 14 / 18 / 16 and gap 10; category pills 32 px
   (butter-200, bold), tag pills 30 px (paper-50, ink-500 outline), « +N » pill dashed on paper-200; title Fraunces 24 / 30 on at
   most two lines with 60 px reserved; byline 16 / 22 in ink-700. Pressed: butter-100, no shadow, 2 px down.
 - **Sheet** (`BottomSheet`): corners `rounded-sheet` (28) on top on a phone, all round and centered from 600 px, 85 % of the screen high at most, `shadow-sheet`, dimmed page `ink-900/58`.

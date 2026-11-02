@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { delay, http, HttpResponse } from 'msw'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -640,6 +640,22 @@ describe('RecipeScreen', () => {
         .click(await screen.findByRole('link', { name: 'Écrire une autre recette' }))
 
       expect(router.state.location.pathname).toBe('/recettes/nouvelle')
+    })
+
+    it('does not celebrate again when the way back leads to it', async () => {
+      serveRecipe()
+      const { router } = renderJustPublished()
+      await userEvent
+        .setup()
+        .click(await screen.findByRole('link', { name: 'Écrire une autre recette' }))
+      expect(router.state.location.pathname).toBe('/recettes/nouvelle')
+
+      await act(() => router.navigate(-1))
+
+      expect(
+        await screen.findByRole('heading', { level: 1, name: 'Tarte fine aux pommes' }),
+      ).toBeVisible()
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     })
 
     it('is not celebrated on an ordinary visit', async () => {

@@ -1,10 +1,10 @@
-import { useLocation, useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { useRecipe } from '../../api/recipes'
 import { useCreateButtonMode } from '../../app/createButtonMode'
-import { isJustPublished } from '../../app/justPublished'
 import { paths } from '../../app/paths'
 import { RecipeProblem } from '../../app/RecipeProblem/RecipeProblem'
 import { useGoBack } from '../../app/useGoBack'
+import { useJustPublished } from '../../app/useJustPublished'
 import { IconButton } from '../../components/IconButton/IconButton'
 import { PublishedDialog } from './components/PublishedDialog/PublishedDialog'
 import { ReadyRecipe } from './components/ReadyRecipe/ReadyRecipe'
@@ -20,8 +20,7 @@ export function RecipeScreen() {
   const { id = '' } = useParams()
   const recipe = useRecipe(id)
   const goBack = useGoBack(paths.search)
-  const location = useLocation()
-  const navigate = useNavigate()
+  const published = useJustPublished()
   // The page has its own actions; the shell's « + » would only cover the cook's tip.
   useCreateButtonMode('hidden')
 
@@ -65,13 +64,7 @@ export function RecipeScreen() {
       ) : (
         <>
           <ReadyRecipe recipe={view} backButton={backButton} />
-          <PublishedDialog
-            open={isJustPublished(location.state)}
-            onClose={() => {
-              // The entry no longer says « just published »: a reload or a return does not celebrate again.
-              void navigate(location.pathname, { replace: true })
-            }}
-          />
+          <PublishedDialog open={published.celebrating} onClose={published.dismiss} />
         </>
       )}
     </main>
