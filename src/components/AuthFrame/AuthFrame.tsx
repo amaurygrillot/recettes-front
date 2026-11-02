@@ -3,6 +3,8 @@ import { Link } from 'react-router'
 import { classNames } from '../../lib/classNames'
 import { Icon } from '../Icon/Icon'
 import { Logo } from '../Logo/Logo'
+import { Mascot } from '../Mascot/Mascot'
+import { strings } from './strings'
 
 /**
  * `form`: the logo on a 232 px butter band, the way back in its corner. `login`: the logo larger
@@ -17,6 +19,8 @@ export interface AuthFrameProps {
   back?: { to: string; label: string } | undefined
   /** Makes the content a form (validated by the form itself, not by the browser). */
   onSubmit?: SubmitEventHandler<HTMLFormElement> | undefined
+  /** What the band shows: the logo with its name, or (the sign-in) the happy mascot with the welcome sentence. */
+  emblem?: 'logo' | 'mascot'
   children: ReactNode
 }
 
@@ -26,13 +30,17 @@ const BAND_HEIGHTS: Record<AuthLayout, string> = {
   welcome: 'h-70',
 }
 
-/** The logo's size on a phone; from a tablet it is 160 px everywhere (300 px beside the sign-in form). */
-const PHONE_LOGO: Record<AuthLayout, number> = { form: 160, login: 196, welcome: 196 }
+/**
+ * The logo's height on a phone, name included. The board gives the cocotte 190 px (228 with the name): the sign-in and the welcome
+ * have it. The screens with a way back keep 160, since the « Retour » pill in the corner would cover the steam of a larger one.
+ * From a tablet it is 160 px everywhere (300 px beside the sign-in form).
+ */
+const PHONE_LOGO: Record<AuthLayout, number> = { form: 160, login: 228, welcome: 228 }
 
 const LOGO_SHRINKS: Record<AuthLayout, string> = {
   form: '',
-  login: 'tablet:[&>svg]:h-40 tablet:[&>svg]:w-auto desktop:[&>svg]:h-75',
-  welcome: 'tablet:[&>svg]:h-40 tablet:[&>svg]:w-auto',
+  login: 'tablet:[&_svg]:h-40 tablet:[&_svg]:w-auto desktop:[&_svg]:h-75',
+  welcome: 'tablet:[&_svg]:h-40 tablet:[&_svg]:w-auto',
 }
 
 interface SideBySide {
@@ -61,7 +69,7 @@ const SIDE_BY_SIDE: Record<AuthLayout, SideBySide> = {
  * the logo on a phone; on a tablet and a desktop the logo above a centred 520 px card on calm
  * stripes. No tabs and no top bar: these are tasks of their own, the screen has the whole page.
  */
-export function AuthFrame({ layout, back, onSubmit, children }: AuthFrameProps) {
+export function AuthFrame({ layout, back, onSubmit, emblem = 'logo', children }: AuthFrameProps) {
   const side = SIDE_BY_SIDE[layout]
 
   const bodyClassName = classNames(
@@ -109,7 +117,16 @@ export function AuthFrame({ layout, back, onSubmit, children }: AuthFrameProps) 
             side.band,
           )}
         >
-          <Logo variant="large" tone="on-butter" size={PHONE_LOGO[layout]} />
+          {emblem === 'logo' ? (
+            <Logo variant="large" tone="on-butter" size={PHONE_LOGO[layout]} />
+          ) : (
+            <div className="flex flex-col items-center gap-2 px-4 text-center">
+              <Mascot mood="happy" size="large" tone="on-butter" />
+              <p className="font-title text-label font-extrabold text-balance text-ink-900">
+                {strings.welcome}
+              </p>
+            </div>
+          )}
         </div>
         {onSubmit === undefined ? (
           <div className={bodyClassName}>{content}</div>

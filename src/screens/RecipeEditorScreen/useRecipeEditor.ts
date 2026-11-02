@@ -3,6 +3,7 @@ import { useEffect, useEffectEvent, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { useSession } from '../../api/session'
+import { JUST_PUBLISHED_STATE } from '../../app/justPublished'
 import { paths } from '../../app/paths'
 import { useGoBack } from '../../app/useGoBack'
 import { useToasts } from '../../app/useToasts'
@@ -111,7 +112,17 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
 
   const leaveForRecipe = useEffectEvent((id: string) => {
     draft.discard()
-    void navigate(paths.recipe(id), { replace: true })
+    // A recipe that was just created is celebrated by the page it lands on; a change is not.
+    const created = recipeId === undefined
+    logger.info(
+      created
+        ? 'A recipe was created: leaving for its page'
+        : 'A recipe was changed: leaving for its page',
+    )
+    void navigate(paths.recipe(id), {
+      replace: true,
+      state: created ? JUST_PUBLISHED_STATE : undefined,
+    })
   })
   useEffect(() => {
     if (saving.savedId !== undefined) leaveForRecipe(saving.savedId)

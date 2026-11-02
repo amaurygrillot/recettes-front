@@ -136,7 +136,7 @@ describe('the phone « + » of the shell', () => {
     it('hides it in « Mes recettes » while the list is empty, the empty state having its own button', async () => {
       serveFeed([])
       renderRoutes(routes, '/mes-recettes')
-      await screen.findByText("Tu n'as pas encore de recette")
+      await screen.findByText('Ajoute ta première recette')
 
       expect(phoneCreate()).not.toBeInTheDocument()
     })

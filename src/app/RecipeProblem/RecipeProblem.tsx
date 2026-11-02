@@ -1,9 +1,10 @@
 import type { ApiFailure } from '../../api/failure'
-import { BowlIllustration } from '../../components/BowlIllustration/BowlIllustration'
+import { Mascot } from '../../components/Mascot/Mascot'
 import { Button } from '../../components/Button/Button'
 import { EmptyState } from '../../components/EmptyState/EmptyState'
 import { ErrorState } from '../../components/ErrorState/ErrorState'
 import { LinkButton } from '../../components/LinkButton/LinkButton'
+import { failureIllustration } from '../failureIllustration'
 import { failureMessage, feedFailureText } from '../failureMessage'
 import { paths } from '../paths'
 import { strings } from './strings'
@@ -27,7 +28,7 @@ export function RecipeProblem({ failure, retry }: RecipeProblemProps) {
   if (failure.kind === 'not-found') {
     return (
       <EmptyState
-        illustration={<BowlIllustration variant="no-result" size="compact" />}
+        illustration={<Mascot mood="lost" size="xl" />}
         title={strings.notFound.title}
         description={strings.notFound.description}
         size="compact"
@@ -42,7 +43,13 @@ export function RecipeProblem({ failure, retry }: RecipeProblemProps) {
 
   const { title, description } = failedText(failure)
   return (
-    <ErrorState title={title} description={description} size="compact" headingLevel={1}>
+    <ErrorState
+      title={title}
+      description={description}
+      size="compact"
+      headingLevel={1}
+      illustration={failureIllustration(failure)}
+    >
       <Button icon="refresh" fullWidth onClick={retry}>
         {strings.failed.retry}
       </Button>

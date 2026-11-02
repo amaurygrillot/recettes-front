@@ -199,6 +199,8 @@ describe('RecipeEditorScreen: sending', () => {
 
     expect(await screen.findByText('Page de la recette')).toBeVisible()
     expect(router.state.location.pathname).toBe('/recettes/r-new')
+    // The recipe page celebrates a creation.
+    expect(router.state.location.state).toEqual({ justPublished: true })
     expect(backend.sent).toEqual([
       {
         title: 'Tarte aux pommes',
@@ -224,6 +226,8 @@ describe('RecipeEditorScreen: sending', () => {
 
     expect(await screen.findByText('Page de la recette')).toBeVisible()
     expect(router.state.location.pathname).toBe('/recettes/r-1')
+    // A change is not celebrated.
+    expect(router.state.location.state).toBeNull()
     expect(backend.sent).toHaveLength(1)
     expect(backend.sent[0]).toMatchObject({
       title: 'Tarte tatin',

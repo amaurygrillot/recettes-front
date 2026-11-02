@@ -136,7 +136,7 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
   (16, ink-700; bold brick with an alert icon for an error; bold herb for a success). The password toggle, the textarea with
   counter, the select, the checkbox row and the search pill live on the `Champs-avances` board and come with their screens.
 - **Recipe card** (`Carte-accueil`, local to HomeScreen until a second screen needs it): radius 24, 2 px ink, `card` shadow, 4:3
-  photo (butter stripes and a cutlery in a cream disc without one), body padding 14 / 18 / 16 and gap 10; category pills 32 px
+  photo (without one: the dejected mascot on paper stripes, `NoPhoto`; butter stripes and a cutlery in a cream disc when the photo cannot be loaded), body padding 14 / 18 / 16 and gap 10; category pills 32 px
   (butter-200, bold), tag pills 30 px (paper-50, ink-500 outline), « +N » pill dashed on paper-200; title Fraunces 24 / 30 on at
   most two lines with 60 px reserved; byline 16 / 22 in ink-700. Pressed: butter-100, no shadow, 2 px down.
 - **Sheet** (`BottomSheet`): corners `rounded-sheet` (28) on top on a phone, all round and centered from 600 px, 85 % of the screen high at most, `shadow-sheet`, dimmed page `ink-900/58`.
@@ -152,8 +152,8 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
 - **Create link** (`CreateLink`): the yellow « + », 64 px tall, round alone or extended with « Nouvelle recette ».
 - **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (no animation under `prefers-reduced-motion`), announced as
   « Chargement… » by one status region, shown only after 300 ms, at most 6 per list.
-- **Empty state**: dashed ink-500 frame, radius 24, 176 px ink-line bowl, state title, 18 px text, one 64 px button.
-  **Compact size** (`size="compact"`, drawn on `Accueil-etats` for a block among others): padding 20 / 18, gap 12, 140 px bowl,
+- **Empty state**: dashed ink-500 frame, radius 24, 240 px mascot (R4; it was a 176 px ink-line bowl), state title, 18 px text, one 64 px button.
+  **Compact size** (`size="compact"`, drawn on `Accueil-etats` for a block among others): padding 20 / 18, gap 12, 160 px mascot (R4; it was a 140 px bowl),
   title 26 / 32; the error block likewise has a 64 px badge (icon 32) instead of 80 px.
   **Error block**: ink outline, `card` shadow, 80 px brick circle with the warning icon, dialog title, 18 px text, a primary
   and a quiet button. **Error banner**: brick on brick-bg, radius 16, alert icon, bold message, optional 56 px action.

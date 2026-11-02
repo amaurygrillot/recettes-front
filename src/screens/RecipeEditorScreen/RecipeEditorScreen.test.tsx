@@ -161,6 +161,17 @@ describe('RecipeEditorScreen', () => {
       await findForm()
     })
 
+    it('shows the sleeping mascot, not the warning, when there is no connection', async () => {
+      useEditorBackend()
+      server.use(http.get(`${API}/recipes/:id`, () => HttpResponse.error()))
+      renderEditor('/recettes/r-1/modifier')
+
+      const alert = await screen.findByRole('alert')
+
+      // The mascot's drawing is 200 x 220; the warning badge's icon is 24 x 24.
+      expect(alert.querySelector('svg')).toHaveAttribute('viewBox', '0 0 200 220')
+    })
+
     it('does not open for someone who may not change it', async () => {
       useEditorBackend({ recipe: storedRecipe({ author: { id: 'u-2', username: 'Hugo' } }) })
       renderEditor('/recettes/r-1/modifier')

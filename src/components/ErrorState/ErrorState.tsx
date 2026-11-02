@@ -17,6 +17,8 @@ export interface ErrorStateProps {
   headingLevel?: 1 | 2
   /** In the badge: the warning triangle by default, the padlock for what the person may not do. */
   icon?: IconName
+  /** Instead of the badge: the Mascot, for a failure that is nobody's fault (no connection). */
+  illustration?: ReactNode
 }
 
 const BADGES: Record<StateSize, string> = { regular: 'size-20', compact: 'size-16' }
@@ -30,6 +32,7 @@ export function ErrorState({
   size = 'regular',
   headingLevel = 2,
   icon = 'warning',
+  illustration,
 }: ErrorStateProps) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2'
   return (
@@ -40,14 +43,16 @@ export function ErrorState({
         STATE_FRAMES[size],
       )}
     >
-      <div
-        className={classNames(
-          'grid place-items-center rounded-full border-3 border-brick bg-brick-bg text-brick',
-          BADGES[size],
-        )}
-      >
-        <Icon name={icon} size={ICON_SIZES[size]} strokeWidth={2.4} />
-      </div>
+      {illustration ?? (
+        <div
+          className={classNames(
+            'grid place-items-center rounded-full border-3 border-brick bg-brick-bg text-brick',
+            BADGES[size],
+          )}
+        >
+          <Icon name={icon} size={ICON_SIZES[size]} strokeWidth={2.4} />
+        </div>
+      )}
       <Heading className="font-title text-dialog-title text-ink-900">{title}</Heading>
       <p className="text-body text-ink-800">{description}</p>
       {children ? <div className="flex w-full flex-col gap-3">{children}</div> : null}

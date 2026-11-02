@@ -1,5 +1,5 @@
 import { paths } from '../../../../app/paths'
-import { BowlIllustration } from '../../../../components/BowlIllustration/BowlIllustration'
+import { Mascot } from '../../../../components/Mascot/Mascot'
 import { EmptyState } from '../../../../components/EmptyState/EmptyState'
 import { ErrorState } from '../../../../components/ErrorState/ErrorState'
 import { LinkButton } from '../../../../components/LinkButton/LinkButton'
@@ -15,7 +15,7 @@ export interface EditorRefusalProps {
 
 /**
  * Instead of a form that could not be saved: the person may not change this recipe (a padlock,
- * and the way back to reading it), or it is not there any more (the empty bowl, a finding rather
+ * and the way back to reading it), or it is not there any more (the lost mascot, a finding rather
  * than a fault). One cause, one message, one main way out.
  */
 export function EditorRefusal({ kind, recipeId }: EditorRefusalProps) {
@@ -38,7 +38,7 @@ export function EditorRefusal({ kind, recipeId }: EditorRefusalProps) {
   const { gone } = strings
   return (
     <EmptyState
-      illustration={<BowlIllustration variant="no-result" size="compact" />}
+      illustration={<Mascot mood="lost" size="xl" />}
       title={gone.title}
       description={gone.text}
       size="compact"

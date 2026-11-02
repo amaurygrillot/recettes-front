@@ -90,8 +90,9 @@ export const strings = {
   // cause the design words in its own way; any other uses the sentence of its cause.
   feedFailures: {
     network: {
-      title: 'Pas de connexion pour le moment',
-      description: "Vérifie ta connexion internet, puis réessaie. Tes recettes t'attendent.",
+      title: 'Je fais une petite sieste',
+      description:
+        "Pas de connexion pour le moment. Vérifie ta connexion internet, puis réessaie. Tes recettes t'attendent.",
     },
     otherTitle: 'Impossible de charger les recettes',
     nextPage: 'Impossible de charger la suite.',

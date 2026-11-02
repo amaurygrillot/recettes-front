@@ -4,7 +4,9 @@ import { useCreateButtonMode } from '../../app/createButtonMode'
 import { paths } from '../../app/paths'
 import { RecipeProblem } from '../../app/RecipeProblem/RecipeProblem'
 import { useGoBack } from '../../app/useGoBack'
+import { useJustPublished } from '../../app/useJustPublished'
 import { IconButton } from '../../components/IconButton/IconButton'
+import { PublishedDialog } from './components/PublishedDialog/PublishedDialog'
 import { ReadyRecipe } from './components/ReadyRecipe/ReadyRecipe'
 import { RecipeSkeleton } from './components/RecipeSkeleton/RecipeSkeleton'
 import { toRecipeView } from '../../app/recipeView'
@@ -18,6 +20,7 @@ export function RecipeScreen() {
   const { id = '' } = useParams()
   const recipe = useRecipe(id)
   const goBack = useGoBack(paths.search)
+  const published = useJustPublished()
   // The page has its own actions; the shell's « + » would only cover the cook's tip.
   useCreateButtonMode('hidden')
 
@@ -59,7 +62,10 @@ export function RecipeScreen() {
           }}
         />
       ) : (
-        <ReadyRecipe recipe={view} backButton={backButton} />
+        <>
+          <ReadyRecipe recipe={view} backButton={backButton} />
+          <PublishedDialog open={published.celebrating} onClose={published.dismiss} />
+        </>
       )}
     </main>
   )

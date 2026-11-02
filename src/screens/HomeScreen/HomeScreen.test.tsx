@@ -310,7 +310,7 @@ describe('HomeScreen', () => {
 
       const alert = await screen.findByRole('alert')
       expect(
-        within(alert).getByRole('heading', { name: 'Pas de connexion pour le moment' }),
+        within(alert).getByRole('heading', { name: 'Je fais une petite sieste' }),
       ).toBeVisible()
       expect(alert).toHaveTextContent('Vérifie ta connexion internet, puis réessaie.')
 

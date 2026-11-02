@@ -6,7 +6,7 @@ import { RecipeProblem } from '../../app/RecipeProblem/RecipeProblem'
 import { toRecipeView } from '../../app/recipeView'
 import { EmptyState } from '../../components/EmptyState/EmptyState'
 import { LinkButton } from '../../components/LinkButton/LinkButton'
-import { BowlIllustration } from '../../components/BowlIllustration/BowlIllustration'
+import { Mascot } from '../../components/Mascot/Mascot'
 import { LoadingRegion } from '../../components/LoadingRegion/LoadingRegion'
 import { Skeleton } from '../../components/Skeleton/Skeleton'
 import { Cooking } from './components/Cooking/Cooking'
@@ -75,7 +75,7 @@ export function CookingScreen() {
     return (
       <Plain>
         <EmptyState
-          illustration={<BowlIllustration variant="no-result" size="compact" />}
+          illustration={<Mascot mood="lost" size="xl" />}
           title={strings.noSteps.title}
           description={strings.noSteps.description}
           size="compact"

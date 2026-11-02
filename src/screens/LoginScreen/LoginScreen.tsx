@@ -12,14 +12,14 @@ import { useLoginForm } from './useLoginForm'
 const { auth } = appStrings
 
 /**
- * Logs in, then returns to the page that asked for it. A task of its own: the logo on a butter
+ * Logs in, then returns to the page that asked for it. A task of its own: the happy mascot on a butter
  * band (beside the form on a desktop), no tabs, and one message on top when the login is refused.
  */
 export function LoginScreen() {
   const { register, errors, isPending, failureText, rejected, submit } = useLoginForm()
 
   return (
-    <AuthFrame layout="login" onSubmit={(event) => void submit(event)}>
+    <AuthFrame layout="login" emblem="mascot" onSubmit={(event) => void submit(event)}>
       <h1 className="font-title text-page-title-lg desktop:text-auth-title-lg">{strings.title}</h1>
       {failureText && <ErrorBanner message={failureText} />}
       <TextField

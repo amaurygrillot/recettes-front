@@ -19,7 +19,7 @@ made. Update this file as milestones land.
   user: `.claude/settings.json` (the allowlist for `npm run lint|test|build`, `git status|diff|log`), because it edits the agent's
   own permissions. `.claude/launch.json` exists.
 - **M2 · Theme and base components — done (2026-10-22).** Components built: `Icon` (49 icons), `Logo`, `Button`, `Tag`, `FilterChip`,
-  `TextField`, `Skeleton` with `LoadingRegion` (status region and 300 ms delay), `BowlIllustration` with `EmptyState`,
+  `TextField`, `Skeleton` with `LoadingRegion` (status region and 300 ms delay), `BowlIllustration` (replaced by the `Mascot` in R4) with `EmptyState`,
   `ErrorState` with `ErrorBanner`, `Avatar`. `IconButton`, `Toast`, `Dialog`, `BottomSheet`, the password toggle, textarea, select
   and checkbox are deliberately not built: they come with the first screen that needs them. Decisions left open on purpose, to
   take when the first screen needs them (all additive, none breaks an existing call site): `Button` rendered as a link

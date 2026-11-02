@@ -218,12 +218,21 @@
   }
 }
 
-/* The stand-in of a recipe without a photo: butter stripes, same 4:3 frame as a photo. */
+/* The stand-in of a photo that cannot be loaded: butter stripes, same 4:3 frame as a photo. */
 @utility bg-butter-stripes {
   background-image: repeating-linear-gradient(
     135deg,
     var(--color-butter-200) 0 1rem,
     var(--color-butter-300) 1rem 2rem
+  );
+}
+
+/* The stand-in of a recipe without a photo (the mascot's frame): the two paper tones in stripes. */
+@utility bg-paper-stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-paper-200) 0 0.875rem,
+    var(--color-paper-300) 0.875rem 1.75rem
   );
 }
 

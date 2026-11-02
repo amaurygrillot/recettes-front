@@ -37,6 +37,20 @@ describe('ErrorState', () => {
     expect(screen.getByRole('button', { name: "Retour à l'accueil" })).toBeVisible()
   })
 
+  it('puts the illustration it is given in place of the warning badge', () => {
+    const { container } = render(
+      <ErrorState
+        title={TITLE}
+        description={DESCRIPTION}
+        illustration={<svg data-testid="mascot" aria-hidden="true" />}
+      />,
+    )
+
+    expect(screen.getByTestId('mascot')).toBeInTheDocument()
+    // The badge is the only other drawing of the block: it is gone.
+    expect(container.querySelectorAll('svg')).toHaveLength(1)
+  })
+
   it('has no action when none is given', () => {
     render(<ErrorState title={TITLE} description={DESCRIPTION} />)
 

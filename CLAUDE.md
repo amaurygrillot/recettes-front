@@ -30,7 +30,7 @@ prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
 What exists: the Vite + React + TypeScript project, the strict TypeScript flags, ESLint with the import boundaries and the bans
 (tested by `scripts/eslintGuardrails.test.ts`), the Tailwind theme from the design tokens, self-hosted fonts, the base
 components in `src/components/` (Icon, Logo, Button, LinkButton, Tag, FilterChip, TextField, Skeleton, LoadingRegion, EmptyState,
-BowlIllustration, ErrorState, ErrorBanner, Avatar, AlertDialog, TabBar, TopBar), and a development-only **`/styleguide`** route that
+Mascot, NoPhoto, ErrorState, ErrorBanner, Avatar, AlertDialog, TabBar, TopBar), and a development-only **`/styleguide`** route that
 displays the base ones. M3: the API layer in `src/api` ([docs/api-layer.md](docs/api-layer.md)): generated schema, typed client,
 one error union, the session and token module, query hooks per resource, MSW in every test, and the logger in `src/lib`. M4:
 the router, the shell (phone tab bar with the « + », desktop top bar from 1024 px with a search field and the member's avatar,

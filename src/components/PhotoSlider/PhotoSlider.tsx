@@ -1,6 +1,7 @@
 import { useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import { classNames } from '../../lib/classNames'
 import { Icon } from '../Icon/Icon'
+import { NoPhoto } from '../NoPhoto/NoPhoto'
 import { strings } from './strings'
 
 export interface SliderPhoto {
@@ -29,19 +30,9 @@ const SWIPE_PX = 48
 const ROUND_BUTTON =
   'absolute grid size-14 cursor-pointer place-items-center rounded-full border-2 border-ink-900 bg-paper-50 text-ink-900 shadow-paper focus-visible:outline-offset-3 active:bg-butter-200'
 
-function Placeholder() {
-  return (
-    <div className="grid size-full place-items-center bg-butter-stripes">
-      <span className="grid size-21 place-items-center rounded-full border-2 border-ink-900 bg-paper-50 text-ink-900 shadow-stamp-sm">
-        <Icon name="cutlery" size={40} />
-      </span>
-    </div>
-  )
-}
-
 /**
  * The photos of a recipe in a 4:3 frame: arrows, a counter, dots and thumbnails, all leading to
- * the same picture, and a swipe. One photo shows no controls; none shows the butter stand-in,
+ * the same picture, and a swipe. One photo shows no controls; none shows the mascot's « no photo yet »,
  * never an empty square. Arrow keys move through the photos when the gallery has the focus.
  */
 export function PhotoSlider({ photos, label, leading, trailing }: PhotoSliderProps) {
@@ -91,7 +82,7 @@ export function PhotoSlider({ photos, label, leading, trailing }: PhotoSliderPro
       >
         <div className="aspect-4/3">
           {shown === undefined ? (
-            <Placeholder />
+            <NoPhoto />
           ) : (
             <img
               src={shown.url}

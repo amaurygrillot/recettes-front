@@ -11,6 +11,19 @@ export const strings = {
     mark: 'Marque compacte, 96 à 40 px',
     icon: 'Icône, 32 et 16 px',
   },
+  mascot: {
+    title: 'Mascotte, Mijotine',
+    moods: {
+      happy: 'Contente',
+      dejected: 'Dépitée',
+      smitten: 'Coup de cœur',
+      surprised: 'Surprise',
+      lost: 'Perdue',
+      asleep: 'Endormie',
+      celebrating: 'En fête',
+    },
+    sizes: 'Quatre tailles : 240, 160, 96 et 64 px',
+  },
   icons: {
     title: 'Icônes',
   },

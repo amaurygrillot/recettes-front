@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
-import { BowlIllustration } from '../BowlIllustration/BowlIllustration'
+import { Mascot } from '../Mascot/Mascot'
 import { Button } from '../Button/Button'
 import { EmptyState } from './EmptyState'
 
@@ -10,7 +10,7 @@ describe('EmptyState', () => {
   it('states the finding as a heading and explains what to do', () => {
     render(
       <EmptyState
-        illustration={<BowlIllustration variant="first-visit" />}
+        illustration={<Mascot mood="happy" size="xl" />}
         title="Ton carnet est vide"
         description="Ajoute ta première recette : une photo, les ingrédients, quelques étapes."
       />,
@@ -24,7 +24,7 @@ describe('EmptyState', () => {
     const onCreate = vi.fn()
     render(
       <EmptyState
-        illustration={<BowlIllustration variant="first-visit" />}
+        illustration={<Mascot mood="happy" size="xl" />}
         title="Ton carnet est vide"
         description="Ajoute ta première recette."
       >
@@ -42,7 +42,7 @@ describe('EmptyState', () => {
   it('has no action when none is given', () => {
     render(
       <EmptyState
-        illustration={<BowlIllustration variant="no-result" />}
+        illustration={<Mascot mood="lost" size="xl" />}
         title="Rien ne correspond"
         description="Retire un filtre ou deux."
       />,
@@ -54,7 +54,7 @@ describe('EmptyState', () => {
   it.each(['regular', 'compact'] as const)('keeps its content at its %s size', (size) => {
     render(
       <EmptyState
-        illustration={<BowlIllustration variant="no-result" size={size} />}
+        illustration={<Mascot mood="lost" size={size === 'regular' ? 'xl' : 'large'} />}
         title="Rien ne correspond"
         description="Retire un filtre ou deux."
         size={size}
@@ -70,7 +70,7 @@ describe('EmptyState', () => {
   it('has no accessibility violation', async () => {
     const { container } = render(
       <EmptyState
-        illustration={<BowlIllustration variant="no-result" />}
+        illustration={<Mascot mood="lost" size="xl" />}
         title="Rien ne correspond"
         description="Retire un filtre ou deux."
       >

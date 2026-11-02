@@ -3,7 +3,7 @@ import { classNames } from '../../lib/classNames'
 import { STATE_FRAMES, type StateSize } from './stateSize'
 
 export interface EmptyStateProps {
-  /** A BowlIllustration, or a Logo for the main empty states. */
+  /** The Mascot, in the mood of the finding. */
   illustration: ReactNode
   /** The finding, in one or two lines: « Ton carnet est vide ». */
   title: string
