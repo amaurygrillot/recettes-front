@@ -43,7 +43,7 @@ export function SizeMenu({ editor, base, size }: SizeMenuProps) {
             value={size}
             onValueChange={(value) => {
               const chosen = SIZE_CHOICES[base].find((choice) => choice.size === value)
-              if (chosen !== undefined) chooseSize(editor, size, chosen.size)
+              if (chosen !== undefined) chooseSize(editor, chosen.size)
             }}
           >
             {SIZE_CHOICES[base].map((choice) => (
@@ -54,7 +54,9 @@ export function SizeMenu({ editor, base, size }: SizeMenuProps) {
               >
                 <span className="flex items-baseline gap-2.5">
                   <span className={choice.sampleClass}>{strings.sizeNames[choice.size]}</span>
-                  <span className="text-caption font-normal text-ink-800">{choice.metrics}</span>
+                  <span aria-hidden="true" className="text-caption font-normal text-ink-800">
+                    {choice.metrics}
+                  </span>
                 </span>
                 <DropdownMenu.ItemIndicator>
                   <Icon name="check" size={22} strokeWidth={2.6} />

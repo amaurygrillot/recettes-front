@@ -1,23 +1,21 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { LexicalExtensionComposer } from '@lexical/react/LexicalExtensionComposer'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
-import { DESKTOP_QUERY, TABLET_QUERY } from '../../lib/breakpoints'
 import { classNames } from '../../lib/classNames'
 import { useKeyboardInset } from '../../lib/useKeyboardInset'
-import { useMediaQuery } from '../../lib/useMediaQuery'
+import { useLayoutKind } from '../../lib/useLayoutKind'
 import { Icon } from '../Icon/Icon'
 import { RichTextView } from '../RichTextView/RichTextView'
 import { EditableText } from './EditableText'
 import { $toHtml } from './htmlConversion'
 import { createRichTextExtension } from './richTextExtension'
 import { strings } from './strings'
-import { baseOf, type RichTextVariant } from './textSizes'
+import { baseOf, FIELD_LOOK, type RichTextVariant } from './textSizes'
 import { Toolbar } from './Toolbar'
+import { useChangeReport } from './useChangeReport'
 import { useToolbarState } from './useToolbarState'
 import { useWritingMode } from './useWritingMode'
 import { WritingMode } from './WritingMode'
-
-export type { RichTextVariant }
 
 export interface RichTextEditorProps {
   variant: RichTextVariant
@@ -82,9 +80,8 @@ function Field({
   const labelId = useId()
   const messageId = useId()
   const frame = useRef<HTMLDivElement>(null)
-  const tabletOrMore = useMediaQuery(TABLET_QUERY)
-  const desktop = useMediaQuery(DESKTOP_QUERY)
-  const phone = !tabletOrMore
+  const layout = useLayoutKind()
+  const phone = layout === 'phone'
   const advice = variant === 'advice'
   const base = baseOf(variant)
 
@@ -102,31 +99,16 @@ function Field({
     editor.setEditable(!locked)
   }, [editor, locked])
 
-  // The latest listener, without registering the editor again each time the page re-renders.
-  const onChangeRef = useRef(onChange)
-  useEffect(() => {
-    onChangeRef.current = onChange
+  useChangeReport(editor, (html) => {
+    onChange(html)
+    setSnapshot(html)
   })
-  useEffect(() => {
-    // `read` first commits the initial text: only what the person changes from here on is reported.
-    let lastHtml = editor.read($toHtml)
-    return editor.registerUpdateListener(({ editorState, dirtyElements, dirtyLeaves }) => {
-      if (dirtyElements.size === 0 && dirtyLeaves.size === 0) return
-      const html = editorState.read($toHtml)
-      if (html === lastHtml) return
-      lastHtml = html
-      onChangeRef.current(html)
-      setSnapshot(html)
-    })
-  }, [editor])
 
-  // The text is the editor's own, moved into the mode and back: it needs its caret and selection again. Back on
-  // the page, the field is scrolled into view, and with a keyboard (not a phone) the caret returns to the text.
+  // The editor is moved into the mode and back (the text takes the caret itself on its way in). Back on the page, the
+  // field is scrolled into view, and with a keyboard (not a phone) the caret returns to the text.
   const wasWriting = useRef(false)
   useEffect(() => {
-    if (mode.writing) {
-      editor.focus()
-    } else if (wasWriting.current) {
+    if (!mode.writing && wasWriting.current) {
       frame.current?.scrollIntoView({ block: 'center' })
       if (!phone) editor.focus()
     }
@@ -175,7 +157,7 @@ function Field({
     </div>
   )
 
-  const fullScreenButton = tabletOrMore && !locked && (
+  const fullScreenButton = !phone && !locked && (
     <button
       type="button"
       aria-label={strings.writeFullScreen}
@@ -188,14 +170,16 @@ function Field({
   )
 
   // On a phone the tools come with the writing mode only.
-  const toolbarNode = tabletOrMore && !mode.writing && (
+  const toolbarNode = !phone && !mode.writing && (
     <div className={advice ? undefined : 'border-b-2 border-paper-300'}>
       <Toolbar editor={editor} state={toolbar} base={base} surface="field" />
     </div>
   )
 
   const body = mode.writing ? (
-    <div className={advice ? 'px-0.5 py-0.5' : 'px-4 py-3.5'}>
+    <div
+      className={classNames(FIELD_LOOK[variant].height, advice ? 'px-0.5 py-0.5' : 'px-4 py-3.5')}
+    >
       <RichTextView html={snapshot} size={base} />
     </div>
   ) : (
@@ -251,8 +235,7 @@ function Field({
         open={mode.writing}
         title={label}
         note={note}
-        desktop={desktop}
-        toolbarAtTop={tabletOrMore}
+        layout={layout}
         keyboardInset={keyboardInset}
         onClose={mode.close}
         toolbar={<Toolbar editor={editor} state={toolbar} base={base} surface="writing" />}

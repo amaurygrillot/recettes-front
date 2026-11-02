@@ -125,8 +125,8 @@ Step instructions, the introduction and the recommendations are rich text, store
   `dangerouslySetInnerHTML`. Using `dangerouslySetInnerHTML` anywhere else is a bug.
 - The editor is Lexical with a deliberately small toolbar: text size (Petit / Normal / Grand), bold, italic, underline,
   strikethrough, bulleted list, numbered list, undo, redo (R3 added size, underline and strikethrough to the original six). No
-  headings, colors, images or links. They are stored as `<b>`/`<strong>`, `<i>`/`<em>`, `<u>`, `<s>`, `<small>` (Petit), `<big>` (Grand)
-  and the list tags, **with no attribute**: the DOMPurify allow-list in `lib/sanitizeRichText.ts` is exactly that vocabulary, and a new
+  headings, colors, images or links. They are stored as `<b>`/`<strong>`, `<i>`/`<em>`, `<u>`, `<s>`, `<small>` (Petit), `<big>` (Grand),
+  the list tags and `<p>`/`<br>`, **with no attribute**: the DOMPurify allow-list in `lib/sanitizeRichText.ts` is exactly that vocabulary, and a new
   format means a new tag there, with its hostile-input test, never an attribute (see `docs/design-boards.md`, R3). A text field also has a
   full-screen writing mode (a tap on a phone, « Plein écran » or Ctrl/Cmd + Maj + F from a tablet). Pin Lexical's exact version (it is
   a 0.x library at the time of writing).

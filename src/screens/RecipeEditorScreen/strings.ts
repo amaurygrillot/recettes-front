@@ -174,7 +174,6 @@ export const strings = {
     dropHint: 'Relâche la carte pour la déposer. Les numéros se mettent à jour en direct.',
   },
 
-  // « Recommandations »: one rich text field, the cook's tip.
   // Said when a text field's writing mode is closed on a phone.
   writingDone: {
     introduction: 'Introduction mise à jour',
@@ -182,6 +181,7 @@ export const strings = {
     advice: 'Conseil mis à jour',
   },
 
+  // « Recommandations »: one rich text field, the cook's tip.
   advice: {
     label: 'le petit conseil',
     placeholder: 'Un geste, une astuce, ce que tu referais la prochaine fois.',

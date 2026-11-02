@@ -9,6 +9,13 @@ export type RichTextVariant = 'introduction' | 'step' | 'advice'
 /** What the size of the field's own text is: a step (22/34) or an introduction and a tip (18/28). */
 export type TextBase = 'body' | 'step'
 
+/** The text size of a field and the height it starts with: an introduction 144 px, a step 160 px, a tip 112 px. */
+export const FIELD_LOOK: Record<RichTextVariant, { height: string; text: string }> = {
+  introduction: { height: 'min-h-36', text: 'text-body' },
+  step: { height: 'min-h-40', text: 'text-step' },
+  advice: { height: 'min-h-28', text: 'text-body' },
+}
+
 export function baseOf(variant: RichTextVariant): TextBase {
   return variant === 'step' ? 'step' : 'body'
 }

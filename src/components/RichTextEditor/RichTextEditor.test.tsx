@@ -94,6 +94,18 @@ async function placeCaretAtEnd(editor: LexicalEditor) {
   })
 }
 
+/** Records where the editor's root is each time it is asked to take the focus (jsdom cannot show a contenteditable's caret). */
+function recordFocusRoots(editor: LexicalEditor): (HTMLElement | null)[] {
+  const roots: (HTMLElement | null)[] = []
+  vi.spyOn(editor, 'focus').mockImplementation(() => {
+    roots.push(editor.getRootElement())
+  })
+  return roots
+}
+
+const inDialog = (root: HTMLElement | null) =>
+  root?.closest('[role="dialog"]') !== null && root !== null
+
 describe('RichTextEditor', () => {
   beforeEach(() => {
     installMatchMedia(1280)
@@ -608,6 +620,37 @@ describe('RichTextEditor', () => {
       expect(onWritingDone).not.toHaveBeenCalled()
     })
 
+    it('puts the caret in the text of the mode once it is there, not in the page it left', async () => {
+      const user = userEvent.setup()
+      renderEditor()
+      const roots = recordFocusRoots(editorOf(textbox()))
+
+      await user.click(open())
+
+      await waitFor(() => {
+        expect(roots.some(inDialog)).toBe(true)
+      })
+    })
+
+    it('lets the size be chosen from inside the mode, and gives the text the focus back', async () => {
+      const user = userEvent.setup()
+      const { onChange } = renderEditor()
+      await user.click(open())
+      const text = editorOf(within(dialog()).getByRole('textbox'))
+      await placeCaretAtEnd(text)
+      const roots = recordFocusRoots(text)
+
+      await user.click(within(dialog()).getByRole('button', { name: 'Taille du texte : Normal' }))
+      await user.click(screen.getByRole('menuitemradio', { name: /^Grand/ }))
+      await write(text, 'texte')
+
+      expect(lastHtml(onChange)).toBe('<p><big>texte</big></p>')
+      await waitFor(() => {
+        expect(roots.some(inDialog)).toBe(true)
+      })
+      expect(dialog()).toBeVisible()
+    })
+
     it('has no « Plein écran » while the field is locked', () => {
       renderEditor({ locked: true })
 
@@ -663,6 +706,18 @@ describe('RichTextEditor', () => {
       const mode = within(dialog())
       const order = mode.getByRole('toolbar').compareDocumentPosition(mode.getByRole('textbox'))
       expect(order & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy()
+    })
+
+    it('puts the caret in the text of the mode once it is there', async () => {
+      const user = userEvent.setup()
+      renderEditor()
+      const roots = recordFocusRoots(editorOf(textbox()))
+
+      await user.click(textbox())
+
+      await waitFor(() => {
+        expect(roots.some(inDialog)).toBe(true)
+      })
     })
 
     it('is not opened by a tap when the field is locked', async () => {

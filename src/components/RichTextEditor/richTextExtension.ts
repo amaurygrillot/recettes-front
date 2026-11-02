@@ -59,9 +59,9 @@ const THEME = {
   text: {
     bold: 'font-bold',
     italic: 'italic',
-    underline: 'underline',
-    strikethrough: 'line-through',
-    underlineStrikethrough: 'underline line-through',
+    underline: 'rt-underline',
+    strikethrough: 'rt-strike',
+    underlineStrikethrough: 'rt-underline-strike',
   },
   list: { nested: { listitem: 'list-none' } },
 }

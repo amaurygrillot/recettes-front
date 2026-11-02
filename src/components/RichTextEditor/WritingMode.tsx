@@ -1,6 +1,7 @@
 import { Dialog } from 'radix-ui'
 import type { ReactNode } from 'react'
 import { classNames } from '../../lib/classNames'
+import type { LayoutKind } from '../../lib/useLayoutKind'
 import { Icon } from '../Icon/Icon'
 import { strings } from './strings'
 
@@ -10,10 +11,11 @@ export interface WritingModeProps {
   title: string
   /** Said next to the name (« facultatif »). */
   note?: string | undefined
-  /** A panel on a desktop (from 1024 px), the whole screen from a phone to a tablet. */
-  desktop: boolean
-  /** From a tablet the bar sits under the strip; on a phone it sits at the bottom, above the keyboard. */
-  toolbarAtTop: boolean
+  /**
+   * A panel on a desktop, the whole screen on a phone and a tablet. The bar sits at the bottom, above the keyboard, on
+   * a phone and under the strip from a tablet; the back arrow is a phone's.
+   */
+  layout: LayoutKind
   /** How many pixels of the bottom of the screen a phone's keyboard covers: the bar sits above it. */
   keyboardInset: number
   onClose: () => void
@@ -39,13 +41,14 @@ export function WritingMode({
   open,
   title,
   note,
-  desktop,
-  toolbarAtTop,
+  layout,
   keyboardInset,
   onClose,
   toolbar,
   children,
 }: WritingModeProps) {
+  const desktop = layout === 'desktop'
+  const phone = layout === 'phone'
   return (
     <Dialog.Root
       open={open}
@@ -69,7 +72,7 @@ export function WritingMode({
           className={classNames('z-50 outline-none', desktop ? PANELS.panel : PANELS.screen)}
         >
           <header className="flex flex-none items-center gap-2.5 border-b-2 border-paper-300 px-3 py-2.5 tablet:px-8 tablet:py-3">
-            {!toolbarAtTop && (
+            {phone && (
               <button
                 type="button"
                 aria-label={strings.writing.back}
@@ -101,13 +104,13 @@ export function WritingMode({
               {strings.writing.done}
             </button>
           </header>
-          {toolbarAtTop && <div className="flex-none border-b-2 border-paper-300">{toolbar}</div>}
+          {!phone && <div className="flex-none border-b-2 border-paper-300">{toolbar}</div>}
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="mx-auto min-h-full w-full max-w-190 px-4 pt-4 pb-6 tablet:px-16 tablet:pt-7 desktop:px-0">
               {open ? children : null}
             </div>
           </div>
-          {!toolbarAtTop && <div className="flex-none border-t-2 border-ink-900">{toolbar}</div>}
+          {phone && <div className="flex-none border-t-2 border-ink-900">{toolbar}</div>}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

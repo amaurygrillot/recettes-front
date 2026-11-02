@@ -1,13 +1,8 @@
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
-import type { KeyboardEvent } from 'react'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useEffect, type KeyboardEvent } from 'react'
 import { classNames } from '../../lib/classNames'
-import type { RichTextVariant } from './textSizes'
-
-const VARIANTS: Record<RichTextVariant, { height: string; text: string }> = {
-  introduction: { height: 'min-h-36', text: 'text-body' },
-  step: { height: 'min-h-40', text: 'text-step' },
-  advice: { height: 'min-h-28', text: 'text-body' },
-}
+import { FIELD_LOOK, type RichTextVariant } from './textSizes'
 
 /** The text's padding and its placeholder's: in the writing mode the page around the text gives the margins, so it has none. */
 const PADDINGS = {
@@ -48,11 +43,17 @@ export function EditableText({
   onTap,
   onKeyDown,
 }: EditableTextProps) {
+  const [editor] = useLexicalComposerContext()
   const advice = variant === 'advice' && !fill
   const place = placeOf(fill, advice)
   const { text: padding, placeholder: placeholderPadding } = PADDINGS[place]
-  const { height, text } = VARIANTS[variant]
+  const { height, text } = FIELD_LOOK[variant]
   const size = classNames(text, !fill && height)
+
+  // In the writing mode the editor has just been moved here: the caret goes with it, which the page left behind cannot do.
+  useEffect(() => {
+    if (fill) editor.focus()
+  }, [fill, editor])
 
   return (
     <div className={classNames('relative', fill && 'min-h-full')}>

@@ -18,6 +18,5 @@ export const strings = {
     done: 'Terminé',
     back: 'Fermer le mode écriture',
     escapeHint: 'Échap pour revenir à la recette',
-    draftSaved: 'Brouillon enregistré',
   },
 } as const

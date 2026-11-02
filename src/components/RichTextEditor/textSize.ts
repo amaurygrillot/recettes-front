@@ -1,9 +1,8 @@
 import {
   $getSelection,
   $isRangeSelection,
-  FORMAT_TEXT_COMMAND,
+  SET_TEXT_FORMAT_COMMAND,
   type LexicalEditor,
-  type TextFormatType,
 } from 'lexical'
 
 /**
@@ -12,11 +11,6 @@ import {
  * (see `htmlConversion.ts` for how they are stored).
  */
 export type TextSize = 'small' | 'normal' | 'large'
-
-const FORMATS: Record<Exclude<TextSize, 'normal'>, TextFormatType> = {
-  small: 'subscript',
-  large: 'superscript',
-}
 
 /** The size at the caret (read inside an editor state). */
 export function $sizeAtCaret(): TextSize {
@@ -28,12 +22,12 @@ export function $sizeAtCaret(): TextSize {
 }
 
 /**
- * Gives the selection (or what is typed next) a size. The two formats toggle and exclude each other, so going to
- * Normal switches the current one off and going to a size switches that one on, whatever is on now.
+ * Gives the selection (or what is typed next) a size. It sets both formats outright instead of toggling one, so it
+ * works whatever the text was before, a selection of several sizes included (Normal then makes it all Normal).
  */
-export function chooseSize(editor: LexicalEditor, current: TextSize, wanted: TextSize): void {
-  if (current === wanted) return
-  const toggled = wanted === 'normal' ? current : wanted
-  if (toggled === 'normal') return
-  editor.dispatchCommand(FORMAT_TEXT_COMMAND, FORMATS[toggled])
+export function chooseSize(editor: LexicalEditor, wanted: TextSize): void {
+  editor.dispatchCommand(SET_TEXT_FORMAT_COMMAND, {
+    subscript: wanted === 'small',
+    superscript: wanted === 'large',
+  })
 }

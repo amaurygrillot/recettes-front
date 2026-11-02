@@ -313,12 +313,18 @@
     font-style: italic;
   }
 
-  .rich-text u {
+  /* The editor draws underline as a class on a span, with both lines when the text is struck through as well. */
+  .rich-text :is(u, .rt-underline) {
     text-decoration: underline;
     text-underline-offset: 0.2em;
   }
 
-  .rich-text s {
+  .rich-text .rt-underline-strike {
+    text-decoration: underline line-through;
+    text-underline-offset: 0.2em;
+  }
+
+  .rich-text :is(s, .rt-strike) {
     text-decoration: line-through;
   }
 
@@ -331,6 +337,7 @@
     font-size: var(--text-detail);
     line-height: var(--text-detail--line-height);
     vertical-align: baseline;
+    position: static;
   }
 
   .rich-text.text-step :is(small, sub) {
@@ -342,6 +349,7 @@
     font-size: var(--text-step);
     line-height: var(--text-step--line-height);
     vertical-align: baseline;
+    position: static;
   }
 
   .rich-text.text-step :is(big, sup) {

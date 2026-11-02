@@ -98,6 +98,16 @@ describe('opening stored HTML and storing it again', () => {
         '<p>Clique</p>',
       ],
       ['a heading, keeping its words', '<h1>Titre</h1><p>Texte</p>', '<p>Titre</p><p>Texte</p>'],
+      [
+        'an attribute on a size or a mark',
+        '<p><small class="x" onmouseover="window.hacked = true">a</small><u style="color:red">b</u><s id="y">c</s><big data-z="1">d</big></p>',
+        '<p><small>a</small><u>b</u><s>c</s><big>d</big></p>',
+      ],
+      [
+        'a script inside a size',
+        '<p><big><script>window.hacked = true</script>grand</big></p>',
+        '<p><big>grand</big></p>',
+      ],
     ])('does not let %s into what is stored again', (_what, html, expected) => {
       expect(roundTrip(html)).toBe(expected)
       expect(Reflect.get(window, 'hacked')).toBeUndefined()

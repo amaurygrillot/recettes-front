@@ -207,7 +207,7 @@ Own set, drawn on a 24 px grid: **stroke 2.2** (2.5 for the icon of an active ta
 out, 48 px in empty states. Names in the canvas (49): home, search, book, user, log-in, log-out, heart, plus, minus, close,
 check, edit, trash, share, filter, upload, refresh, grip, chef-hat, bold, italic, list-bullet, list-number, undo, redo,
 chevron-left/right/up/down, warning, alert, check-circle, info, clock, users, image, camera, lock, eye, eye-off, cutlery, grid,
-leaf, plate, cake, soup, bread, **mail, more**.
+leaf, plate, cake, soup, bread, **mail, more**, and the four of R3: **text-size, underline, strike, expand**.
 **`heart`, `share`, `clock` and `users` exist in the set but their features do not exist yet** (favorites, sharing,
 prep time, servings): do not wire them to anything.
 

@@ -17,7 +17,7 @@ function withWritingFlag(state: unknown): object {
     : { [STATE_KEY]: true }
 }
 
-export interface WritingMode {
+interface WritingModeState {
   writing: boolean
   open: () => void
   close: () => void
@@ -35,7 +35,7 @@ export function useWritingMode({
 }: {
   phone: boolean
   onClosedOnPhone: () => void
-}): WritingMode {
+}): WritingModeState {
   const location = useLocation()
   const navigate = useNavigate()
   const [writing, setWriting] = useState(false)
@@ -58,6 +58,8 @@ export function useWritingMode({
     void navigate(`${location.pathname}${location.search}`, {
       state: withWritingFlag(location.state),
       preventScrollReset: true,
+      // The page goes to its own address: nothing it loaded can have changed.
+      defaultShouldRevalidate: false,
     })
   }
 

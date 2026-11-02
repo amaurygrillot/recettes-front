@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { sessionStore } from '../../api/sessionStore'
@@ -286,6 +286,25 @@ describe('RecipeEditorScreen: leaving', () => {
     await user.click(close())
 
     expect(await screen.findByText('Page de la recette')).toBeVisible()
+  })
+
+  it('does not ask to leave when the writing mode of a text opens and closes on a phone, with changes made', async () => {
+    useEditorBackend()
+    const user = userEvent.setup()
+    renderEditor('/recettes/nouvelle')
+    await findForm()
+    await user.type(title(), 'Tarte')
+
+    await user.click(screen.getByRole('textbox', { name: /^Introduction/ }))
+    await user.click(
+      within(screen.getByRole('dialog', { name: 'Introduction' })).getByRole('button', {
+        name: 'Terminé',
+      }),
+    )
+
+    expect(await screen.findByText('Introduction mise à jour')).toBeVisible()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(title()).toHaveValue('Tarte')
   })
 
   it('asks first when something was changed, and the first answer is to stay', async () => {
