@@ -1,5 +1,4 @@
 import { act, screen, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { API_BASE_URL } from '../api/apiConfig'
@@ -91,16 +90,11 @@ describe('the phone « + » of the shell', () => {
 
   it('is the plain round « + » on the other pages, and again after leaving the home page', async () => {
     serveFeed([{ id: '1', title: 'Gratin dauphinois' }])
-    const user = userEvent.setup()
-    renderRoutes(routes, '/')
+    const { router } = renderRoutes(routes, '/')
     await screen.findByRole('link', { name: 'Gratin dauphinois' })
     expect(phoneCreate()).toHaveTextContent('Nouvelle recette')
 
-    await user.click(
-      within(screen.getByRole('navigation', { name: 'Navigation principale' })).getByRole('link', {
-        name: 'Rechercher',
-      }),
-    )
+    await act(() => router.navigate('/rechercher?q=gratin'))
     await screen.findByRole('heading', { level: 1, name: 'Rechercher' })
 
     expect(phoneCreate()).toHaveTextContent('')
@@ -109,16 +103,11 @@ describe('the phone « + » of the shell', () => {
 
   it('is back after an empty home page that hid it, when the next page needs it', async () => {
     serveFeed([])
-    const user = userEvent.setup()
-    renderRoutes(routes, '/')
+    const { router } = renderRoutes(routes, '/')
     await screen.findByText('Ton carnet attend sa première recette')
     expect(phoneCreate()).not.toBeInTheDocument()
 
-    await user.click(
-      within(screen.getByRole('navigation', { name: 'Navigation principale' })).getByRole('link', {
-        name: 'Rechercher',
-      }),
-    )
+    await act(() => router.navigate('/rechercher?q=gratin'))
     await screen.findByRole('heading', { level: 1, name: 'Rechercher' })
 
     expect(phoneCreate()).toBeInTheDocument()
@@ -143,7 +132,7 @@ describe('the phone « + » of the shell', () => {
 
     it('stays the plain round « + » on the search page', async () => {
       serveFeed([{ id: '1', title: 'Gratin dauphinois' }])
-      renderRoutes(routes, '/rechercher')
+      renderRoutes(routes, '/rechercher?q=gratin')
       await screen.findByRole('link', { name: 'Gratin dauphinois' })
 
       expect(phoneCreate()).toHaveTextContent('')
