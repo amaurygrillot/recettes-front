@@ -174,6 +174,13 @@ export const strings = {
     dropHint: 'Relâche la carte pour la déposer. Les numéros se mettent à jour en direct.',
   },
 
+  // Said when a text field's writing mode is closed on a phone.
+  writingDone: {
+    introduction: 'Introduction mise à jour',
+    step: 'Texte de l’étape mis à jour',
+    advice: 'Conseil mis à jour',
+  },
+
   // « Recommandations »: one rich text field, the cook's tip.
   advice: {
     label: 'le petit conseil',

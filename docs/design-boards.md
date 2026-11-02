@@ -220,19 +220,18 @@ One component for the three rich texts of a recipe (`variant`: `introduction` 18
 112 px), built on Lexical **0.52.0, every package pinned to that exact version**, with the extension API (`LexicalExtensionComposer`; the
 plain `LexicalComposer` is deprecated in this release). Checked in the browser at 390, 768 and 1280 px through the development `/styleguide`.
 
-- **Six tools, in three groups, and no more**: bold, italic · bulleted list, numbered list · undo, redo. 44 px buttons, `aria-pressed` for the
+- **Six tools, in three groups, and no more** (**extended to nine, and one line that scrolls, by R3**, below): bold, italic · bulleted list, numbered list · undo, redo. 44 px buttons, `aria-pressed` for the
   tools that are on at the caret (yellow, ink outline), undo and redo dashed while there is nothing to undo or redo. Pressing a tool never takes
   the focus out of the text (`mousedown` is prevented). Ctrl + B, I, Z and Shift + Z work as in any editor.
-- **What it refuses**: no heading, quote, underline, link, image or colour. A shortcut for another format is swallowed
+- **What it refuses** (underline and strikethrough are allowed since R3): no heading, quote, link, image or colour. A shortcut for another format is swallowed
   (`FORMAT_TEXT_COMMAND`), a heading or a quote that arrives with a paste becomes a paragraph (node transform), and Tab leaves the field.
 - **What it stores** (`htmlConversion.ts`): the HTML is written by hand from the editor's tree, in the viewer's own vocabulary only (`p`, `br`,
-  `strong`, `em`, `ul`, `ol`, `li`), with no attribute (Lexical's own export adds styles and classes), without the blank paragraphs and list
+  `strong`, `em`, `u`, `s`, `small`, `big`, `ul`, `ol`, `li`, the last four from R3), with no attribute (Lexical's own export adds styles and classes), without the blank paragraphs and list
   items a stray Enter leaves, and `''` when nothing is written. **What it opens** goes through the same `sanitizeRichText` (DOMPurify) as the
   viewer first, so a script stored in a recipe never gets into the editor either. Both directions are tested against hostile input.
 - **The field**: label above (with « facultatif »), a frame like the text fields (2 px ink-500; 2 px ink and a 3 px ring on focus; 3 px brick and a
-  rosy background in error), the toolbar in the field's top on a tablet and a desktop. **On a phone, while the text has the focus, the toolbar
-  leaves the field and sits on the whole width just above the keyboard** (`useKeyboardInset`, from `visualViewport`); it keeps its place in the
-  DOM (so Tab still reaches it) and the field keeps its height (the text does not jump).
+  rosy background in error), the toolbar in the field's top on a tablet and a desktop. **On a phone** (replaced by R3: there is no bar in the
+  field any more, the tools come with the writing mode, above the keyboard through `useKeyboardInset`).
 - **Use**: `initialHtml` and `onChange(html)`: the editor keeps the text itself after it has started (give it a new `key` to replace it, e.g. to
   restore a draft). It does not report the text it started with as a change.
 - **Tests**: jsdom does not deliver typed characters to a contenteditable, so insertions go through the editor's own API
@@ -422,3 +421,46 @@ the shared `NoPhoto` (dejected mascot, « Pas encore de photo », on paper strip
 and the cutlery. The words of the **lost** states and of an empty « Mes recettes » are the board's (« Je n’ai rien trouvé… », « Ajoute ta première
 recette »); the sentence under « Je n’ai rien trouvé… » names the text searched, and says to remove a filter only when there is one. **À valider**:
 on the sign-in the happy mascot and « Qu’est-ce qu’on mijote aujourd’hui ? » replace the name of the application (as the board draws it).
+
+### R3 · rich text: three more tools and the writing mode (`Retouche-3-texte-riche-mobile`, `-grands-ecrans`)
+
+It **extends the minimal toolbar** of [RichTextEditor](#richtexteditor-editeur-texte-riche) (and the Rich text section of `CLAUDE.md`): bold and italic, the two lists,
+undo and redo stay, and **text size, underline and strikethrough** are added; the bar is one scrolling line; a full-screen **writing mode** takes the field.
+
+- **How the three are stored** (the back keeps the HTML unsanitised, `RichTextView` and the editor's loader both run `sanitizeRichText`, and
+  recipes written before R3 must render unchanged): underline is `<u>`, strikethrough `<s>`, a smaller text `<small>` and a larger one `<big>`;
+  Normal is no tag. **No attribute is ever allowed**, so the allow-list only grows by four tags and the DOMPurify rule « no attribute at all »
+  stays true (the board's own samples are written with `<u>` and `<s>`). Old recipes contain none of the four tags, so nothing in them changes;
+  the only text that could change is one that already held a `<small>` or a `<big>` that was being stripped, which the editor never wrote.
+- **What the sizes mean**: they are the sizes of the recipe page's text. A step is 22/34, so there **Petit** is 18/28 (the body text) and there
+  is no Grand; the introduction and the tip are 18/28, so there **Petit** is 16/22 (`text-detail`) and **Grand** 22/34 (`text-step`). CSS under
+  `.rich-text` gives `small` and `big` these sizes relative to the field's own (`RichTextView` `size`), in the editor and on the page alike.
+- **Inside Lexical** a size is carried by the `subscript` (Petit) and `superscript` (Grand) text formats, which the editor otherwise never
+  uses (a sub- or superscript shortcut is not offered): Lexical makes them exclusive, undoes them with the rest of the history and keeps them
+  across the paste and import paths. `htmlConversion.ts` (the HTML) and `textSize.ts` (the size at the caret, and choosing one with
+  `SET_TEXT_FORMAT_COMMAND`, which sets both formats outright, so a selection of several sizes can be made one size) are the only code that knows
+  the mapping, and the editor's CSS draws `sub` and `sup` as the two sizes.
+- **The bar** (one line, the order of the board: size, bold, italic, underline, strike, bullets, numbers, undo, redo; groups separated by a
+  rule): it scrolls sideways, the size button first; a fade and a « › » at the right edge say there is more until the end of the line is
+  reached; 44 px tools, the board's size. On a phone it lives in the writing mode only (the inline field of the mobile board has no bar); from
+  a tablet it sits at the top of the field, the « Écrire en plein écran » button on the label line. In the writing mode it sits at the bottom
+  on a phone (above the keyboard) and under the strip from a tablet, as the boards draw it.
+- **Writing mode**: a modal (Radix `Dialog`: focus kept inside, the page behind inert, the page does not move). Phone and tablet: the whole
+  screen; desktop (from 1024 px): a 920 px panel on a dimmed background, the text 760 px wide at most. A strip at the top with the way back
+  (arrow), the name of the field and « Terminé »; the text fills the space down to the bar, which sits above the keyboard on a phone
+  (`useKeyboardInset`). The « Annuler / Enregistrer » bar of the editor is covered, so the old problem of two bars one over the other is gone.
+  - **In**: a tap on the text on a phone; on a tablet and a desktop the « Écrire en plein écran » button or Ctrl + Maj + F (Cmd + Maj + F on
+    a Mac) while the text has the focus. Keyboard focus alone does not open it (the editor moves the focus to a field to correct).
+  - **Out**: « Terminé », Escape, a click on the dimmed part (desktop), and on a phone the arrow (a phone's only: the tablet board draws none)
+    and the device's back gesture. The text is kept in every case (it is the same editor, moved into the dialog) and the page is back on the
+    same field, scrolled to it; after a mode opened **on a phone** it says the board's short « … mise à jour ». From a tablet « Terminé » is
+    152 px wide (the phone's is 128), the strip and the bar have 32 px of margin and the text 64 px (a desktop panel: the text 760 px wide).
+  - **Where the focus goes**: into the text as soon as it is in the mode (`EditableText`, once it has been moved: the page it left cannot do
+    it), and back into the field's text after the mode on a tablet and a desktop; on a phone nowhere, so the keyboard does not come back.
+  - **The back gesture**: opening on a phone adds one history entry for the same address (`state.writingMode`); the gesture pops it and closes
+    the mode; closing otherwise pops it too. The leave guard only counts a change of path or search, so it does not interfere.
+- **Left as they are**: Lexical stays pinned at 0.52.0 and everything the editor refuses (headings, quotes, colours, links, images).
+- **Not built**: the « Brouillon enregistré » indicator the tablet and desktop boards draw in the writing mode's strip (the draft state belongs
+  to the editor screen, which the field does not know; the covered editor bar keeps saying it behind the panel), and a live « Brouillon »
+  reading in the mode itself. A phone's « … mise à jour » notification is the editor screen's (`useWritingDone`), told by the field
+  (`onWritingDone`), and only after a mode that was opened on a phone.

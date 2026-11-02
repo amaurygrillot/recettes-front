@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { StyleguideScreen } from './StyleguideScreen'
@@ -7,6 +8,7 @@ import { strings } from './strings'
 
 const SECTION_TITLES = [
   strings.logo.title,
+  strings.mascot.title,
   strings.icons.title,
   strings.buttons.title,
   strings.tags.title,
@@ -17,9 +19,18 @@ const SECTION_TITLES = [
   strings.avatars.title,
 ]
 
+// The rich text field of the page keeps its writing mode in the history, as it does in the app.
+function renderStyleguide() {
+  return render(
+    <MemoryRouter>
+      <StyleguideScreen />
+    </MemoryRouter>,
+  )
+}
+
 describe('StyleguideScreen', () => {
   it('has one page title and a section per family of components', () => {
-    render(<StyleguideScreen />)
+    renderStyleguide()
 
     expect(screen.getByRole('heading', { level: 1, name: strings.title })).toBeVisible()
     for (const title of SECTION_TITLES) {
@@ -29,7 +40,7 @@ describe('StyleguideScreen', () => {
 
   it('lets a filter chip be chosen and dropped again', async () => {
     const user = userEvent.setup()
-    render(<StyleguideScreen />)
+    renderStyleguide()
     const chip = screen.getByRole('button', { name: strings.tags.desserts })
 
     await user.click(chip)
@@ -40,7 +51,7 @@ describe('StyleguideScreen', () => {
   })
 
   it('has no accessibility violation', async () => {
-    const { container } = render(<StyleguideScreen />)
+    const { container } = renderStyleguide()
 
     await expectNoAccessibilityViolations(container)
   })

@@ -1,0 +1,89 @@
+import { ContentEditable } from '@lexical/react/LexicalContentEditable'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useEffect, type KeyboardEvent } from 'react'
+import { classNames } from '../../lib/classNames'
+import { FIELD_LOOK, type RichTextVariant } from './textSizes'
+
+/** The text's padding and its placeholder's: in the writing mode the page around the text gives the margins, so it has none. */
+const PADDINGS = {
+  field: { text: 'px-4 py-3.5', placeholder: 'px-4 py-3.5' },
+  tip: { text: 'px-0.5 pt-0.5 pb-2.5', placeholder: 'px-0.5 py-0.5' },
+  writing: { text: 'px-0 py-0', placeholder: 'px-0 py-0' },
+} as const
+
+type Place = keyof typeof PADDINGS
+
+function placeOf(fill: boolean, advice: boolean): Place {
+  if (fill) return 'writing'
+  return advice ? 'tip' : 'field'
+}
+
+export interface EditableTextProps {
+  variant: RichTextVariant
+  labelId: string
+  placeholder: string
+  /** The id of the hint or error under the field, which describes the text. */
+  messageId: string | undefined
+  invalid: boolean
+  /** In the writing mode the text fills the screen, with no height of its own. */
+  fill?: boolean
+  /** A tap or a click on the text. */
+  onTap?: (() => void) | undefined
+  onKeyDown?: ((event: KeyboardEvent) => void) | undefined
+}
+
+/** The editable text of a field: the same one inline and in the writing mode, which is where the editor is moved to. */
+export function EditableText({
+  variant,
+  labelId,
+  placeholder,
+  messageId,
+  invalid,
+  fill = false,
+  onTap,
+  onKeyDown,
+}: EditableTextProps) {
+  const [editor] = useLexicalComposerContext()
+  const advice = variant === 'advice' && !fill
+  const place = placeOf(fill, advice)
+  const { text: padding, placeholder: placeholderPadding } = PADDINGS[place]
+  const { height, text } = FIELD_LOOK[variant]
+  const size = classNames(text, !fill && height)
+
+  // In the writing mode the editor has just been moved here: the caret goes with it, which the page left behind cannot do.
+  useEffect(() => {
+    if (fill) editor.focus()
+  }, [fill, editor])
+
+  return (
+    <div className={classNames('relative', fill && 'min-h-full')}>
+      <ContentEditable
+        aria-labelledby={labelId}
+        aria-multiline
+        aria-invalid={invalid ? true : undefined}
+        aria-describedby={messageId}
+        aria-placeholder={placeholder}
+        onClick={onTap}
+        onKeyDown={onKeyDown}
+        placeholder={
+          <div
+            aria-hidden="true"
+            className={classNames(
+              'pointer-events-none absolute top-0 left-0 text-ink-700',
+              placeholderPadding,
+              size,
+            )}
+          >
+            {placeholder}
+          </div>
+        }
+        className={classNames(
+          'rich-text text-ink-900 outline-none',
+          padding,
+          fill && 'min-h-full',
+          size,
+        )}
+      />
+    </div>
+  )
+}

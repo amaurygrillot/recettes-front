@@ -5,20 +5,32 @@ import { useExtensionSignalValue } from '@lexical/react/useExtensionSignalValue'
 import { $getNearestNodeOfType } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 import { useEffect, useState } from 'react'
+import { $sizeAtCaret, type TextSize } from './textSize'
 
 /** What the toolbar shows: which tools are on at the caret, and what can be undone or redone. */
 export interface ToolbarState {
+  size: TextSize
   bold: boolean
   italic: boolean
+  underline: boolean
+  strikethrough: boolean
   bulletList: boolean
   numberList: boolean
   canUndo: boolean
   canRedo: boolean
 }
 
-type CaretState = Pick<ToolbarState, 'bold' | 'italic' | 'bulletList' | 'numberList'>
+type CaretState = Omit<ToolbarState, 'canUndo' | 'canRedo'>
 
-const NOWHERE: CaretState = { bold: false, italic: false, bulletList: false, numberList: false }
+const NOWHERE: CaretState = {
+  size: 'normal',
+  bold: false,
+  italic: false,
+  underline: false,
+  strikethrough: false,
+  bulletList: false,
+  numberList: false,
+}
 
 /** The tools that are on where the caret is (read inside an editor state). */
 function $caretState(): CaretState {
@@ -27,8 +39,11 @@ function $caretState(): CaretState {
   const list = $getNearestNodeOfType(selection.anchor.getNode(), ListNode)
   const listType = $isListNode(list) ? list.getListType() : undefined
   return {
+    size: $sizeAtCaret(),
     bold: selection.hasFormat('bold'),
     italic: selection.hasFormat('italic'),
+    underline: selection.hasFormat('underline'),
+    strikethrough: selection.hasFormat('strikethrough'),
     bulletList: listType === 'bullet',
     numberList: listType === 'number',
   }
@@ -36,8 +51,11 @@ function $caretState(): CaretState {
 
 function sameCaret(a: CaretState, b: CaretState): boolean {
   return (
+    a.size === b.size &&
     a.bold === b.bold &&
     a.italic === b.italic &&
+    a.underline === b.underline &&
+    a.strikethrough === b.strikethrough &&
     a.bulletList === b.bulletList &&
     a.numberList === b.numberList
   )

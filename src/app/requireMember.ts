@@ -6,7 +6,9 @@ import { loginPath } from './paths'
 /**
  * Loader of the pages that need a login: a visitor is sent to the login screen, which brings them
  * back to the page they asked for. It runs when a page is entered, not while it is open, so a
- * member whose session expires on a page stays on it (the dialog takes over).
+ * member whose session expires on a page stays on it (the dialog takes over): an expired session is
+ * not a visitor. It may run again when the page goes to itself (the writing mode of a text field adds
+ * a history entry for its own address, and removes it), which changes nothing for the same reason.
  */
 export function requireMember({ request }: LoaderFunctionArgs): Response | null {
   if (getSession().status !== 'visitor') return null

@@ -3,9 +3,9 @@ import { useRef } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { useCanScrollMore } from './useCanScrollMore'
 
-function Reader({ text }: { text: string }) {
+function Reader({ text, axis }: { text: string; axis?: 'vertical' | 'horizontal' }) {
   const ref = useRef<HTMLDivElement>(null)
-  const more = useCanScrollMore(ref, text)
+  const more = useCanScrollMore(ref, text, axis)
   return (
     <div ref={ref} data-testid="reader">
       {more ? 'Il y a la suite' : 'Tout est là'}
@@ -50,5 +50,31 @@ describe('useCanScrollMore', () => {
     rerender(<Reader text="très long" />)
 
     expect(screen.getByText('Il y a la suite')).toBeInTheDocument()
+  })
+
+  describe('along a row', () => {
+    function widths(scrollWidth: number, clientWidth: number) {
+      vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(scrollWidth)
+      vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(clientWidth)
+    }
+
+    it('is true while the row is wider than the element, and false at its end', () => {
+      widths(600, 300)
+      render(<Reader text="barre" axis="horizontal" />)
+      expect(screen.getByText('Il y a la suite')).toBeInTheDocument()
+
+      screen.getByTestId('reader').scrollLeft = 300
+      fireEvent.scroll(screen.getByTestId('reader'))
+
+      expect(screen.getByText('Tout est là')).toBeInTheDocument()
+    })
+
+    it('ignores the height', () => {
+      sizes(900, 200)
+      widths(300, 300)
+      render(<Reader text="barre" axis="horizontal" />)
+
+      expect(screen.getByText('Tout est là')).toBeInTheDocument()
+    })
   })
 })

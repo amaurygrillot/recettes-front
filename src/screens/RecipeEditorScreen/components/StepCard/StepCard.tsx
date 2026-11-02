@@ -4,6 +4,7 @@ import { RichTextEditor } from '../../../../components/RichTextEditor/RichTextEd
 import type { EditorValues } from '../../editorModel'
 import { messageOf } from '../../fieldError'
 import { useSaving } from '../../savingContext'
+import { useWritingDone } from '../../useWritingDone'
 import { strings } from '../../strings'
 import { GestureButton } from '../GestureButton/GestureButton'
 import { GripButton } from '../GestureButton/GripButton'
@@ -30,6 +31,7 @@ export interface StepCardProps {
 export function StepCard({ index, total, handle, onMove, onRemove }: StepCardProps) {
   const { control } = useFormContext<EditorValues>()
   const saving = useSaving()
+  const writingDone = useWritingDone(strings.writingDone.step)
   const position = index + 1
 
   return (
@@ -80,6 +82,7 @@ export function StepCard({ index, total, handle, onMove, onRemove }: StepCardPro
             onChange={field.onChange}
             error={messageOf(fieldState.error)}
             locked={saving}
+            onWritingDone={writingDone}
           />
         )}
       />
