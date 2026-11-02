@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text'
 import {
@@ -11,25 +11,51 @@ import {
   getNearestEditorFromDOMNode,
   type LexicalEditor,
 } from 'lexical'
+import { MemoryRouter } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { installMatchMedia, removeMatchMedia } from '../../test/matchMedia'
+import { renderRoutes } from '../../test/renderRoutes'
 import { RichTextEditor, type RichTextEditorProps } from './RichTextEditor'
 
 function renderEditor(props: Partial<RichTextEditorProps> = {}) {
   const onChange = vi.fn<(html: string) => void>()
-  const rendered = render(
-    <RichTextEditor
-      variant="introduction"
-      label="Introduction"
-      note="facultatif"
-      placeholder="Présente ta recette en quelques phrases"
-      initialHtml=""
-      onChange={onChange}
-      {...props}
-    />,
+  const rendered = renderRoutes(
+    [
+      {
+        path: '/',
+        element: (
+          <RichTextEditor
+            variant="introduction"
+            label="Introduction"
+            note="facultatif"
+            placeholder="Présente ta recette en quelques phrases"
+            initialHtml=""
+            onChange={onChange}
+            {...props}
+          />
+        ),
+      },
+    ],
+    '/',
   )
   return { ...rendered, onChange }
+}
+
+/** The field with the props that change between two renders of one test, in the router it needs. */
+function fieldWith(props: Partial<RichTextEditorProps> = {}) {
+  return (
+    <MemoryRouter>
+      <RichTextEditor
+        variant="introduction"
+        label="Introduction"
+        placeholder="Présente ta recette en quelques phrases"
+        initialHtml=""
+        onChange={vi.fn()}
+        {...props}
+      />
+    </MemoryRouter>
+  )
 }
 
 const textbox = () => screen.getByRole('textbox', { name: /^Introduction/ })
@@ -86,7 +112,7 @@ describe('RichTextEditor', () => {
       expect(screen.getByText('Présente ta recette en quelques phrases')).toBeVisible()
     })
 
-    it('has the six tools, in a toolbar of its own, and no more', () => {
+    it('has the nine tools, in the order of use, in a toolbar of its own, and no more', () => {
       renderEditor()
 
       const toolbar = screen.getByRole('toolbar', { name: 'Mise en forme du texte' })
@@ -95,8 +121,11 @@ describe('RichTextEditor', () => {
           button.getAttribute('aria-label'),
         ),
       ).toEqual([
+        'Taille du texte : Normal',
         'Gras',
         'Italique',
+        'Souligné',
+        'Barré',
         'Liste à puces',
         'Liste numérotée',
         'Annuler la dernière action',
@@ -118,19 +147,14 @@ describe('RichTextEditor', () => {
     })
 
     it('shows a hint, and replaces it with the error, which puts the field in error', () => {
-      const { rerender } = renderEditor({ hint: 'Quelques phrases suffisent.' })
+      const { rerender } = render(fieldWith({ hint: 'Quelques phrases suffisent.' }))
       expect(textbox()).toHaveAccessibleDescription('Quelques phrases suffisent.')
 
       rerender(
-        <RichTextEditor
-          variant="introduction"
-          label="Introduction"
-          placeholder="Présente ta recette en quelques phrases"
-          initialHtml=""
-          onChange={vi.fn()}
-          hint="Quelques phrases suffisent."
-          error="Écris au moins une phrase."
-        />,
+        fieldWith({
+          hint: 'Quelques phrases suffisent.',
+          error: 'Écris au moins une phrase.',
+        }),
       )
 
       expect(textbox()).toBeInvalid()
@@ -266,7 +290,7 @@ describe('RichTextEditor', () => {
   })
 
   describe('what it refuses to write', () => {
-    it('swallows the other formats: Ctrl + U does not underline', async () => {
+    it('swallows the formats it has no tool for: code does not apply', async () => {
       renderEditor()
       const editor = editorOf(textbox())
       await write(editor, 'sous')
@@ -276,7 +300,7 @@ describe('RichTextEditor', () => {
         editor.update(() => {
           $getRoot().select()
         })
-        handled = editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
+        handled = editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')
         await Promise.resolve()
       })
 
@@ -285,7 +309,7 @@ describe('RichTextEditor', () => {
         editor.read(() =>
           $getRoot()
             .getAllTextNodes()
-            .some((node) => $isTextNode(node) && node.hasFormat('underline')),
+            .some((node) => $isTextNode(node) && node.hasFormat('code')),
         ),
       ).toBe(false)
     })
@@ -319,19 +343,10 @@ describe('RichTextEditor', () => {
 
   describe('while it is locked', () => {
     it('cannot be written in, and can again once unlocked', () => {
-      const { rerender } = renderEditor({ locked: true })
+      const { rerender } = render(fieldWith({ locked: true }))
       expect(textbox()).toHaveAttribute('contenteditable', 'false')
 
-      rerender(
-        <RichTextEditor
-          variant="introduction"
-          label="Introduction"
-          placeholder="Présente ta recette en quelques phrases"
-          initialHtml=""
-          onChange={vi.fn()}
-          locked={false}
-        />,
-      )
+      rerender(fieldWith({ locked: false }))
 
       expect(textbox()).toHaveAttribute('contenteditable', 'true')
     })
@@ -357,7 +372,7 @@ describe('RichTextEditor', () => {
       expect(screen.getByRole('toolbar')).toBeVisible()
     })
 
-    it('has no tools at rest on a phone, and brings them above the keyboard with the focus', async () => {
+    it('has no tools in its frame on a phone: they come with the writing mode', async () => {
       installMatchMedia(390)
       const user = userEvent.setup()
       renderTip()
@@ -365,7 +380,7 @@ describe('RichTextEditor', () => {
 
       await user.click(tip())
 
-      expect(screen.getByRole('toolbar')).toHaveClass('fixed')
+      expect(within(screen.getByRole('dialog')).getByRole('toolbar')).toBeVisible()
     })
 
     it('has no accessibility violation', async () => {
@@ -375,41 +390,337 @@ describe('RichTextEditor', () => {
     })
   })
 
-  describe('on a phone', () => {
+  describe('the new marks', () => {
+    it.each([
+      ['Souligné', '<p><u>texte</u></p>'],
+      ['Barré', '<p><s>texte</s></p>'],
+    ])('writes with « %s » on, and says it is on', async (name, html) => {
+      const user = userEvent.setup()
+      const { onChange } = renderEditor()
+      const editor = editorOf(textbox())
+      await placeCaretAtEnd(editor)
+
+      await user.click(tool(name))
+      expect(tool(name)).toHaveAttribute('aria-pressed', 'true')
+      await write(editor, 'texte')
+
+      expect(lastHtml(onChange)).toBe(html)
+    })
+
+    it('marks the selected words when the underline command comes in, as Ctrl + U sends it', async () => {
+      const { onChange } = renderEditor({ initialHtml: '<p>un mot</p>' })
+      const editor = editorOf(textbox())
+
+      await act(async () => {
+        editor.update(
+          () => {
+            const text = $getRoot().getFirstDescendant()
+            if ($isTextNode(text)) text.select(0, text.getTextContentSize())
+          },
+          { discrete: true },
+        )
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')
+        await Promise.resolve()
+      })
+
+      expect(lastHtml(onChange)).toBe('<p><u>un mot</u></p>')
+    })
+  })
+
+  describe('the size', () => {
+    const sizeButton = (current = 'Normal') =>
+      screen.getByRole('button', { name: `Taille du texte : ${current}` })
+
+    it('offers Petit, Normal and Grand for an introduction, each with the size of the page’s text', async () => {
+      const user = userEvent.setup()
+      renderEditor()
+
+      await user.click(sizeButton())
+
+      const list = screen.getByRole('menu')
+      const items = within(list).getAllByRole('menuitemradio')
+      expect(items.map((item) => item.textContent)).toEqual([
+        'Petit16 / 22',
+        'Normal18 / 28',
+        'Grand22 / 34',
+      ])
+      expect(items[1]).toHaveAttribute('aria-checked', 'true')
+    })
+
+    it('offers only Petit and Normal for a step', async () => {
+      const user = userEvent.setup()
+      renderEditor({ variant: 'step', label: 'Texte de l’étape' })
+
+      await user.click(sizeButton())
+
+      const items = within(screen.getByRole('menu')).getAllByRole('menuitemradio')
+      expect(items.map((item) => item.textContent)).toEqual(['Petit18 / 28', 'Normal22 / 34'])
+    })
+
+    it.each([
+      ['Petit', '<p><small>texte</small></p>'],
+      ['Grand', '<p><big>texte</big></p>'],
+    ])('writes %s, and says so on the button', async (name, html) => {
+      const user = userEvent.setup()
+      const { onChange } = renderEditor()
+      const editor = editorOf(textbox())
+      await placeCaretAtEnd(editor)
+
+      await user.click(sizeButton())
+      await user.click(screen.getByRole('menuitemradio', { name: new RegExp(`^${name}`) }))
+      await write(editor, 'texte')
+
+      expect(lastHtml(onChange)).toBe(html)
+      expect(sizeButton(name)).toBeVisible()
+    })
+
+    it('gives the focus back to the text once a size is chosen', async () => {
+      const user = userEvent.setup()
+      renderEditor()
+      // jsdom has no real focus for a contenteditable: what counts is that the editor is asked to take it.
+      const focus = vi.spyOn(editorOf(textbox()), 'focus')
+      await user.click(sizeButton())
+
+      await user.click(screen.getByRole('menuitemradio', { name: /^Petit/ }))
+
+      await waitFor(() => {
+        expect(focus).toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('the writing mode on a tablet and a desktop', () => {
+    const open = () => screen.getByRole('button', { name: 'Écrire en plein écran' })
+    const dialog = () => screen.getByRole('dialog', { name: 'Introduction' })
+
+    it('is opened by « Plein écran », and shows the same text, in a dialog', async () => {
+      const user = userEvent.setup()
+      renderEditor({ initialHtml: '<p>La tarte du dimanche.</p>' })
+
+      await user.click(open())
+
+      expect(within(dialog()).getByRole('textbox', { name: /^Introduction/ })).toHaveTextContent(
+        'La tarte du dimanche.',
+      )
+      expect(
+        within(dialog()).getByRole('toolbar', { name: 'Mise en forme du texte' }),
+      ).toBeVisible()
+      expect(within(dialog()).getByRole('button', { name: 'Terminé' })).toBeVisible()
+    })
+
+    it.each([
+      ['Ctrl', '{Control>}{Shift>}f{/Shift}{/Control}'],
+      ['Cmd', '{Meta>}{Shift>}f{/Shift}{/Meta}'],
+    ])('is opened by %s + Maj + F while the text has the focus', async (_key, keys) => {
+      const user = userEvent.setup()
+      renderEditor()
+      textbox().focus()
+
+      await user.keyboard(keys)
+
+      expect(dialog()).toBeVisible()
+    })
+
+    it('keeps what is written in it, and shows it in the field once it is closed with « Terminé »', async () => {
+      const user = userEvent.setup()
+      const { onChange } = renderEditor({ initialHtml: '<p>Avant.</p>' })
+      await user.click(open())
+      await write(editorOf(within(dialog()).getByRole('textbox')), ' Après.')
+
+      await user.click(within(dialog()).getByRole('button', { name: 'Terminé' }))
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+      await waitFor(() => {
+        expect(textbox()).toHaveTextContent('Avant. Après.')
+      })
+      expect(lastHtml(onChange)).toBe('<p>Avant. Après.</p>')
+    })
+
+    it('is closed by Escape, and the text is kept', async () => {
+      const user = userEvent.setup()
+      renderEditor({ initialHtml: '<p>Garde-moi.</p>' })
+      await user.click(open())
+
+      await user.keyboard('{Escape}')
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+      await waitFor(() => {
+        expect(textbox()).toHaveTextContent('Garde-moi.')
+      })
+    })
+
+    it('is closed by a click on the dimmed part, and the text is kept', async () => {
+      const user = userEvent.setup()
+      renderEditor({ initialHtml: '<p>Garde-moi.</p>' })
+      await user.click(open())
+      const backdrop = dialog().previousElementSibling
+      if (!(backdrop instanceof HTMLElement)) throw new Error('No dimmed part behind the dialog')
+
+      await user.click(backdrop)
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+      await waitFor(() => {
+        expect(textbox()).toHaveTextContent('Garde-moi.')
+      })
+    })
+
+    it('puts the caret back in the text, and does not say anything was updated', async () => {
+      const user = userEvent.setup()
+      const onWritingDone = vi.fn()
+      renderEditor({ onWritingDone })
+      const focus = vi.spyOn(editorOf(textbox()), 'focus')
+      await user.click(open())
+      focus.mockClear()
+
+      await user.click(within(dialog()).getByRole('button', { name: 'Terminé' }))
+
+      await waitFor(() => {
+        expect(focus).toHaveBeenCalled()
+      })
+      expect(onWritingDone).not.toHaveBeenCalled()
+    })
+
+    it('has no « Plein écran » while the field is locked', () => {
+      renderEditor({ locked: true })
+
+      expect(
+        screen.queryByRole('button', { name: 'Écrire en plein écran' }),
+      ).not.toBeInTheDocument()
+    })
+
+    it('has no accessibility violation while it is open', async () => {
+      const user = userEvent.setup()
+      renderEditor({ initialHtml: '<p>Texte.</p>' })
+      await user.click(open())
+
+      await expectNoAccessibilityViolations(document.body)
+    })
+  })
+
+  describe('the writing mode on a phone', () => {
     beforeEach(() => {
       installMatchMedia(390)
     })
 
-    it('keeps the toolbar in the field until the text has the focus', () => {
+    const dialog = () => screen.getByRole('dialog', { name: 'Introduction' })
+
+    it('has no tools and no « Plein écran » in the field itself', () => {
       renderEditor()
 
-      expect(screen.getByRole('toolbar')).not.toHaveClass('fixed')
+      expect(screen.queryByRole('toolbar')).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('button', { name: 'Écrire en plein écran' }),
+      ).not.toBeInTheDocument()
     })
 
-    it('moves the toolbar to the bar above the keyboard while the text has the focus, and back after', async () => {
+    it('is opened by a tap on the text, with the arrow, « Terminé » and the tools', async () => {
       const user = userEvent.setup()
-      renderEditor()
+      renderEditor({ initialHtml: '<p>Un texte.</p>' })
 
       await user.click(textbox())
-      expect(screen.getByRole('toolbar')).toHaveClass('fixed')
-      await act(async () => {
-        textbox().blur()
-        await Promise.resolve()
-      })
+
+      const mode = within(dialog())
+      expect(mode.getByRole('button', { name: 'Fermer le mode écriture' })).toBeVisible()
+      expect(mode.getByRole('button', { name: 'Terminé' })).toBeVisible()
+      expect(mode.getByRole('toolbar', { name: 'Mise en forme du texte' })).toBeVisible()
+      expect(mode.getByRole('textbox')).toHaveTextContent('Un texte.')
+    })
+
+    it('is not opened by a tap when the field is locked', async () => {
+      const user = userEvent.setup()
+      renderEditor({ locked: true })
+
+      await user.click(textbox())
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it.each(['Terminé', 'Fermer le mode écriture'])(
+      'is closed by « %s », which keeps the text and says the field was updated',
+      async (name) => {
+        const user = userEvent.setup()
+        const onWritingDone = vi.fn()
+        const { onChange } = renderEditor({ initialHtml: '<p>Avant.</p>', onWritingDone })
+        await user.click(textbox())
+        const inMode = editorOf(within(dialog()).getByRole('textbox'))
+        await placeCaretAtEnd(inMode)
+        await write(inMode, ' Après.')
+
+        await user.click(within(dialog()).getByRole('button', { name }))
+
+        await waitFor(() => {
+          expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        })
+        await waitFor(() => {
+          expect(textbox()).toHaveTextContent('Avant. Après.')
+        })
+        expect(lastHtml(onChange)).toBe('<p>Avant. Après.</p>')
+        expect(onWritingDone).toHaveBeenCalledOnce()
+      },
+    )
+
+    it('is closed by Escape too', async () => {
+      const user = userEvent.setup()
+      const onWritingDone = vi.fn()
+      renderEditor({ onWritingDone })
+      await user.click(textbox())
+
+      await user.keyboard('{Escape}')
 
       await waitFor(() => {
-        expect(screen.getByRole('toolbar')).not.toHaveClass('fixed')
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+      expect(onWritingDone).toHaveBeenCalledOnce()
+    })
+
+    it('adds a history entry while it is open, so that the back gesture closes it and nothing else', async () => {
+      const user = userEvent.setup()
+      const onWritingDone = vi.fn()
+      const { router } = renderEditor({ initialHtml: '<p>Garde-moi.</p>', onWritingDone })
+      const before = router.state.location.key
+      await user.click(textbox())
+      await waitFor(() => {
+        expect(router.state.location.key).not.toBe(before)
+      })
+      expect(router.state.location.pathname).toBe('/')
+
+      await act(() => router.navigate(-1))
+
+      await waitFor(() => {
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+      expect(router.state.location.key).toBe(before)
+      await waitFor(() => {
+        expect(textbox()).toHaveTextContent('Garde-moi.')
+      })
+      expect(onWritingDone).toHaveBeenCalledOnce()
+    })
+
+    it('takes its history entry away again when it is closed another way', async () => {
+      const user = userEvent.setup()
+      const { router } = renderEditor()
+      const before = router.state.location.key
+      await user.click(textbox())
+
+      await user.click(within(dialog()).getByRole('button', { name: 'Terminé' }))
+
+      await waitFor(() => {
+        expect(router.state.location.key).toBe(before)
       })
     })
 
-    it('keeps the toolbar docked while the focus goes from the text to a tool', async () => {
+    it('has no accessibility violation while it is open', async () => {
       const user = userEvent.setup()
-      renderEditor()
+      renderEditor({ initialHtml: '<p>Texte.</p>' })
       await user.click(textbox())
 
-      await user.tab({ shift: true })
-
-      expect(screen.getByRole('toolbar')).toHaveClass('fixed')
+      await expectNoAccessibilityViolations(document.body)
     })
   })
 })

@@ -175,6 +175,13 @@ export const strings = {
   },
 
   // « Recommandations »: one rich text field, the cook's tip.
+  // Said when a text field's writing mode is closed on a phone.
+  writingDone: {
+    introduction: 'Introduction mise à jour',
+    step: 'Texte de l’étape mis à jour',
+    advice: 'Conseil mis à jour',
+  },
+
   advice: {
     label: 'le petit conseil',
     placeholder: 'Un geste, une astuce, ce que tu referais la prochaine fois.',

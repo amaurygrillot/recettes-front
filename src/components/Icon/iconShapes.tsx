@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
 /**
- * The icon set of the design system, drawn on a 24 px grid (« Icônes » board, 49 icons). Each
+ * The icon set of the design system, drawn on a 24 px grid (« Icônes » board, 49 icons, and the four of R3: text size, underline, strikethrough, expand). Each
  * entry is the inside of the <svg>: stroke, caps and joins come from Icon. Elements that are
  * filled dots (grip, more, bullets) set their own fill.
  *
@@ -303,6 +303,35 @@ const ICON_SHAPES = {
     <>
       <path d="M19 9 H9.5 a5 5 0 0 0 0 10 H15" />
       <path d="M15.5 5 L19.5 9 L15.5 13" />
+    </>
+  ),
+  'text-size': (
+    <>
+      <path d="M2.5 19 L8 5.5 L13.5 19" />
+      <path d="M4.6 14.6 H11.4" />
+      <path d="M15.5 19 L18.5 11.5 L21.5 19" />
+      <path d="M16.6 16.6 H20.4" />
+    </>
+  ),
+  underline: (
+    <>
+      <path d="M7 4.5 V11 a5 5 0 0 0 10 0 V4.5" />
+      <path d="M5 20 H19" />
+    </>
+  ),
+  strike: (
+    <>
+      <path d="M16.5 8 C16.5 5.9 14.6 4.5 12 4.5 C9.4 4.5 7.5 5.9 7.5 8 C7.5 10.4 9.4 11.4 12 12" />
+      <path d="M12 12 C14.8 12.6 16.5 13.8 16.5 16 C16.5 18.1 14.6 19.5 12 19.5 C9.4 19.5 7.5 18.1 7.5 16" />
+      <path d="M4 12 H20" />
+    </>
+  ),
+  expand: (
+    <>
+      <path d="M4 9 V4 H9" />
+      <path d="M20 9 V4 H15" />
+      <path d="M4 15 V20 H9" />
+      <path d="M20 15 V20 H15" />
     </>
   ),
 } satisfies Record<string, ReactElement>

@@ -312,6 +312,42 @@
   .rich-text :is(em, i) {
     font-style: italic;
   }
+
+  .rich-text u {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .rich-text s {
+    text-decoration: line-through;
+  }
+
+  /*
+   * The sizes of a text are the sizes of the page's text, relative to the field's own: a step is 22/34 (Petit
+   * is the 18/28 body text, there is no Grand); an introduction or a tip is 18/28 (Petit 16/22, Grand 22/34).
+   * In the editor, Lexical writes the same two sizes as sub and sup: they are never shifted off the baseline.
+   */
+  .rich-text :is(small, sub) {
+    font-size: var(--text-detail);
+    line-height: var(--text-detail--line-height);
+    vertical-align: baseline;
+  }
+
+  .rich-text.text-step :is(small, sub) {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  .rich-text :is(big, sup) {
+    font-size: var(--text-step);
+    line-height: var(--text-step--line-height);
+    vertical-align: baseline;
+  }
+
+  .rich-text.text-step :is(big, sup) {
+    font-size: inherit;
+    line-height: inherit;
+  }
 }
 
 /* The layout grid: side margins of 16 / 32 / 64 px (phone, tablet, desktop), the content centered

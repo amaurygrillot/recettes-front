@@ -1,28 +1,23 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { LexicalExtensionComposer } from '@lexical/react/LexicalExtensionComposer'
-import { useEffect, useId, useRef, useState } from 'react'
-import { TABLET_QUERY } from '../../lib/breakpoints'
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
+import { DESKTOP_QUERY, TABLET_QUERY } from '../../lib/breakpoints'
 import { classNames } from '../../lib/classNames'
 import { useKeyboardInset } from '../../lib/useKeyboardInset'
 import { useMediaQuery } from '../../lib/useMediaQuery'
 import { Icon } from '../Icon/Icon'
+import { RichTextView } from '../RichTextView/RichTextView'
+import { EditableText } from './EditableText'
 import { $toHtml } from './htmlConversion'
 import { createRichTextExtension } from './richTextExtension'
+import { strings } from './strings'
+import { baseOf, type RichTextVariant } from './textSizes'
 import { Toolbar } from './Toolbar'
 import { useToolbarState } from './useToolbarState'
+import { useWritingMode } from './useWritingMode'
+import { WritingMode } from './WritingMode'
 
-/**
- * Where the text goes, which sets its size (the one the page shows it in) and the height the field
- * starts with: an introduction (18/28, 144 px), a step (22/34, 160 px), a tip (18/28, 112 px).
- */
-export type RichTextVariant = 'introduction' | 'step' | 'advice'
-
-const VARIANTS: Record<RichTextVariant, string> = {
-  introduction: 'min-h-36 text-body',
-  step: 'min-h-40 text-step',
-  advice: 'min-h-28 text-body',
-}
+export type { RichTextVariant }
 
 export interface RichTextEditorProps {
   variant: RichTextVariant
@@ -42,6 +37,8 @@ export interface RichTextEditorProps {
   error?: string | undefined
   /** The text cannot be changed for now (a recipe being saved): it keeps its look and says nothing. */
   locked?: boolean
+  /** Told when the writing mode, opened on a phone, is closed: the page can say the field was updated. */
+  onWritingDone?: (() => void) | undefined
 }
 
 const FRAMES = {
@@ -53,9 +50,10 @@ const FRAMES = {
 }
 
 /**
- * A rich text field with a minimal toolbar (bold, italic, two lists, undo, redo), drawn once and
- * used for the introduction, the steps and the tip. The toolbar sits at the top of the field; on a
- * phone, while the text has the focus, it moves to the bar just above the keyboard.
+ * A rich text field, drawn once and used for the introduction, the steps and the tip: a bar of tools (size, bold,
+ * italic, underline, strikethrough, two lists, undo, redo) in one scrolling line, and a writing mode that gives the
+ * text a screen of its own. On a phone the tools only come with the writing mode, which a tap on the text opens;
+ * from a tablet the bar sits at the top of the field and « Plein écran » (or Ctrl + Maj + F) opens the mode.
  */
 export function RichTextEditor(props: RichTextEditorProps) {
   // One editor for as long as this field lives: it must not be built again when the page re-renders.
@@ -77,16 +75,28 @@ function Field({
   hint,
   error,
   locked = false,
+  onWritingDone,
 }: RichTextEditorProps) {
   const [editor] = useLexicalComposerContext()
   const toolbar = useToolbarState()
   const labelId = useId()
   const messageId = useId()
   const frame = useRef<HTMLDivElement>(null)
-  const [focused, setFocused] = useState(false)
   const tabletOrMore = useMediaQuery(TABLET_QUERY)
-  const docked = !tabletOrMore && focused
-  const keyboardInset = useKeyboardInset(docked)
+  const desktop = useMediaQuery(DESKTOP_QUERY)
+  const phone = !tabletOrMore
+  const advice = variant === 'advice'
+  const base = baseOf(variant)
+
+  const mode = useWritingMode({
+    phone,
+    onClosedOnPhone: () => {
+      onWritingDone?.()
+    },
+  })
+  const keyboardInset = useKeyboardInset(mode.writing && phone)
+  // What the text says while it is being written over there: the field here shows it, dimmed behind.
+  const [snapshot, setSnapshot] = useState('')
 
   useEffect(() => {
     editor.setEditable(!locked)
@@ -106,34 +116,49 @@ function Field({
       if (html === lastHtml) return
       lastHtml = html
       onChangeRef.current(html)
+      setSnapshot(html)
     })
   }, [editor])
 
-  // Whether the focus is anywhere in the field, tools included: moving from the text to a tool is still in it.
+  // The text is the editor's own, moved into the mode and back: it needs its caret and selection again. Back on
+  // the page, the field is scrolled into view, and with a keyboard (not a phone) the caret returns to the text.
+  const wasWriting = useRef(false)
   useEffect(() => {
-    const element = frame.current
-    if (element === null) return undefined
-    const enter = () => {
-      setFocused(true)
+    if (mode.writing) {
+      editor.focus()
+    } else if (wasWriting.current) {
+      frame.current?.scrollIntoView({ block: 'center' })
+      if (!phone) editor.focus()
     }
-    const leave = (event: FocusEvent) => {
-      if (!(event.relatedTarget instanceof Node) || !element.contains(event.relatedTarget)) {
-        setFocused(false)
-      }
+    wasWriting.current = mode.writing
+  }, [mode.writing, editor, phone])
+
+  function openWriting(): void {
+    setSnapshot(editor.read($toHtml))
+    mode.open()
+  }
+
+  function onKeyDown(event: KeyboardEvent): void {
+    if (mode.writing) return
+    if (event.shiftKey && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
+      event.preventDefault()
+      if (!locked) openWriting()
     }
-    element.addEventListener('focusin', enter)
-    element.addEventListener('focusout', leave)
-    return () => {
-      element.removeEventListener('focusin', enter)
-      element.removeEventListener('focusout', leave)
-    }
-  }, [])
+  }
 
   const message = error ?? hint
-  const advice = variant === 'advice'
-  // The tip has no bar of its own at rest: it is the stitched frame of the recipe page, and its tools
-  // come with the keyboard (on a phone), or sit inside the frame (from a tablet).
-  const showToolbar = !advice || tabletOrMore || docked
+  const text = (
+    <EditableText
+      variant={variant}
+      labelId={labelId}
+      placeholder={placeholder}
+      messageId={message ? messageId : undefined}
+      invalid={error !== undefined}
+      fill={mode.writing}
+      onTap={phone && !locked && !mode.writing ? openWriting : undefined}
+      onKeyDown={onKeyDown}
+    />
+  )
 
   const labelNode = (
     <div
@@ -150,43 +175,37 @@ function Field({
     </div>
   )
 
-  const toolbarNode = showToolbar && (
-    // The tools keep their place in the field even when they sit above the keyboard: the text does not jump.
-    <div className={advice ? 'min-h-15' : 'min-h-15 border-b-2 border-paper-300 bg-paper-100'}>
-      <Toolbar
-        editor={editor}
-        state={toolbar}
-        {...(docked ? { dockedAbove: keyboardInset } : {})}
-      />
+  const fullScreenButton = tabletOrMore && !locked && (
+    <button
+      type="button"
+      aria-label={strings.writeFullScreen}
+      onClick={openWriting}
+      className="inline-flex h-11 flex-none cursor-pointer items-center gap-2 rounded-m border-2 border-ink-900 bg-paper-50 py-0 pr-3.5 pl-3 text-detail font-bold text-ink-900 hover:bg-butter-100 focus-visible:outline-offset-2 active:bg-butter-200"
+    >
+      <Icon name="expand" size={22} strokeWidth={2.4} />
+      {strings.fullScreenLabel}
+    </button>
+  )
+
+  // On a phone the tools come with the writing mode only.
+  const toolbarNode = tabletOrMore && !mode.writing && (
+    <div className={advice ? undefined : 'border-b-2 border-paper-300'}>
+      <Toolbar editor={editor} state={toolbar} base={base} surface="field" />
     </div>
   )
 
-  const textNode = (
-    <div className="relative">
-      <ContentEditable
-        aria-labelledby={labelId}
-        aria-multiline
-        aria-invalid={error ? true : undefined}
-        aria-describedby={message ? messageId : undefined}
-        aria-placeholder={placeholder}
-        placeholder={
-          <div
-            aria-hidden="true"
-            className={classNames(
-              'pointer-events-none absolute top-0 left-0 text-ink-700',
-              advice ? 'px-0.5 py-0.5' : 'px-4 py-3.5',
-              VARIANTS[variant],
-            )}
-          >
-            {placeholder}
-          </div>
-        }
-        className={classNames(
-          'rich-text text-ink-900 outline-none',
-          advice ? 'px-0.5 pt-0.5 pb-2.5' : 'px-4 py-3.5',
-          VARIANTS[variant],
-        )}
-      />
+  const body = mode.writing ? (
+    <div className={advice ? 'px-0.5 py-0.5' : 'px-4 py-3.5'}>
+      <RichTextView html={snapshot} size={base} />
+    </div>
+  ) : (
+    text
+  )
+
+  const labelRow = (
+    <div className="flex items-center justify-between gap-3">
+      {labelNode}
+      {fullScreenButton}
     </div>
   )
 
@@ -200,19 +219,19 @@ function Field({
             error ? FRAMES.error : FRAMES.advice,
           )}
         >
-          {labelNode}
+          {labelRow}
           {toolbarNode}
-          {textNode}
+          {body}
         </div>
       ) : (
         <>
-          {labelNode}
+          {labelRow}
           <div
             ref={frame}
             className={classNames('overflow-hidden rounded-m', error ? FRAMES.error : FRAMES.idle)}
           >
             {toolbarNode}
-            {textNode}
+            {body}
           </div>
         </>
       )}
@@ -228,6 +247,16 @@ function Field({
           {message}
         </p>
       )}
+      <WritingMode
+        open={mode.writing}
+        title={label}
+        desktop={desktop}
+        keyboardInset={keyboardInset}
+        onClose={mode.close}
+        toolbar={<Toolbar editor={editor} state={toolbar} base={base} surface="writing" />}
+      >
+        {text}
+      </WritingMode>
     </div>
   )
 }

@@ -8,16 +8,29 @@ import {
   FORMAT_TEXT_COMMAND,
   defineExtension,
   type ElementNode,
+  type TextFormatType,
 } from 'lexical'
 import { $fillFromHtml } from './htmlConversion'
 
-/** Bold and italic are the only formats: a shortcut for another one (Ctrl + U) is swallowed. */
+/**
+ * What a text can be: bold, italic, underlined, struck through, and (as the `subscript` and `superscript` formats,
+ * see `textSize.ts`) smaller or larger. A shortcut for any other format (code, highlight…) is swallowed.
+ */
+const ALLOWED_FORMATS: readonly TextFormatType[] = [
+  'bold',
+  'italic',
+  'underline',
+  'strikethrough',
+  'subscript',
+  'superscript',
+]
+
 const AllowedFormatsExtension = defineExtension({
   name: 'recettes/allowed-formats',
   register: (editor) =>
     editor.registerCommand(
       FORMAT_TEXT_COMMAND,
-      (format) => format !== 'bold' && format !== 'italic',
+      (format) => !ALLOWED_FORMATS.includes(format),
       COMMAND_PRIORITY_HIGH,
     ),
 })
@@ -38,15 +51,24 @@ const PlainBlocksExtension = defineExtension({
     ),
 })
 
-/** The look of what is written: the text styles come from the page's `.rich-text`, which the viewer shares. */
+/**
+ * The look of what is written: the text styles come from the page's `.rich-text`, which the viewer shares (the sizes
+ * too: Lexical writes them as `sub` and `sup`, which that stylesheet draws as the two sizes).
+ */
 const THEME = {
-  text: { bold: 'font-bold', italic: 'italic' },
+  text: {
+    bold: 'font-bold',
+    italic: 'italic',
+    underline: 'underline',
+    strikethrough: 'line-through',
+    underlineStrikethrough: 'underline line-through',
+  },
   list: { nested: { listitem: 'list-none' } },
 }
 
 /**
- * An editor made of the minimal vocabulary of a recipe's text: paragraphs, bold, italic, bulleted
- * and numbered lists, undo and redo. Create one per editor (it must stay the same object for as
+ * An editor made of the vocabulary of a recipe's text: paragraphs, bold, italic, underline, strikethrough, two sizes,
+ * bulleted and numbered lists, undo and redo. Create one per editor (it must stay the same object for as
  * long as the editor lives) with the stored HTML to start from.
  */
 export function createRichTextExtension(initialHtml: string) {

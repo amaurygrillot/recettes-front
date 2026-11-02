@@ -2,6 +2,7 @@ import { Controller, useFormContext } from 'react-hook-form'
 import { RichTextEditor } from '../../../../components/RichTextEditor/RichTextEditor'
 import type { EditorValues } from '../../editorModel'
 import { useSaving } from '../../savingContext'
+import { useWritingDone } from '../../useWritingDone'
 import { strings } from '../../strings'
 import { EditorSection } from '../EditorSection/EditorSection'
 
@@ -9,6 +10,7 @@ import { EditorSection } from '../EditorSection/EditorSection'
 export function AdviceSection() {
   const { control } = useFormContext<EditorValues>()
   const saving = useSaving()
+  const writingDone = useWritingDone(strings.writingDone.advice)
 
   return (
     <EditorSection id="advice" number={5} title={strings.sections.adviceTitle}>
@@ -24,6 +26,7 @@ export function AdviceSection() {
             initialHtml={field.value}
             onChange={field.onChange}
             locked={saving}
+            onWritingDone={writingDone}
           />
         )}
       />

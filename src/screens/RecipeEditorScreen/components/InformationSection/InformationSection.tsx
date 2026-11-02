@@ -8,6 +8,7 @@ import { LIMITS } from '../../editorSchema'
 import { messageOf } from '../../fieldError'
 import { useReferences } from '../../references'
 import { useSaving } from '../../savingContext'
+import { useWritingDone } from '../../useWritingDone'
 import { strings } from '../../strings'
 import { CategorySheet } from '../CategorySheet/CategorySheet'
 import { EditorSection } from '../EditorSection/EditorSection'
@@ -23,6 +24,7 @@ export function InformationSection() {
   const references = useReferences()
   const [sheet, setSheet] = useState<Sheet | null>(null)
   const saving = useSaving()
+  const introductionDone = useWritingDone(strings.writingDone.introduction)
   const typedTitle = useWatch({ control, name: 'title' }).length
 
   return (
@@ -47,6 +49,7 @@ export function InformationSection() {
             initialHtml={field.value}
             onChange={field.onChange}
             locked={saving}
+            onWritingDone={introductionDone}
           />
         )}
       />

@@ -50,6 +50,29 @@ describe('RecipeEditorScreen', () => {
       expect(screen.queryByRole('button', { name: 'Supprimer la recette' })).not.toBeInTheDocument()
     })
 
+    it.each([
+      ['Introduction', /^Introduction/, 'Introduction mise à jour'],
+      ['Texte de l’étape', /^Texte de l’étape/, 'Texte de l’étape mis à jour'],
+      ['le petit conseil', /^le petit conseil/, 'Conseil mis à jour'],
+    ])(
+      'says the text was updated when the writing mode of « %s » is closed on a phone',
+      async (label, name, message) => {
+        useEditorBackend()
+        const user = userEvent.setup()
+        renderEditor('/recettes/nouvelle')
+        await findForm()
+
+        await user.click(screen.getByRole('textbox', { name }))
+        await user.click(
+          within(screen.getByRole('dialog', { name: label })).getByRole('button', {
+            name: 'Terminé',
+          }),
+        )
+
+        expect(await screen.findByText(message)).toBeVisible()
+      },
+    )
+
     it('waits for its vocabulary, then opens', async () => {
       useEditorBackend()
       server.use(

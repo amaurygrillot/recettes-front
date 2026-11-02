@@ -9,6 +9,7 @@ import {
   type LexicalEditor,
   type LexicalNode,
   type ParagraphNode,
+  type TextNode,
 } from 'lexical'
 import { sanitizeRichText } from '../../lib/sanitizeRichText'
 
@@ -21,16 +22,36 @@ function $textOf(node: LexicalNode): string {
 }
 
 /**
- * The markup of one node, in the editor's own vocabulary only (`p`, `br`, `strong`, `em`, `ul`,
- * `ol`, `li`) and with no attribute: what is stored is exactly what `RichTextView` will keep.
+ * A size is carried by the `subscript` (smaller) and `superscript` (larger) text formats, which the editor
+ * otherwise never uses; it is stored as `small` and `big`. This file is the only one that knows it.
+ */
+function $sizeTagOf(node: TextNode): 'small' | 'big' | undefined {
+  if (node.hasFormat('superscript')) return 'big'
+  if (node.hasFormat('subscript')) return 'small'
+  return undefined
+}
+
+function wrap(tag: string, html: string): string {
+  return `<${tag}>${html}</${tag}>`
+}
+
+/** The marks of a text, in a fixed order whichever order they came in: italic innermost, then bold, strikethrough, underline, size. */
+function $textToHtml(node: TextNode): string {
+  let html = escapeHtml(node.getTextContent())
+  if (node.hasFormat('italic')) html = wrap('em', html)
+  if (node.hasFormat('bold')) html = wrap('strong', html)
+  if (node.hasFormat('strikethrough')) html = wrap('s', html)
+  if (node.hasFormat('underline')) html = wrap('u', html)
+  const size = $sizeTagOf(node)
+  return size === undefined ? html : wrap(size, html)
+}
+
+/**
+ * The markup of one node, in the editor's own vocabulary only (`p`, `br`, `strong`, `em`, `u`, `s`,
+ * `small`, `big`, `ul`, `ol`, `li`) and with no attribute: what is stored is exactly what `RichTextView` will keep.
  */
 function $nodeToHtml(node: LexicalNode): string {
-  if ($isTextNode(node)) {
-    let html = escapeHtml(node.getTextContent())
-    if (node.hasFormat('italic')) html = `<em>${html}</em>`
-    if (node.hasFormat('bold')) html = `<strong>${html}</strong>`
-    return html
-  }
+  if ($isTextNode(node)) return $textToHtml(node)
   if ($isLineBreakNode(node)) return '<br>'
   if (!$isElementNode(node)) return ''
 
@@ -55,6 +76,15 @@ export function $toHtml(): string {
     .join('')
 }
 
+/** The other way: `small` and `big` are what Lexical knows how to open as `sub` and `sup`. */
+function renameSizeTags(document: Document): void {
+  document.querySelectorAll('small, big').forEach((element) => {
+    const replacement = document.createElement(element.tagName === 'BIG' ? 'sup' : 'sub')
+    replacement.append(...element.childNodes)
+    element.replaceWith(replacement)
+  })
+}
+
 /**
  * Replaces what the editor holds with stored HTML. The markup is cleaned first (the back end keeps
  * whatever was written, so nothing foreign gets into the editor), and loose text becomes paragraphs.
@@ -64,6 +94,7 @@ export function $fillFromHtml(editor: LexicalEditor, html: string): void {
   const root = $getRoot()
   root.clear()
   const document = new DOMParser().parseFromString(sanitizeRichText(html), 'text/html')
+  renameSizeTags(document)
 
   let paragraph: ParagraphNode | null = null
   for (const node of $generateNodesFromDOM(editor, document)) {
