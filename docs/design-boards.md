@@ -422,3 +422,37 @@ the shared `NoPhoto` (dejected mascot, « Pas encore de photo », on paper strip
 and the cutlery. The words of the **lost** states and of an empty « Mes recettes » are the board's (« Je n’ai rien trouvé… », « Ajoute ta première
 recette »); the sentence under « Je n’ai rien trouvé… » names the text searched, and says to remove a filter only when there is one. **À valider**:
 on the sign-in the happy mascot and « Qu’est-ce qu’on mijote aujourd’hui ? » replace the name of the application (as the board draws it).
+
+### R3 · rich text: three more tools and the writing mode (`Retouche-3-texte-riche-mobile`, `-grands-ecrans`)
+
+It **extends the minimal toolbar** of [RichTextEditor](#richtexteditor-editeur-texte-riche) (and the Rich text section of `CLAUDE.md`): bold and italic, the two lists,
+undo and redo stay, and **text size, underline and strikethrough** are added; the bar is one scrolling line; a full-screen **writing mode** takes the field.
+
+- **How the three are stored** (the back keeps the HTML unsanitised, `RichTextView` and the editor's loader both run `sanitizeRichText`, and
+  recipes written before R3 must render unchanged): underline is `<u>`, strikethrough `<s>`, a smaller text `<small>` and a larger one `<big>`;
+  Normal is no tag. **No attribute is ever allowed**, so the allow-list only grows by four tags and the DOMPurify rule « no attribute at all »
+  stays true (the board's own samples are written with `<u>` and `<s>`). Old recipes contain none of the four tags, so nothing in them changes;
+  the only text that could change is one that already held a `<small>` or a `<big>` that was being stripped, which the editor never wrote.
+- **What the sizes mean**: they are the sizes of the recipe page's text. A step is 22/34, so there **Petit** is 18/28 (the body text) and there
+  is no Grand; the introduction and the tip are 18/28, so there **Petit** is 16/22 (`text-detail`) and **Grand** 22/34 (`text-step`). CSS under
+  `.rich-text` gives `small` and `big` these sizes relative to the field's own (`RichTextView` `size`), in the editor and on the page alike.
+- **Inside Lexical** a size is carried by the `subscript` (Petit) and `superscript` (Grand) text formats, which the editor otherwise never
+  uses (a sub- or superscript shortcut is not offered): Lexical makes them exclusive, undoes them with the rest of the history and keeps them
+  across the paste and import paths. `htmlConversion.ts` is the only place that knows the mapping (`small` ↔ `sub`, `big` ↔ `sup` when reading,
+  the reverse when writing).
+- **The bar** (one line, the order of the board: size, bold, italic, underline, strike, bullets, numbers, undo, redo; groups separated by a
+  rule): it scrolls sideways, the size button first; a fade and a « › » at the right edge say there is more until the end of the line is
+  reached; 44 px tools, the board's size. On a phone it lives in the writing mode only (the inline field of the mobile board has no bar); from
+  a tablet it sits at the top of the field, the « Écrire en plein écran » button on the label line.
+- **Writing mode**: a modal (Radix `Dialog`: focus kept inside, the page behind inert, the page does not move). Phone and tablet: the whole
+  screen; desktop (from 1024 px): a 920 px panel on a dimmed background, the text 760 px wide at most. A strip at the top with the way back
+  (arrow), the name of the field and « Terminé »; the text fills the space down to the bar, which sits above the keyboard on a phone
+  (`useKeyboardInset`). The « Annuler / Enregistrer » bar of the editor is covered, so the old problem of two bars one over the other is gone.
+  - **In**: a tap on the text on a phone; on a tablet and a desktop the « Écrire en plein écran » button or Ctrl + Maj + F (Cmd + Maj + F on
+    a Mac) while the text has the focus. Keyboard focus alone does not open it (the editor moves the focus to a field to correct).
+  - **Out**: « Terminé », the arrow, Escape, a click on the dimmed part (desktop), and on a phone the device's back gesture. The text is kept in
+    every case (it is the same editor, moved into the dialog), the page is back on the same field, scrolled to it, with the board's short
+    « … mise à jour » notification.
+  - **The back gesture**: opening on a phone adds one history entry for the same address (`state.writing`); the gesture pops it and closes
+    the mode; closing otherwise pops it too. The leave guard only counts a change of path or search, so it does not interfere.
+- **Left as they are**: Lexical stays pinned at 0.52.0 and everything the editor refuses (headings, quotes, colours, links, images).
