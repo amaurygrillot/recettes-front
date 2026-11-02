@@ -22,7 +22,6 @@ export const recipeKeys = {
   all: ['recipes'] as const,
   searches: ['recipes', 'search'] as const,
   search: (filters: RecipeSearchFilters) => ['recipes', 'search', filters] as const,
-  count: (filters: RecipeSearchFilters) => ['recipes', 'search', 'count', filters] as const,
   detail: (id: string) => ['recipes', 'detail', id] as const,
 }
 
@@ -33,10 +32,11 @@ function searchRecipes(filters: RecipeSearchFilters, page: number, signal: Abort
 /**
  * The feed and the search results, a page at a time (« Voir plus » calls `fetchNextPage`). When
  * the filters change, the previous answer stays in `data` (with `isPlaceholderData` true) until
- * the new one arrives, so a list being refined never blanks.
+ * the new one arrives, so a list being refined never blanks. A disabled search asks nothing.
  */
-export function useRecipeSearch(filters: RecipeSearchFilters) {
+export function useRecipeSearch(filters: RecipeSearchFilters, enabled = true) {
   return useInfiniteQuery({
+    enabled,
     queryKey: recipeKeys.search(filters),
     queryFn: ({ pageParam, signal }) => searchRecipes(filters, pageParam, signal),
     placeholderData: keepPreviousData,
@@ -44,19 +44,6 @@ export function useRecipeSearch(filters: RecipeSearchFilters) {
     // `last` is Spring's own flag; anything but an explicit `false` ends the list.
     getNextPageParam: (lastPage) =>
       lastPage.last === false ? (lastPage.number ?? 0) + 1 : undefined,
-  })
-}
-
-/** How many recipes match, without loading them: `totalElements` of a page of one. */
-export function useRecipeCount(filters: RecipeSearchFilters, enabled = true) {
-  return useQuery({
-    enabled,
-    queryKey: recipeKeys.count(filters),
-    queryFn: async ({ signal }) => {
-      const page = await searchRecipes({ ...filters, size: 1 }, 0, signal)
-      return page.totalElements ?? 0
-    },
-    placeholderData: keepPreviousData,
   })
 }
 

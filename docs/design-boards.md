@@ -35,8 +35,8 @@ for the current page, round « + » of 64 px 16 px above the bar and 16 px from 
   field**, the account tab with the member's **avatar**, and « + Nouvelle recette » **in the page header** instead of in the bar.
   M5 follows them: `TopBar` has no create button any more. **Until each screen is built, a member on a desktop has no create
   button on the pages that do not have one yet** (the home page has it, beside the feed title); each screen adds its own as
-  its board draws it (« Mes recettes » has it in the list header). The field is a real search form (`HeaderSearch`): Enter opens
-  `/rechercher?q=…`; on the two searching pages it is their field (see SearchScreen below).
+  its board draws it (« Mes recettes » has it in the list header). The field is a button that opens the search over the
+  page (R1 below); on the two results pages it shows the word searched.
 - **The « + » is named « Nouvelle recette », round or extended.** The `Bouton-flottant-feuille` board says « Créer une recette »,
   the home board « Nouvelle recette »; a visible label has to be part of the accessible name, and a name that changed as the page
   scrolled would be confusing, so there is one string (`navigation.newRecipe`). The extended form is the home screen's: it
@@ -47,8 +47,8 @@ for the current page, round « + » of 64 px 16 px above the bar and 16 px from 
   username only). The stand-in LoginScreen asks for « Nom d'utilisateur ». **Settled with the user (2026-10-23): stay on the username for
   now.** The board's label has to follow (or the back end has to accept an e-mail) when the auth screens are built.
 - **The search page's URL contract** (`searchPath` in `app/paths.ts`): `/rechercher?categorie=<id>` opens with that category
-  chosen (home tiles), `/rechercher?q=<text>` with that text in the title search (the bar's field). The fake search field on the
-  phone and tablet opens plain `/rechercher`, where the field has the focus. SearchScreen reads these (and `exacte`, `tag`, `auteur`, `tri`, see below).
+  chosen (home tiles), `/rechercher?q=<text>` with that text in the title search (the bar's field). The search field no longer leads to a search page
+  (R1 below: it opens the search over the page; `/rechercher` with nothing to search for only invites to search). SearchScreen reads these (and `exacte`, `tag`, `auteur`, `tri`, see below).
 - **Full-screen screens** (no tab bar): login and the other public auth screens, cooking mode, the recipe editor.
 - The session-expired dialog text is the board's, minus « Ton brouillon est conservé »: no draft exists before the editor does.
 - The filter bottom sheet of `Bouton-flottant-feuille` belongs to SearchScreen, not to the shell.
@@ -83,8 +83,8 @@ Built from `Accueil-mobile`, `Accueil-etats`, `Carte-accueil`, `Accueil-tablette
 Built from `Rechercher-entrees`, `-filtres`, `-etats`, `-mes-recettes`, `-tablette` and `-ordinateur`. **The URL is the state**:
 `?q=` (title text, 200 characters at most) `&categorie=<id>` `&exacte=1` (only that category) `&tag=<id>` `&auteur=<text>`
 `&tri=recentes|modifiees|titre-az|titre-za`; only what differs from the default is written (`app/searchCriteria.ts`). Changes replace
-the history entry, so « back » returns to where the reader came from. Typing searches after a 300 ms pause (or Enter); the same text
-is typed in the page's field (phone, tablet) or in the bar's (desktop).
+the history entry, so « back » returns to where the reader came from. **Since R1 (below) the title text is typed in the search overlay,
+not in the page: the field of the page only shows it, and the overlay's `Rechercher` writes it into the address.**
 
 **Where the boards ask for more than the API gives** (decided, not asked: the board itself says so on `Rechercher-filtres`):
 
@@ -96,9 +96,9 @@ is typed in the page's field (phone, tablet) or in the bar's (desktop).
   list of category ids and of tag ids (with an AND/OR rule) and an ingredient criterion.
 - « Les plus utilisés »: the API has no usage count, so the tags are all shown (chosen first) and the field narrows them.
 
-Other decisions: filters on a phone and a tablet are a `BottomSheet` working on a **draft** (« Voir les N recettes », N from a page of
-one, applies it; closing drops it; « Réinitialiser » clears the draft), centered from 600 px; on a desktop a 270 px column applies each
-choice at once. The sheet's handle is a button (it closes; there is no drag). The sort is a sheet of radio buttons on a phone and the
+Other decisions: filters on a phone and a tablet are, since R1, part of the search overlay's `BottomSheet`, working on a **draft**
+(« Rechercher » applies it; closing drops it; « Réinitialiser » clears the draft), centered from 600 px; on a desktop a 270 px column
+applies each choice at once. The sheet's handle is a button (it closes; there is no drag). The sort is a sheet of radio buttons on a phone and the
 browser's own list on a desktop. Section pills jump to their section and follow the scroll. The suggestions of the category and tag
 fields are a `Combobox` (start of word, accents and case ignored, five at most, nothing created). While a new answer comes, the
 previous one stays with « Recherche… » in the count line. « Mes recettes »: author fixed to the member by id (an `auteur` in the URL
@@ -472,34 +472,43 @@ A search button no longer goes to a « Rechercher » page: it opens the search e
 blocks of 21 into the overlay (the sort stays on the results page), changes 22 and 23 (no entry state, no « Pendant la saisie », no « toutes les
 recettes »), 24 and 25 (the overlay is a centred panel on a tablet and a panel under the bar on a desktop) and the bars of boards 6, 18, 19 and 24.
 
-- **One overlay, owned by the shell** (`app/SearchOverlay`, opened through `useSearchOverlay()`): every entry point asks it to open, with the
-  scope it was asked from (« Mes recettes » or everybody), the section to land on (« Filtres » lands on the categories) and a first character
-  to carry. It works on a **draft** (the text and the filter choices) and writes it into the address only when validated, **with the same
-  URL model as before** (`q`, `categorie`, `exacte`, `tag`, `auteur`, `tri`; `app/searchCriteria`). Opened from a results page it starts
-  from that page's criteria; from anywhere else it is empty.
-- **Entry points**: the home bar (phone and tablet); the « Rechercher » tab (**phone only**); the field of the top bar (tablet and desktop;
-  on a desktop the first printable key typed on it is carried into the overlay's field); on the results page the field and « Filtres ». The
-  category tiles of the home page and the « Mes recettes » tab go straight to results, with their filter (a tab is still a link). « Mes recettes »
-  opens the overlay **without the author field**: the author is the member, locked.
-- **Layouts**: a phone gets the existing bottom sheet look (almost full height, title « Rechercher », a close cross, the section pills, the
-  blocks, « Réinitialiser » and « Rechercher » fixed at the bottom); a tablet a centred 600 px panel in a veil; a desktop a panel that starts
-  under the top bar (which stays sharp) in **two columns, with no pills**: the category tree on the left, tags and author on the right, the
-  buttons below. The field takes the focus when it opens (and the keyboard comes up on a phone).
-- **« Rechercher »** replaces « Voir les N recettes » (no live count: the count asked a request per choice). It and the keyboard's Enter are
-  **disabled until there is a word or a filter** (« Mes recettes » counts as a filter). « Réinitialiser » empties the draft without closing.
-  The cross, Escape, a touch on the veil (and on a phone the handle or a swipe down) close it without applying anything; the focus goes back to
-  what opened it (Radix); the page behind does not move.
+- **One overlay, owned by the app** (`app/SearchOverlayProvider`, in `RootLayout`; the container is `screens/SearchScreen/components/SearchOverlay`,
+  which `app` may import). Every entry point asks it to open through `useSearchOverlay()` (outside the app, in a screen under test, that opener does
+  nothing, like `useCreateButtonMode`), with what to focus (the text field, or, from « Filtres », the filters) and a first character to carry. The
+  scope comes from the page: on `/mes-recettes` the search is the member's own. It works on a **draft** (`searchDraft.ts`: the text and the
+  filter choices) and writes it into the address only when validated, **with the same URL model as before** (`q`, `categorie`, `exacte`, `tag`,
+  `auteur`, `tri`; `app/searchCriteria`; `resultsPath`). Opened from a results page it starts from that page's criteria (and keeps its sort); from
+  anywhere else it is empty. Closing it unmounts it, so the next opening never finds a dropped draft.
+- **Entry points**: the home bar (phone and tablet); the « Rechercher » tab (**phone only**); the field of the top bar (desktop) and of the
+  tablet header; on the results page the field, « Filtres » (phone and tablet) and the invitation's button. They are all the same `SearchLauncher`
+  (a button that looks like the field; `app/SearchEntryField` binds it to the address): a printable key typed on it opens the search with that key
+  written **after the word already there**. The category tiles of the home page and the « Mes recettes » tab go straight to results, with their
+  filter (a tab is still a link). « Mes recettes » opens the overlay **without the author field**: the author is the member, locked.
+- **Layouts**: a phone and a tablet get the bottom sheet (`BottomSheet`: almost full height on a phone, centred from 600 px; title « Rechercher »,
+  a close cross, the field, the section pills, the blocks, « Réinitialiser » and « Rechercher » fixed at the bottom); a desktop gets `TopPanel`, a
+  panel that hangs under the top bar (the veil starts under it, so the bar stays sharp) in **two columns, with no pills**: the category tree on the
+  left, tags and author on the right, the buttons below, to the right. The text field takes the focus when it opens (and the keyboard comes up on
+  a phone); opened from « Filtres » the title does, so the keyboard does not hide the filters.
+- **« Rechercher »** replaces « Voir les N recettes » (no live count: the count asked a request per choice). It and the keyboard's Enter in the
+  text field are **disabled until there is a word or a filter** (« Mes recettes » counts as a filter). « Réinitialiser » empties the draft without
+  closing. The cross, Escape, a touch on the veil and, on a phone, the handle close it without applying anything (the sheet has no swipe, as
+  before); the focus goes back to what opened it; the page behind does not move.
 - **Filters that fail to load** show the brick message with « Réessayer » inside the overlay, and the text search still works.
 - **The results page** has no entry state: it is reached by a validation, a category tile or « Mes recettes », always with a criterion. Its field
   and « Filtres » keep their look but are buttons that reopen the overlay, prefilled; the cross of the field clears the word, in place, like
-  the removable chips and « Tout effacer ». With no criterion left it shows the invitation (« Que veux-tu cuisiner ? », its button opens the
-  overlay), with neither count nor sort. The sort stays on the page, and so does the desktop filter column (it refines the results live).
+  the removable chips and « Tout effacer ». With no criterion left (every chip dropped; or an address typed by hand) it shows the invitation
+  (« Que veux-tu cuisiner ? », its button « Lancer une recherche » opens the overlay), with neither count nor sort, and **asks the API for nothing**
+  (`useRecipeFeed(…, { enabled })`). The sort stays on the page, and so does the desktop filter column (it refines the results live; choosing a
+  filter in it lists again). The « Toutes les recettes, … » line under the count, and the « Aucune recette pour le moment » state of the
+  everybody's search, are gone with the unfiltered list.
 - **Back**: validating from a page **pushes** the results (so the device's back returns to the page before the search was opened, not to the
   overlay); validating again from a results page replaces that entry. The overlay itself adds no history entry.
-- **Bars**: the phone keeps its tabs; a **tablet loses the « Rechercher » tab** (2 tabs for a visitor, 3 for a member) and gets a header with the
-  logo and the search field **on every page of the shell but the home page** (which has its own bar); a **desktop loses the « Rechercher » link**
-  and keeps the field.
+- **Bars**: the phone keeps its tabs (« Rechercher » is a button among the links: `NavigationAction`, yellow while a results page is shown); a
+  **tablet loses the « Rechercher » tab** (2 tabs for a visitor, 3 for a member) and gets a header with the logo and the search field **on every
+  shell page but the home page and the two results pages** (which have their own field); a **desktop loses the « Rechercher » link** and keeps the
+  field, now 56 px tall like every other field (it was 52 px).
 - **Not built, and why**: the **ingredient filter** (section, pill, chip and sentence): `GET /recipes` still has no ingredient criterion (see
   SearchScreen above), so the board's « Ingrédients » is left out, as it was in the old sheet; and the board's several categories and tags (the
   API takes one of each, the model is unchanged).
-- **À valider** (the board asks too): the missing live count; the tablet header; the removed desktop link; the desktop two-column panel.
+- **À valider** (the board asks too): the missing live count; the tablet header; the removed desktop link; the desktop two-column panel; the
+  carried key being appended to the word of a results page; the invitation's button label.

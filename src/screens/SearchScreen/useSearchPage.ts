@@ -1,4 +1,4 @@
-import { activeFilterCount, type SearchCriteria } from '../../app/searchCriteria'
+import { activeFilterCount, isNarrowed, type SearchCriteria } from '../../app/searchCriteria'
 import { useRecipeFeed } from '../../app/useRecipeFeed'
 import { useSearchCriteria } from '../../app/useSearchCriteria'
 import { activeFiltersOf } from './activeFilters'
@@ -16,7 +16,9 @@ export function useSearchPage(scope: SearchScope) {
   // In « Mes recettes » the author is the member: a name in the address is ignored, as it is for the API.
   const criteria: SearchCriteria = showAuthor ? requested : { ...requested, author: '' }
 
-  const feed = useRecipeFeed(toRecipeFilters(criteria, scope))
+  // Nothing to search for (every filter taken off a results page): the page invites to search, it lists nothing.
+  const searching = scope.kind === 'mine' || isNarrowed(criteria)
+  const feed = useRecipeFeed(toRecipeFilters(criteria, scope), { enabled: searching })
   const options = useFilterOptions()
 
   const changeFilters = (changes: Partial<FilterChoices>) => {
@@ -25,6 +27,7 @@ export function useSearchPage(scope: SearchScope) {
 
   return {
     criteria,
+    searching,
     feed,
     options,
     showAuthor,

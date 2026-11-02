@@ -1,20 +1,28 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { SearchOverlayContext } from '../../../../app/useSearchOverlay'
 import { expectNoAccessibilityViolations } from '../../../../test/expectNoAccessibilityViolations'
 import { installMatchMedia, removeMatchMedia } from '../../../../test/matchMedia'
 import { HomeHeader } from './HomeHeader'
 
 function renderHeader() {
+  const openSearch = vi.fn()
   const router = createMemoryRouter(
     [
-      { path: '/', element: <HomeHeader /> },
-      { path: '/rechercher', element: <p>Page de recherche</p> },
+      {
+        path: '/',
+        element: (
+          <SearchOverlayContext value={openSearch}>
+            <HomeHeader />
+          </SearchOverlayContext>
+        ),
+      },
     ],
     { initialEntries: ['/'] },
   )
-  return { router, ...render(<RouterProvider router={router} />) }
+  return { router, openSearch, ...render(<RouterProvider router={router} />) }
 }
 
 describe('HomeHeader', () => {
@@ -43,25 +51,35 @@ describe('HomeHeader', () => {
     expect(container.querySelector('text')).not.toBeInTheDocument()
   })
 
-  it('shows a link that looks like a search field, named for what it does', () => {
+  it('shows a button that looks like a search field, and opens a dialog', () => {
     renderHeader()
 
-    const prompt = screen.getByRole('link', { name: 'Chercher une recette : ouvrir la recherche' })
+    const prompt = screen.getByRole('button', { name: 'Chercher une recette' })
     expect(prompt).toHaveTextContent('Chercher une recette')
-    expect(prompt).toHaveAttribute('href', '/rechercher')
+    expect(prompt).toHaveAttribute('aria-haspopup', 'dialog')
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
   })
 
-  it('opens the search page with a touch or the keyboard', async () => {
+  it('opens the search over the page with a touch, and with the keyboard', async () => {
     const user = userEvent.setup()
-    const { router } = renderHeader()
+    const { router, openSearch } = renderHeader()
 
-    await user.tab()
-    await user.tab()
-    expect(screen.getByRole('link', { name: /ouvrir la recherche/ })).toHaveFocus()
+    await user.click(screen.getByRole('button', { name: 'Chercher une recette' }))
     await user.keyboard('{Enter}')
 
-    expect(router.state.location.pathname).toBe('/rechercher')
+    expect(openSearch).toHaveBeenCalledTimes(2)
+    expect(openSearch).toHaveBeenCalledWith({})
+    expect(router.state.location.pathname).toBe('/')
+  })
+
+  it('carries the first key typed on it into the search', async () => {
+    const user = userEvent.setup()
+    const { openSearch } = renderHeader()
+    screen.getByRole('button', { name: 'Chercher une recette' }).focus()
+
+    await user.keyboard('t')
+
+    expect(openSearch).toHaveBeenCalledExactlyOnceWith({ typed: 't' })
   })
 
   it('has no accessibility violation', async () => {

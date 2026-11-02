@@ -35,8 +35,9 @@ function EmptyResults({
   hasFilters,
   onClearFilters,
 }: Pick<SearchResultsProps, 'criteria' | 'scope' | 'hasFilters' | 'onClearFilters'>) {
-  if (!isNarrowed(criteria)) {
-    return scope.kind === 'mine' ? (
+  // Everybody's recipes are never listed without a criterion, so only the member's own can be empty of them.
+  if (scope.kind === 'mine' && !isNarrowed(criteria)) {
+    return (
       <EmptyState
         illustration={<Mascot mood="happy" size="xl" />}
         title={states.emptyMine.title}
@@ -47,13 +48,6 @@ function EmptyResults({
           {states.emptyMine.create}
         </LinkButton>
       </EmptyState>
-    ) : (
-      <EmptyState
-        illustration={<Mascot mood="happy" size="xl" />}
-        title={states.emptyBase.title}
-        description={states.emptyBase.description}
-        size="compact"
-      />
     )
   }
 

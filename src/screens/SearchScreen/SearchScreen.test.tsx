@@ -1,15 +1,15 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { delay, http, HttpResponse } from 'msw'
-import { afterEach, describe, expect, it } from 'vitest'
-import { API_BASE_URL } from '../../api/apiConfig'
-import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
-import { installMatchMedia, removeMatchMedia } from '../../test/matchMedia'
-import { problemResponse } from '../../test/problem'
-import { server } from '../../test/server'
+import { delay, HttpResponse } from 'msw'
+import { Outlet } from 'react-router'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { sessionStore } from '../../api/sessionStore'
+import { SearchOverlayContext } from '../../app/useSearchOverlay'
+import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { fakeToken } from '../../test/fakeToken'
 import { page, serveBackend } from '../../test/fakeRecipeBackend'
+import { installMatchMedia, removeMatchMedia } from '../../test/matchMedia'
+import { problemResponse } from '../../test/problem'
 import { renderRoutes } from '../../test/renderRoutes'
 import { MyRecipesScreen } from './MyRecipesScreen'
 import { SearchScreen } from './SearchScreen'
@@ -18,34 +18,46 @@ function signInAs(options: Parameters<typeof fakeToken>[0] = {}) {
   expect(sessionStore.signIn(fakeToken(options))).toBe(true)
 }
 
-function renderSearch(path = '/rechercher') {
-  return renderRoutes(
+/** A results page, reached with a criterion as it always is. `openSearch` stands for the shell's overlay. */
+function renderSearch(path = '/rechercher?q=tarte') {
+  const openSearch = vi.fn()
+  const rendered = renderRoutes(
     [
-      { path: '/rechercher', element: <SearchScreen /> },
-      { path: '/mes-recettes', element: <MyRecipesScreen /> },
-      { path: '/recettes/nouvelle', element: <p>Page de création</p> },
-      { path: '/recettes/:id', element: <p>Page de la recette</p> },
+      {
+        element: (
+          <SearchOverlayContext value={openSearch}>
+            <Outlet />
+          </SearchOverlayContext>
+        ),
+        children: [
+          { path: '/rechercher', element: <SearchScreen /> },
+          { path: '/mes-recettes', element: <MyRecipesScreen /> },
+          { path: '/recettes/nouvelle', element: <p>Page de création</p> },
+          { path: '/recettes/:id', element: <p>Page de la recette</p> },
+        ],
+      },
     ],
     path,
   )
+  return { ...rendered, openSearch }
 }
 
-const field = () => screen.getByRole('searchbox', { name: 'Chercher une recette' })
+/** The field of the results page: a button that shows the word searched. */
+const field = () => screen.getByRole('button', { name: /^Chercher une recette/ })
 
 describe('SearchScreen on a phone', () => {
   afterEach(removeMatchMedia)
 
   describe('the list', () => {
-    it('shows every recipe, newest first, with how many there are and what the order is', async () => {
+    it('shows the recipes of the search, newest first, with how many there are', async () => {
       const backend = serveBackend()
       renderSearch()
 
       expect(await screen.findByRole('link', { name: 'Recette 1' })).toBeVisible()
       expect(screen.getByText('3 recettes')).toBeVisible()
-      expect(
-        screen.getByText('Toutes les recettes, des plus récentes aux plus anciennes'),
-      ).toBeVisible()
+      expect(screen.queryByText(/^Toutes les recettes/)).not.toBeInTheDocument()
       expect(backend.lastQuery()).toEqual({
+        title: 'tarte',
         sortBy: 'CREATED_AT',
         direction: 'DESC',
         size: '20',
@@ -80,28 +92,43 @@ describe('SearchScreen on a phone', () => {
   })
 
   describe('the search field', () => {
-    it('searches the titles after a pause, without a button, in the address', async () => {
-      const backend = serveBackend()
-      const { router } = renderSearch()
+    it('shows the word of the address, and opens the search over the page when it is touched', async () => {
+      serveBackend()
+      const { router, openSearch } = renderSearch('/rechercher?q=gratin')
       await screen.findByRole('link', { name: 'Recette 1' })
 
-      await userEvent.setup().type(field(), 'tarte')
+      expect(field()).toHaveAccessibleName('Chercher une recette : gratin')
+      await userEvent.setup().click(field())
 
-      await waitFor(() => {
-        expect(router.state.location.search).toBe('?q=tarte')
-      })
-      await waitFor(() => {
-        expect(backend.lastQuery()).toMatchObject({ title: 'tarte' })
-      })
-      expect(field()).toHaveValue('tarte')
+      expect(openSearch).toHaveBeenCalledExactlyOnceWith({})
+      expect(router.state.location.search).toBe('?q=gratin')
     })
 
-    it('shows the text of the address when it arrives with one', async () => {
+    it('carries the first key typed on it into the search', async () => {
       serveBackend()
-      renderSearch('/rechercher?q=gratin')
-
-      expect(field()).toHaveValue('gratin')
+      const { openSearch } = renderSearch()
       await screen.findByRole('link', { name: 'Recette 1' })
+      field().focus()
+
+      await userEvent.setup().keyboard('x')
+
+      expect(openSearch).toHaveBeenCalledExactlyOnceWith({ typed: 'x' })
+    })
+
+    it('clears the word in place with its cross, and keeps the filters and the list', async () => {
+      const backend = serveBackend()
+      const { router, openSearch } = renderSearch('/rechercher?q=gratin&tag=t-fruits')
+      await screen.findByRole('link', { name: 'Recette 1' })
+
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Effacer la recherche' }))
+
+      expect(router.state.location.search).toBe('?tag=t-fruits')
+      expect(openSearch).not.toHaveBeenCalled()
+      expect(field()).toHaveAccessibleName('Chercher une recette')
+      await waitFor(() => {
+        expect(backend.lastQuery()).not.toHaveProperty('title')
+      })
+      expect(backend.lastQuery()).toMatchObject({ tagId: 't-fruits' })
     })
 
     it('keeps the old answer, marked « Recherche… », while the new one comes', async () => {
@@ -110,44 +137,17 @@ describe('SearchScreen on a phone', () => {
         if (slow) await delay(300)
         return HttpResponse.json(page(0, ['1', '2', '3'], { last: true, total: 3 }))
       })
-      renderSearch()
+      renderSearch('/rechercher?q=gratin&tag=t-fruits')
       await screen.findByRole('link', { name: 'Recette 1' })
       slow = true
 
-      await userEvent.setup().type(field(), 'tarte{Enter}')
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Effacer la recherche' }))
 
       expect(await screen.findByText('Recherche…')).toBeVisible()
       expect(screen.getByRole('link', { name: 'Recette 1' })).toBeVisible()
       await waitFor(() => {
         expect(screen.queryByText('Recherche…')).not.toBeInTheDocument()
       })
-    })
-
-    it('empties with its cross and keeps the focus to type again', async () => {
-      const backend = serveBackend()
-      renderSearch('/rechercher?q=gratin')
-      await screen.findByRole('link', { name: 'Recette 1' })
-
-      await userEvent.setup().click(screen.getByRole('button', { name: 'Effacer la recherche' }))
-
-      expect(field()).toHaveValue('')
-      expect(field()).toHaveFocus()
-      await waitFor(() => {
-        expect(backend.lastQuery()).not.toHaveProperty('title')
-      })
-    })
-
-    it('stops at 200 characters and says so', async () => {
-      serveBackend()
-      renderSearch()
-      await screen.findByRole('link', { name: 'Recette 1' })
-      expect(field()).toHaveAttribute('maxlength', '200')
-
-      fireEvent.change(field(), { target: { value: 'a'.repeat(200) } })
-
-      expect(screen.getByText('200 caractères au maximum.')).toBeVisible()
-      expect(screen.getByText('200 / 200')).toBeVisible()
-      expect(field()).toBeInvalid()
     })
   })
 
@@ -217,7 +217,7 @@ describe('SearchScreen on a phone', () => {
       await user.click(await screen.findByRole('button', { name: 'Tout effacer' }))
 
       expect(router.state.location.search).toBe('?q=tarte&tri=titre-az')
-      expect(field()).toHaveValue('tarte')
+      expect(field()).toHaveAccessibleName('Chercher une recette : tarte')
       expect(screen.queryByRole('button', { name: 'Tout effacer' })).not.toBeInTheDocument()
     })
 
@@ -238,6 +238,28 @@ describe('SearchScreen on a phone', () => {
 
       expect(screen.queryByRole('button', { name: /Retirer le filtre/ })).not.toBeInTheDocument()
       expect(backend.lastQuery()).toMatchObject({ categoryId: 'inconnue' })
+    })
+
+    it('are changed in the search, which « Filtres » opens on its filters', async () => {
+      serveBackend()
+      const { router, openSearch } = renderSearch('/rechercher?q=tarte&categorie=desserts')
+      await screen.findByRole('link', { name: 'Recette 1' })
+
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Filtres, 1 actif' }))
+
+      expect(openSearch).toHaveBeenCalledExactlyOnceWith({ focus: 'filters' })
+      expect(router.state.location.search).toBe('?q=tarte&categorie=desserts')
+    })
+
+    it('has a « Filtres » button without a count when none is in force', async () => {
+      serveBackend()
+      renderSearch()
+      await screen.findByRole('link', { name: 'Recette 1' })
+
+      expect(screen.getByRole('button', { name: 'Filtres' })).toHaveAttribute(
+        'aria-haspopup',
+        'dialog',
+      )
     })
   })
 
@@ -261,7 +283,7 @@ describe('SearchScreen on a phone', () => {
       await waitFor(() => {
         expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
       })
-      expect(router.state.location.search).toBe('?tri=titre-za')
+      expect(router.state.location.search).toBe('?q=tarte&tri=titre-za')
       expect(screen.getByRole('button', { name: /Trier : Titre Z → A/ })).toBeVisible()
       await waitFor(() => {
         expect(backend.lastQuery()).toMatchObject({ sortBy: 'TITLE', direction: 'DESC' })
@@ -273,25 +295,62 @@ describe('SearchScreen on a phone', () => {
       ['titre-az', 'TITLE', 'ASC'],
     ])('« %s » asks for %s %s', async (parameter, sortBy, direction) => {
       const backend = serveBackend()
-      renderSearch(`/rechercher?tri=${parameter}`)
+      renderSearch(`/rechercher?q=tarte&tri=${parameter}`)
 
       await screen.findByRole('link', { name: 'Recette 1' })
 
       expect(backend.lastQuery()).toMatchObject({ sortBy, direction })
     })
+  })
 
-    it('says what the order is above the list only when nothing narrows it down', async () => {
-      serveBackend()
-      renderSearch('/rechercher?tri=titre-az')
-      expect(await screen.findByText('Toutes les recettes, par titre de A à Z')).toBeVisible()
+  describe('with nothing to search for', () => {
+    it('invites to search instead of listing the library, and asks the API for nothing', async () => {
+      const backend = serveBackend()
+      renderSearch('/rechercher')
+
+      expect(await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })).toBeVisible()
+      expect(screen.queryByRole('link', { name: /^Recette/ })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Trier/ })).not.toBeInTheDocument()
+      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+      expect(backend.recipeQueries).toHaveLength(0)
     })
 
-    it('does not show that line for a search', async () => {
+    it('invites also when the order is the only thing in the address', async () => {
+      const backend = serveBackend()
+      renderSearch('/rechercher?tri=titre-az')
+
+      expect(await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })).toBeVisible()
+      expect(backend.recipeQueries).toHaveLength(0)
+    })
+
+    it('opens the search from its button', async () => {
       serveBackend()
-      renderSearch('/rechercher?q=tarte')
+      const { openSearch } = renderSearch('/rechercher')
+
+      await userEvent
+        .setup()
+        .click(await screen.findByRole('button', { name: 'Lancer une recherche' }))
+
+      expect(openSearch).toHaveBeenCalledOnce()
+    })
+
+    it('comes after the last criterion is cleared, and the list is gone', async () => {
+      serveBackend()
+      renderSearch('/rechercher?q=gratin')
       await screen.findByRole('link', { name: 'Recette 1' })
 
-      expect(screen.queryByText(/^Toutes les recettes/)).not.toBeInTheDocument()
+      await userEvent.setup().click(screen.getByRole('button', { name: 'Effacer la recherche' }))
+
+      expect(await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })).toBeVisible()
+      expect(screen.queryByRole('link', { name: 'Recette 1' })).not.toBeInTheDocument()
+    })
+
+    it('has no accessibility violation', async () => {
+      serveBackend()
+      const { container } = renderSearch('/rechercher')
+      await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })
+
+      await expectNoAccessibilityViolations(container)
     })
   })
 
@@ -305,7 +364,7 @@ describe('SearchScreen on a phone', () => {
 
       expect(await screen.findByText('Chargement des recettes…')).toBeInTheDocument()
       expect(screen.getByText('Recherche…')).toBeVisible()
-      expect(field()).toHaveValue('tarte')
+      expect(field()).toHaveAccessibleName('Chercher une recette : tarte')
     })
 
     it('says what was searched when nothing is found, and offers to drop the filters but keep the text', async () => {
@@ -323,7 +382,7 @@ describe('SearchScreen on a phone', () => {
       await user.click(screen.getByRole('button', { name: 'Effacer les filtres' }))
 
       expect(router.state.location.search).toBe('?q=tarte+aux+poires')
-      expect(field()).toHaveValue('tarte aux poires')
+      expect(field()).toHaveAccessibleName('Chercher une recette : tarte aux poires')
     })
 
     it('says so when the filters alone find nothing', async () => {
@@ -343,15 +402,6 @@ describe('SearchScreen on a phone', () => {
       expect(screen.queryByRole('button', { name: 'Effacer les filtres' })).not.toBeInTheDocument()
     })
 
-    it('says the library is empty when there is no recipe at all', async () => {
-      serveBackend(() => HttpResponse.json(page(0, [], { last: true, total: 0 })))
-      renderSearch()
-
-      expect(
-        await screen.findByRole('heading', { name: 'Aucune recette pour le moment' }),
-      ).toBeVisible()
-    })
-
     it('says there is no connection, keeping the field and the filters, and searches again on demand', async () => {
       let up = false
       serveBackend(() =>
@@ -364,7 +414,7 @@ describe('SearchScreen on a phone', () => {
       expect(
         within(alert).getByRole('heading', { name: 'Je fais une petite sieste' }),
       ).toBeVisible()
-      expect(field()).toHaveValue('tarte')
+      expect(field()).toHaveAccessibleName('Chercher une recette : tarte')
       expect(screen.getByRole('button', { name: 'Retirer le filtre Fruits' })).toBeVisible()
       up = true
       await user.click(within(alert).getByRole('button', { name: 'Réessayer' }))
@@ -421,237 +471,6 @@ describe('SearchScreen on a phone', () => {
   })
 })
 
-describe('FiltersControl in the screen', () => {
-  afterEach(removeMatchMedia)
-
-  it('opens a sheet of filters on a draft, shows how many recipes it would give, and applies it', async () => {
-    const backend = serveBackend((query) =>
-      HttpResponse.json(
-        query.get('categoryId') === 'plats'
-          ? page(0, ['9'], { last: true, total: 1 })
-          : page(0, ['1', '2', '3'], { last: true, total: 3 }),
-      ),
-    )
-    const { router } = renderSearch('/rechercher?q=tarte')
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    const sheet = await screen.findByRole('dialog', { name: 'Filtres' })
-    expect(await within(sheet).findByRole('button', { name: 'Voir les 3 recettes' })).toBeVisible()
-    await user.click(within(sheet).getByRole('radio', { name: 'Plats' }))
-
-    expect(await within(sheet).findByRole('button', { name: 'Voir la recette' })).toBeVisible()
-    expect(backend.lastCountQuery()).toMatchObject({
-      title: 'tarte',
-      categoryId: 'plats',
-      size: '1',
-    })
-    expect(router.state.location.search).toBe('?q=tarte')
-
-    await user.click(within(sheet).getByRole('button', { name: 'Voir la recette' }))
-
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    })
-    expect(router.state.location.search).toBe('?q=tarte&categorie=plats')
-    expect(screen.getByRole('button', { name: 'Filtres, 1 actif' })).toHaveFocus()
-  })
-
-  it('drops the draft when the sheet is closed without applying it', async () => {
-    serveBackend()
-    const { router } = renderSearch()
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    const sheet = await screen.findByRole('dialog')
-    await user.click(await within(sheet).findByRole('radio', { name: 'Plats' }))
-
-    await user.click(within(sheet).getByRole('button', { name: 'Fermer' }))
-
-    expect(router.state.location.search).toBe('')
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    expect(await screen.findByRole('radio', { name: 'Toutes les catégories' })).toBeChecked()
-  })
-
-  it('resets the draft to no filter with « Réinitialiser », and applies that', async () => {
-    serveBackend()
-    const { router } = renderSearch('/rechercher?categorie=plats&tag=t-four')
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres, 2 actifs' }))
-    const sheet = await screen.findByRole('dialog')
-    expect(await within(sheet).findByRole('radio', { name: 'Plats' })).toBeChecked()
-
-    await user.click(within(sheet).getByRole('button', { name: 'Réinitialiser' }))
-    expect(within(sheet).getByRole('radio', { name: 'Toutes les catégories' })).toBeChecked()
-    await user.click(within(sheet).getByRole('button', { name: /^Voir/ }))
-
-    await waitFor(() => {
-      expect(router.state.location.search).toBe('')
-    })
-  })
-
-  it('chooses a category among its subcategories, or only that category, and a tag, and an author', async () => {
-    const backend = serveBackend()
-    const { router } = renderSearch()
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    const sheet = await screen.findByRole('dialog')
-    await user.click(await within(sheet).findByRole('button', { name: 'Déplier Desserts' }))
-    await user.click(within(sheet).getByRole('radio', { name: 'Desserts' }))
-    await user.click(within(sheet).getByRole('checkbox', { name: 'Uniquement cette catégorie' }))
-    await user.click(within(sheet).getByRole('button', { name: 'Fruits' }))
-    await user.type(within(sheet).getByLabelText("Nom de l'auteur"), 'Odile')
-    await user.click(within(sheet).getByRole('button', { name: /^Voir/ }))
-
-    await waitFor(() => {
-      expect(router.state.location.search).toBe(
-        '?categorie=desserts&exacte=1&tag=t-fruits&auteur=Odile',
-      )
-    })
-    await waitFor(() => {
-      expect(backend.lastQuery()).toMatchObject({
-        categoryId: 'desserts',
-        includeSubcategories: 'false',
-        tagId: 't-fruits',
-        authorName: 'Odile',
-      })
-    })
-  })
-
-  it('only offers « Uniquement cette catégorie » for the chosen one', async () => {
-    serveBackend()
-    renderSearch()
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    const sheet = await screen.findByRole('dialog')
-    await user.click(await within(sheet).findByRole('button', { name: 'Déplier Desserts' }))
-
-    expect(
-      within(sheet).getByRole('checkbox', { name: 'Uniquement cette catégorie' }),
-    ).toBeDisabled()
-  })
-
-  it('shows a tag already chosen first, and drops it with a touch', async () => {
-    serveBackend()
-    renderSearch('/rechercher?tag=t-rapide')
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres, 1 actif' }))
-    const sheet = await screen.findByRole('dialog')
-
-    await within(sheet).findByRole('button', { name: 'Rapide' })
-    const tagChips = within(sheet)
-      .getAllByRole('button')
-      .filter((chip) => chip.hasAttribute('aria-pressed'))
-    expect(tagChips.map((chip) => chip.textContent)).toEqual(['Rapide', 'Four', 'Fruits'])
-    expect(tagChips[0]).toHaveAttribute('aria-pressed', 'true')
-    await user.click(tagChips[0] ?? sheet)
-    expect(within(sheet).getByRole('button', { name: 'Rapide' })).toHaveAttribute(
-      'aria-pressed',
-      'false',
-    )
-  })
-
-  it('finds a category by typing a start of word, with its parent, and chooses it', async () => {
-    serveBackend()
-    renderSearch()
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    const sheet = await screen.findByRole('dialog')
-
-    await user.type(
-      await within(sheet).findByRole('combobox', { name: 'Chercher une catégorie' }),
-      'tar',
-    )
-    expect(within(sheet).getByRole('option', { name: 'Tartes · Desserts' })).toBeVisible()
-    await user.click(within(sheet).getByRole('option', { name: 'Tartes · Desserts' }))
-
-    expect(within(sheet).getByRole('radio', { name: 'Tartes' })).toBeChecked()
-    expect(within(sheet).getByText('Tartes ajouté')).toBeVisible()
-  })
-
-  it('finds a tag by typing and chooses it', async () => {
-    serveBackend()
-    renderSearch()
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    const sheet = await screen.findByRole('dialog')
-
-    await user.type(
-      await within(sheet).findByRole('combobox', { name: 'Chercher un tag' }),
-      'fr{ArrowDown}{Enter}',
-    )
-
-    expect(within(sheet).getByRole('button', { name: 'Fruits' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
-  })
-
-  it('says which section is in view with pills that jump to them, with the count of choices', async () => {
-    serveBackend()
-    renderSearch('/rechercher?categorie=plats')
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres, 1 actif' }))
-    const sheet = await screen.findByRole('dialog')
-
-    const sections = within(sheet).getByRole('navigation', { name: 'Sections des filtres' })
-    expect(
-      within(sections)
-        .getAllByRole('button')
-        .map((pill) => pill.getAttribute('aria-label') ?? pill.textContent),
-    ).toEqual(['Catégorie, 1 choix actif', 'Tags', 'Auteur'])
-    await user.click(within(sections).getByRole('button', { name: 'Tags' }))
-
-    expect(within(sections).getByRole('button', { name: 'Tags' })).toHaveAttribute(
-      'aria-current',
-      'true',
-    )
-    expect(within(sheet).getByRole('group', { name: 'Tags' })).toHaveFocus()
-  })
-
-  it('tells when the filters could not be loaded, and loads them again', async () => {
-    let up = false
-    serveBackend()
-    server.use(
-      http.get(`${API_BASE_URL}/tags`, () =>
-        up ? HttpResponse.json([{ id: 't-four', name: 'Four' }]) : HttpResponse.error(),
-      ),
-    )
-    renderSearch()
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres' }))
-    const sheet = await screen.findByRole('dialog')
-
-    expect(await within(sheet).findByText('Les filtres ne se sont pas chargés.')).toBeVisible()
-    up = true
-    await user.click(within(sheet).getByRole('button', { name: 'Réessayer' }))
-
-    expect(await within(sheet).findByRole('button', { name: 'Four' })).toBeVisible()
-  })
-
-  it('has no accessibility violation with the sheet open', async () => {
-    serveBackend()
-    renderSearch('/rechercher?categorie=plats')
-    const user = userEvent.setup()
-    await screen.findByRole('link', { name: 'Recette 1' })
-    await user.click(screen.getByRole('button', { name: 'Filtres, 1 actif' }))
-    const sheet = await screen.findByRole('dialog')
-    await within(sheet).findByRole('radio', { name: 'Plats' })
-
-    await expectNoAccessibilityViolations(sheet)
-  })
-})
-
 describe('MyRecipesScreen', () => {
   afterEach(removeMatchMedia)
 
@@ -664,22 +483,30 @@ describe('MyRecipesScreen', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Mes recettes' })).toBeVisible()
     expect(screen.getByText(/Mes recettes/, { selector: 'span' })).toHaveTextContent('verrouillé')
     expect(backend.lastQuery()).toMatchObject({ authorId: 'u-42' })
-    expect(screen.queryByRole('button', { name: 'Filtres' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filtres' })).toBeInTheDocument()
   })
 
-  it('does not count the lock among the filters, and has no author section in the sheet', async () => {
+  it('lists them with no criterion at all: « Mes recettes » is the criterion', async () => {
+    const backend = serveBackend()
+    signInAs({ userId: 'u-42' })
+    renderSearch('/mes-recettes')
+
+    await screen.findByRole('link', { name: 'Recette 1' })
+
+    expect(
+      screen.queryByRole('heading', { name: 'Que veux-tu cuisiner ?' }),
+    ).not.toBeInTheDocument()
+    expect(backend.lastQuery()).toMatchObject({ authorId: 'u-42' })
+  })
+
+  it('does not count the lock among the filters', async () => {
     serveBackend()
     signInAs()
     renderSearch('/mes-recettes?tag=t-four')
-    const user = userEvent.setup()
+
     await screen.findByRole('link', { name: 'Recette 1' })
 
-    await user.click(screen.getByRole('button', { name: 'Filtres, 1 actif' }))
-    const sheet = await screen.findByRole('dialog')
-
-    await within(sheet).findByRole('button', { name: 'Four' })
-    expect(within(sheet).queryByLabelText("Nom de l'auteur")).not.toBeInTheDocument()
-    expect(within(sheet).queryByRole('button', { name: 'Auteur' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filtres, 1 actif' })).toBeVisible()
   })
 
   it("ignores an author in the address: the list must stay the member's", async () => {
@@ -743,18 +570,16 @@ describe('SearchScreen on a desktop', () => {
 
     const column = screen.getByRole('complementary', { name: 'Filtres' })
     expect(screen.queryByRole('button', { name: 'Filtres' })).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole('searchbox', { name: 'Chercher une recette' }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Chercher une recette/ })).not.toBeInTheDocument()
     await user.click(await within(column).findByRole('radio', { name: 'Plats' }))
 
-    expect(router.state.location.search).toBe('?categorie=plats')
+    expect(router.state.location.search).toBe('?q=tarte&categorie=plats')
     await waitFor(() => {
       expect(backend.lastQuery()).toMatchObject({ categoryId: 'plats' })
     })
     expect(within(column).queryByRole('button', { name: /^Voir/ })).not.toBeInTheDocument()
     await user.click(within(column).getByRole('button', { name: 'Réinitialiser' }))
-    expect(router.state.location.search).toBe('')
+    expect(router.state.location.search).toBe('?q=tarte')
   })
 
   it("shows the title of the page and the sort as the browser's own list", async () => {
@@ -767,7 +592,33 @@ describe('SearchScreen on a desktop', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Rechercher' })).toBeVisible()
     await user.selectOptions(screen.getByRole('combobox', { name: /Trier/ }), 'title-asc')
 
-    expect(router.state.location.search).toBe('?tri=titre-az')
+    expect(router.state.location.search).toBe('?q=tarte&tri=titre-az')
+  })
+
+  it('invites to search when nothing is left to search for, keeping the filters column', async () => {
+    installMatchMedia(1280)
+    const backend = serveBackend()
+    const { openSearch } = renderSearch('/rechercher')
+
+    expect(await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })).toBeVisible()
+    expect(screen.getByRole('complementary', { name: 'Filtres' })).toBeVisible()
+    expect(screen.queryByRole('combobox', { name: /Trier/ })).not.toBeInTheDocument()
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Lancer une recherche' }))
+
+    expect(openSearch).toHaveBeenCalledOnce()
+    expect(backend.recipeQueries).toHaveLength(0)
+  })
+
+  it('lists again as soon as a filter of the column is chosen', async () => {
+    installMatchMedia(1280)
+    const backend = serveBackend()
+    renderSearch('/rechercher')
+    const column = await screen.findByRole('complementary', { name: 'Filtres' })
+
+    await userEvent.setup().click(await within(column).findByRole('radio', { name: 'Plats' }))
+
+    expect(await screen.findByRole('link', { name: 'Recette 1' })).toBeVisible()
+    expect(backend.lastQuery()).toMatchObject({ categoryId: 'plats' })
   })
 
   it('offers « Nouvelle recette » in the header of « Mes recettes »', async () => {
@@ -796,5 +647,21 @@ describe('SearchScreen on a desktop', () => {
     })
 
     await expectNoAccessibilityViolations(container)
+  })
+})
+
+describe('the address of a results page that changes under it', () => {
+  afterEach(removeMatchMedia)
+
+  it('follows « back » to a search with nothing to search for, and invites', async () => {
+    serveBackend()
+    const { router } = renderSearch('/rechercher')
+    await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })
+
+    await act(() => router.navigate('/rechercher?q=gratin'))
+    expect(await screen.findByRole('link', { name: 'Recette 1' })).toBeVisible()
+    await act(() => router.navigate(-1))
+
+    expect(await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })).toBeVisible()
   })
 })

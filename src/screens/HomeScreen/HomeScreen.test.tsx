@@ -1,9 +1,10 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { delay, http, HttpResponse } from 'msw'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { API_BASE_URL } from '../../api/apiConfig'
 import { sessionStore } from '../../api/sessionStore'
+import { SearchOverlayContext } from '../../app/useSearchOverlay'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { fakeToken } from '../../test/fakeToken'
 import { problemResponse } from '../../test/problem'
@@ -51,15 +52,24 @@ function serveRecipes(body: object) {
 }
 
 function renderHome() {
-  return renderRoutes(
+  const openSearch = vi.fn()
+  const rendered = renderRoutes(
     [
-      { path: '/', element: <HomeScreen /> },
+      {
+        path: '/',
+        element: (
+          <SearchOverlayContext value={openSearch}>
+            <HomeScreen />
+          </SearchOverlayContext>
+        ),
+      },
       { path: '/rechercher', element: <p>Page de recherche</p> },
       { path: '/recettes/nouvelle', element: <p>Page de création</p> },
       { path: '/recettes/:id', element: <p>Page de la recette</p> },
     ],
     '/',
   )
+  return { ...rendered, openSearch }
 }
 
 function signInAs(options: Parameters<typeof fakeToken>[0] = {}) {
@@ -126,18 +136,16 @@ describe('HomeScreen', () => {
       expect(router.state.location.pathname).toBe('/recettes/2')
     })
 
-    it('offers the logo and a fake search field that open the search page', async () => {
+    it('offers the logo and a search field that opens the search over the page', async () => {
       const user = userEvent.setup()
-      const { router } = renderHome()
+      const { router, openSearch } = renderHome()
       await screen.findByRole('link', { name: 'Recette 1' })
 
       expect(screen.getByRole('link', { name: /retour à l'accueil/ })).toHaveAttribute('href', '/')
-      await user.click(
-        screen.getByRole('link', { name: 'Chercher une recette : ouvrir la recherche' }),
-      )
+      await user.click(screen.getByRole('button', { name: 'Chercher une recette' }))
 
-      expect(router.state.location.pathname).toBe('/rechercher')
-      expect(router.state.location.search).toBe('')
+      expect(openSearch).toHaveBeenCalledOnce()
+      expect(router.state.location.pathname).toBe('/')
     })
 
     it('shows « Toutes » and the main categories, each opening the search on its category', async () => {
@@ -222,7 +230,7 @@ describe('HomeScreen', () => {
 
       expect(await screen.findByText('Chargement des recettes…')).toBeInTheDocument()
       expect(screen.getByRole('heading', { level: 2, name: 'Fraîchement ajoutées' })).toBeVisible()
-      expect(screen.getByRole('link', { name: /ouvrir la recherche/ })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Chercher une recette' })).toBeVisible()
     })
 
     it('shows the tiles as soon as the categories are there, whatever the feed does', async () => {

@@ -1,5 +1,5 @@
 import { paths } from '../../../../app/paths'
-import { isNarrowed } from '../../../../app/searchCriteria'
+import { useSearchOverlay } from '../../../../app/useSearchOverlay'
 import { strings as appStrings } from '../../../../app/strings'
 import { CreateLink } from '../../../../components/CreateLink/CreateLink'
 import { NO_FILTERS } from '../../filterChoices'
@@ -9,6 +9,7 @@ import type { SearchPage } from '../../useSearchPage'
 import { ActiveFilters } from '../ActiveFilters/ActiveFilters'
 import { FiltersColumn } from '../FiltersColumn/FiltersColumn'
 import { ResultsBar } from '../ResultsBar/ResultsBar'
+import { SearchInvitation } from '../SearchInvitation/SearchInvitation'
 import { SearchResults } from '../SearchResults/SearchResults'
 
 export interface DesktopLayoutProps {
@@ -19,13 +20,14 @@ export interface DesktopLayoutProps {
 }
 
 /**
- * The search page from 1024 px: the filters in a column of 270 px, the results in three columns
- * beside it. The title text is searched from the bar, whose field is this page's.
+ * The results page from 1024 px: the filters in a column of 270 px, which refine the results as they are
+ * chosen, the results in three columns beside it. The title text is searched from the bar, whose field opens
+ * the search over the page. With nothing left to search for the results give way to an invitation to search.
  */
 export function DesktopLayout({ page, scope, mayCreate }: DesktopLayoutProps) {
-  const { criteria, feed, options, activeFilters, hasFilters, showAuthor } = page
+  const { criteria, feed, options, activeFilters, hasFilters, showAuthor, searching } = page
+  const openSearch = useSearchOverlay()
   const mine = scope.kind === 'mine'
-  const showCaption = !mine && feed.status === 'ready' && !isNarrowed(criteria)
 
   return (
     <main className="grid grid-cols-12 items-start gap-6 pt-8 pb-12">
@@ -53,20 +55,32 @@ export function DesktopLayout({ page, scope, mayCreate }: DesktopLayoutProps) {
             page.changeFilters(NO_FILTERS)
           }}
         />
-        <ResultsBar feed={feed} sort={criteria.sort} onSortChange={page.changeSort} sortAsList />
-        {showCaption && (
-          <p className="text-detail text-ink-800">{strings.captions[criteria.sort]}</p>
+        {searching ? (
+          <>
+            <ResultsBar
+              feed={feed}
+              sort={criteria.sort}
+              onSortChange={page.changeSort}
+              sortAsList
+            />
+            <SearchResults
+              feed={feed}
+              criteria={criteria}
+              scope={scope}
+              hasFilters={hasFilters}
+              onClearFilters={() => {
+                page.changeFilters(NO_FILTERS)
+              }}
+              desktopColumns={3}
+            />
+          </>
+        ) : (
+          <SearchInvitation
+            onSearch={() => {
+              openSearch()
+            }}
+          />
         )}
-        <SearchResults
-          feed={feed}
-          criteria={criteria}
-          scope={scope}
-          hasFilters={hasFilters}
-          onClearFilters={() => {
-            page.changeFilters(NO_FILTERS)
-          }}
-          desktopColumns={3}
-        />
       </div>
     </main>
   )

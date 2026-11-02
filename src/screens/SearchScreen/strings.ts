@@ -20,13 +20,6 @@ export const strings = {
     // A heading for the cards, which are level 3 under the page's level 1.
     heading: 'Résultats',
   },
-  // Said above the list when nothing narrows it down, naming the order the recipes come in.
-  captions: {
-    recent: 'Toutes les recettes, des plus récentes aux plus anciennes',
-    modified: 'Toutes les recettes, les dernières modifiées en premier',
-    'title-asc': 'Toutes les recettes, par titre de A à Z',
-    'title-desc': 'Toutes les recettes, par titre de Z à A',
-  },
   sort: {
     prefix: 'Trier :',
     title: 'Trier',
@@ -38,6 +31,16 @@ export const strings = {
       'title-desc': 'Titre Z → A',
     },
   },
+  overlay: {
+    title: 'Rechercher',
+    search: 'Rechercher',
+  },
+  // The results page reached with nothing to search for (every filter taken off).
+  invitation: {
+    title: 'Que veux-tu cuisiner ?',
+    description: 'Cherche une recette par son nom, ou choisis une catégorie ou un tag.',
+    action: 'Lancer une recherche',
+  },
   filters: {
     title: 'Filtres',
     button: 'Filtres',
@@ -46,11 +49,6 @@ export const strings = {
     sectionActive: (label: string, count: number) =>
       `${label}, ${count} ${count < 2 ? 'choix actif' : 'choix actifs'}`,
     reset: 'Réinitialiser',
-    showRecipes: (count: number) => {
-      if (count === 0) return 'Voir 0 recette'
-      return count === 1 ? 'Voir la recette' : `Voir les ${recipes(count)}`
-    },
-    showRecipesWithoutCount: 'Voir les recettes',
     category: {
       legend: 'Catégorie',
       searchLabel: 'Chercher une catégorie',
@@ -89,10 +87,6 @@ export const strings = {
   },
   states: {
     failedRetry: 'Réessayer',
-    emptyBase: {
-      title: 'Aucune recette pour le moment',
-      description: 'Les premières recettes arrivent bientôt. Reviens nous voir dans un moment.',
-    },
     emptyMine: {
       title: 'Ajoute ta première recette',
       description: "Ici s'afficheront les recettes que tu écris, avec ou sans photo.",

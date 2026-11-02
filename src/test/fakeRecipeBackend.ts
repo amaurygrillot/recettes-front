@@ -53,12 +53,10 @@ export function page(
 type Answer = (query: URLSearchParams) => Response | Promise<Response>
 
 export interface FakeBackend {
-  /** The query string of every `GET /recipes` that was made, in order, counts included. */
+  /** The query string of every `GET /recipes` that was made, in order. */
   recipeQueries: URLSearchParams[]
-  /** The query of the last request for a page of the list (not for a count), as an object. */
+  /** The query of the last request for a page of the list, as an object. */
   lastQuery: () => Record<string, string>
-  /** The query of the last request for a count (a page of one), as an object. */
-  lastCountQuery: () => Record<string, string>
 }
 
 /** Answers `GET /recipes` with `answer`, and the category tree and the tags with the fixtures above. */
@@ -77,9 +75,6 @@ export function serveBackend(
   )
   return {
     recipeQueries,
-    lastQuery: () =>
-      Object.fromEntries(recipeQueries.findLast((query) => query.get('size') !== '1') ?? []),
-    lastCountQuery: () =>
-      Object.fromEntries(recipeQueries.findLast((query) => query.get('size') === '1') ?? []),
+    lastQuery: () => Object.fromEntries(recipeQueries.at(-1) ?? []),
   }
 }
