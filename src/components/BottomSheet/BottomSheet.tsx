@@ -84,7 +84,7 @@ export function BottomSheet({
             {children}
           </div>
           {actions && (
-            <div className="flex gap-3 border-t-2 border-ink-900 bg-paper-50 px-5 pt-3 pb-safe-bar">
+            <div className="flex gap-3 border-t-2 border-ink-900 bg-paper-50 px-5 pt-3 pb-safe">
               {actions}
             </div>
           )}

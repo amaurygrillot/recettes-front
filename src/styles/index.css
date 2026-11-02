@@ -303,6 +303,11 @@
   padding-right: max(0.375rem, env(safe-area-inset-right));
 }
 
+/* The bottom of a sheet's buttons: the same air under them, more where the device draws a home indicator. */
+@utility pb-safe {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
 /* What an author writes in a recipe: paragraphs and lists with the room a reader at arm's length needs. */
 @layer components {
   .rich-text > * + * {
