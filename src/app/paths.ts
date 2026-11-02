@@ -1,14 +1,6 @@
 import { generatePath } from 'react-router'
 import { criteriaToParams, EMPTY_CRITERIA, type SearchCriteria } from './searchCriteria'
 
-/** What the search page can be opened with, from the home page or the bar. */
-interface SearchPreset {
-  /** Opens with this category already chosen. */
-  categoryId?: string | undefined
-  /** Opens with this text in the title search. */
-  query?: string | undefined
-}
-
 /** The URL patterns of the routes that take a parameter. The reset path below is fixed by the back end. */
 export const ROUTE_PATTERNS = {
   recipe: '/recettes/:id',
@@ -34,14 +26,9 @@ export const paths = {
   account: '/compte',
 } as const
 
-/** The search page, opened on a text and/or a category when there is one. */
-export function searchPath({ categoryId, query }: SearchPreset = {}): string {
-  const queryString = criteriaToParams({
-    ...EMPTY_CRITERIA,
-    categoryId,
-    query: query ?? '',
-  }).toString()
-  return queryString === '' ? paths.search : `${paths.search}?${queryString}`
+/** The results of a category: what a category tile of the home page leads to. */
+export function categoryResultsPath(categoryId: string): string {
+  return resultsPath({ ...EMPTY_CRITERIA, categoryId }, { mine: false })
 }
 
 /**

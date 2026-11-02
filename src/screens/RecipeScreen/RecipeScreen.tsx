@@ -19,7 +19,7 @@ import { strings } from './strings'
 export function RecipeScreen() {
   const { id = '' } = useParams()
   const recipe = useRecipe(id)
-  const goBack = useGoBack(paths.search)
+  const goBack = useGoBack(paths.home)
   const published = useJustPublished()
   // The page has its own actions; the shell's « + » would only cover the cook's tip.
   useCreateButtonMode('hidden')

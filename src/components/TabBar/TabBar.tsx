@@ -38,7 +38,7 @@ export interface CreateAction {
 export interface TabBarProps {
   /** The accessible name of the navigation landmark. */
   label: string
-  /** Three to five tabs; the bar shares its width equally. */
+  /** Two to five tabs; the bar shares its width equally. */
   items: readonly NavigationItem[]
   /** Floats above the bar, at its right. Absent for a visitor. */
   createAction?: CreateAction | undefined
@@ -110,7 +110,6 @@ export function TabBar({
               key={item.label}
               type="button"
               aria-haspopup="dialog"
-              aria-current={item.current ? 'page' : undefined}
               onClick={item.onSelect}
               className={classNames(TAB, 'cursor-pointer', item.current ? TAB_ACTIVE : TAB_IDLE)}
             >

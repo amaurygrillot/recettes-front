@@ -71,7 +71,7 @@ export function FinishScreen({ recipe }: FinishScreenProps) {
           <LinkButton to={paths.recipe(recipe.id)} fullWidth>
             {done.backToRecipe}
           </LinkButton>
-          <LinkButton to={paths.search} variant="secondary" fullWidth>
+          <LinkButton to={paths.home} variant="secondary" fullWidth>
             {done.backToRecipes}
           </LinkButton>
         </div>

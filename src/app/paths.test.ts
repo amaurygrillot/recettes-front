@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { loginPath, paths, resultsPath, returnPathFrom, searchPath } from './paths'
+import { categoryResultsPath, loginPath, paths, resultsPath, returnPathFrom } from './paths'
 import { EMPTY_CRITERIA } from './searchCriteria'
 
 describe('paths', () => {
@@ -14,28 +14,13 @@ describe('paths', () => {
   })
 })
 
-describe('searchPath', () => {
-  it.each([
-    ['nothing to preset', {}, '/rechercher'],
-    ['a category', { categoryId: 'c-1' }, '/rechercher?categorie=c-1'],
-    ['a text', { query: 'gratin' }, '/rechercher?q=gratin'],
-    [
-      'a text and a category',
-      { categoryId: 'c-1', query: 'gratin' },
-      '/rechercher?q=gratin&categorie=c-1',
-    ],
-    ['an empty text', { query: '' }, '/rechercher'],
-    [
-      'a text that needs escaping',
-      { query: 'tarte & crème' },
-      '/rechercher?q=tarte+%26+cr%C3%A8me',
-    ],
-  ])('opens the search page with %s', (_name, preset, expected) => {
-    expect(searchPath(preset)).toBe(expected)
+describe('categoryResultsPath', () => {
+  it('leads to the results of a category', () => {
+    expect(categoryResultsPath('c-1')).toBe('/rechercher?categorie=c-1')
   })
 
-  it('is the plain search page when called with no argument', () => {
-    expect(searchPath()).toBe(paths.search)
+  it('escapes an id that needs it', () => {
+    expect(categoryResultsPath('a&b')).toBe('/rechercher?categorie=a%26b')
   })
 })
 

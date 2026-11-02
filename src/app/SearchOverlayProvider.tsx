@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { SearchOverlay } from '../screens/SearchScreen/components/SearchOverlay/SearchOverlay'
 import { logger } from '../lib/logger'
@@ -11,6 +11,11 @@ import {
 } from './useSearchOverlay'
 import { useSearchCriteria } from './useSearchCriteria'
 
+interface AskedSearch extends SearchOverlayRequest {
+  locationKey: string
+  opener: HTMLElement | null
+}
+
 /**
  * Owns the search overlay and opens it on request. It is opened from « Mes recettes » for the member's own
  * recipes, from a results page on that page's search, and from anywhere else on an empty one. Validating leads to
@@ -19,9 +24,13 @@ import { useSearchCriteria } from './useSearchCriteria'
  */
 export function SearchOverlayProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { pathname, key: locationKey } = useLocation()
   const { criteria: addressed } = useSearchCriteria()
-  const [request, setRequest] = useState<SearchOverlayRequest | undefined>()
+  // The page it was asked for on: the overlay belongs to it, and goes when the history moves to another.
+  const [request, setRequest] = useState<AskedSearch | undefined>()
+
+  // The history moved to another entry: the request is over for good (going forward again must not bring it back).
+  if (request !== undefined && request.locationKey !== locationKey) setRequest(undefined)
 
   const onSearchPage = isSearchPage(pathname)
   const mine = pathname === paths.myRecipes
@@ -30,10 +39,13 @@ export function SearchOverlayProvider({ children }: { children: ReactNode }) {
     ? { ...addressed, author: mine ? '' : addressed.author }
     : EMPTY_CRITERIA
 
-  const open: OpenSearch = useCallback((asked = {}) => {
+  const open: OpenSearch = (asked = {}) => {
     logger.debug('Opening the search', { focus: asked.focus ?? 'text' })
-    setRequest(asked)
-  }, [])
+    const { activeElement } = document
+    const opener =
+      activeElement instanceof HTMLElement && activeElement !== document.body ? activeElement : null
+    setRequest({ ...asked, locationKey, opener })
+  }
 
   function search(criteria: SearchCriteria): void {
     void navigate(resultsPath(criteria, { mine }), { replace: onSearchPage })
@@ -43,12 +55,13 @@ export function SearchOverlayProvider({ children }: { children: ReactNode }) {
   return (
     <SearchOverlayContext value={open}>
       {children}
-      {request !== undefined && (
+      {request?.locationKey === locationKey && (
         <SearchOverlay
           initial={initial}
           typed={request.typed ?? ''}
           focus={request.focus ?? 'text'}
           mine={mine}
+          opener={request.opener}
           onSearch={search}
           onClose={() => {
             setRequest(undefined)

@@ -25,7 +25,7 @@ export function filterChoicesOf({
 
 export type SectionKey = 'category' | 'tags' | 'author'
 
-/** Where each section of the filters is, for the pills that jump to them. One panel exists at a time. */
+/** Where each section of the filters is, for the pills that jump to them. The overlay's panel and a desktop's column can both be in the page, but the page behind a modal overlay is inert. */
 export const SECTION_IDS: Record<SectionKey, string> = {
   category: 'filter-section-category',
   tags: 'filter-section-tags',

@@ -1,6 +1,7 @@
-import type { RefObject } from 'react'
+import { useEffect, type RefObject } from 'react'
 import { MAX_QUERY_LENGTH } from '../../../../app/searchCriteria'
 import { SearchPill } from '../../../../components/SearchPill/SearchPill'
+import { strings as appStrings } from '../../../../app/strings'
 import { strings } from '../../strings'
 
 export interface SearchTextFieldProps {
@@ -18,6 +19,12 @@ export interface SearchTextFieldProps {
 export function SearchTextField({ value, onChange, onSubmit, inputRef }: SearchTextFieldProps) {
   const atLimit = value.length >= MAX_QUERY_LENGTH
 
+  // A text that starts filled (a search to refine, a key carried over) is continued, not selected or prepended to.
+  useEffect(() => {
+    const input = inputRef.current
+    input?.setSelectionRange(input.value.length, input.value.length)
+  }, [inputRef])
+
   return (
     <form
       role="search"
@@ -29,10 +36,10 @@ export function SearchTextField({ value, onChange, onSubmit, inputRef }: SearchT
       className="flex flex-col gap-1.5"
     >
       <SearchPill
-        label={strings.field.label}
+        label={appStrings.navigation.searchField}
         value={value}
         onChange={onChange}
-        clearLabel={strings.field.clear}
+        clearLabel={appStrings.navigation.clearSearch}
         maxLength={MAX_QUERY_LENGTH}
         invalid={atLimit}
         inputRef={inputRef}

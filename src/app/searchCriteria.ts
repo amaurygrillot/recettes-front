@@ -93,11 +93,11 @@ export function activeFilterCount(criteria: SearchCriteria): number {
   return (
     Number(criteria.categoryId !== undefined) +
     Number(criteria.tagId !== undefined) +
-    Number(criteria.author !== '')
+    Number(criteria.author.trim() !== '')
   )
 }
 
 /** Whether the search narrows anything down: a text or a filter. The order alone does not. */
 export function isNarrowed(criteria: SearchCriteria): boolean {
-  return criteria.query !== '' || activeFilterCount(criteria) > 0
+  return criteria.query.trim() !== '' || activeFilterCount(criteria) > 0
 }

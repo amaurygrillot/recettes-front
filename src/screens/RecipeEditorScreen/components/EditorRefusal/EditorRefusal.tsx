@@ -28,7 +28,7 @@ export function EditorRefusal({ kind, recipeId }: EditorRefusalProps) {
             {forbidden.toRecipe}
           </LinkButton>
         )}
-        <LinkButton to={paths.search} variant="secondary" fullWidth>
+        <LinkButton to={paths.home} variant="secondary" fullWidth>
           {forbidden.toRecipes}
         </LinkButton>
       </ErrorState>
@@ -44,7 +44,7 @@ export function EditorRefusal({ kind, recipeId }: EditorRefusalProps) {
       size="compact"
       headingLevel={2}
     >
-      <LinkButton to={paths.search} fullWidth>
+      <LinkButton to={paths.home} fullWidth>
         {gone.toRecipes}
       </LinkButton>
       <LinkButton to={paths.home} variant="secondary" fullWidth>

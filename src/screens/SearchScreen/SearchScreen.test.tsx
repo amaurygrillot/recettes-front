@@ -312,6 +312,7 @@ describe('SearchScreen on a phone', () => {
       expect(screen.queryByRole('link', { name: /^Recette/ })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /Trier/ })).not.toBeInTheDocument()
       expect(screen.queryByRole('status')).not.toBeInTheDocument()
+      await delay(50)
       expect(backend.recipeQueries).toHaveLength(0)
     })
 
@@ -320,6 +321,7 @@ describe('SearchScreen on a phone', () => {
       renderSearch('/rechercher?tri=titre-az')
 
       expect(await screen.findByRole('heading', { name: 'Que veux-tu cuisiner ?' })).toBeVisible()
+      await delay(50)
       expect(backend.recipeQueries).toHaveLength(0)
     })
 

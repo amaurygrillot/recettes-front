@@ -129,18 +129,17 @@ describe('TabBar', () => {
       expect(router.state.location.pathname).toBe('/')
     })
 
-    it('is the current tab when told that its page is the one shown', () => {
-      renderBar(tabsWithSearchAction(vi.fn(), true), { path: '/rechercher' })
+    it('is drawn as the current tab when told that its page is the one shown, and not otherwise', () => {
+      const current = renderBar(tabsWithSearchAction(vi.fn(), true), { path: '/rechercher' })
+      expect(screen.getByRole('button', { name: 'Rechercher' })).toHaveClass('font-bold')
+      current.unmount()
 
-      expect(screen.getByRole('button', { name: 'Rechercher' })).toHaveAttribute(
-        'aria-current',
-        'page',
-      )
-      expect(screen.getByRole('link', { name: 'Accueil' })).not.toHaveAttribute('aria-current')
+      renderBar(tabsWithSearchAction(vi.fn()), { path: '/rechercher' })
+      expect(screen.getByRole('button', { name: 'Rechercher' })).not.toHaveClass('font-bold')
     })
 
-    it('is not the current tab otherwise', () => {
-      renderBar(tabsWithSearchAction(vi.fn()))
+    it('does not claim to be the current page to assistive technology: it opens a dialog', () => {
+      renderBar(tabsWithSearchAction(vi.fn(), true), { path: '/rechercher' })
 
       expect(screen.getByRole('button', { name: 'Rechercher' })).not.toHaveAttribute('aria-current')
     })

@@ -23,8 +23,11 @@ export function SearchLauncher({ label, value = '', onOpen, clear }: SearchLaunc
 
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>): void {
     // A space and Enter press the button; shortcuts (Ctrl+A, Cmd+C…) and the keys that move the focus are not typing.
+    // AltGr reports Ctrl+Alt on Windows, and types « @ » or « € » on many keyboards: it is typing.
     const printable = event.key.length === 1 && event.key !== ' '
-    if (!printable || event.ctrlKey || event.metaKey || event.altKey) return
+    const altGraph = event.getModifierState('AltGraph')
+    const shortcut = event.metaKey || ((event.ctrlKey || event.altKey) && !altGraph)
+    if (!printable || shortcut) return
     event.preventDefault()
     onOpen(event.key)
   }

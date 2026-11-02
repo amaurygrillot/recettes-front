@@ -17,7 +17,7 @@ export function useRecipeDeletion(recipeId: string) {
   const [asking, setAsking] = useState(false)
 
   function leave(): void {
-    void navigate(paths.search, { replace: true })
+    void navigate(paths.home, { replace: true })
   }
 
   function confirm(): void {

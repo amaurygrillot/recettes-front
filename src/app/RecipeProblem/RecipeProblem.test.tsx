@@ -26,10 +26,7 @@ describe('RecipeProblem', () => {
         name: "Cette recette n'existe pas ou a été supprimée",
       }),
     ).toBeVisible()
-    expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute(
-      'href',
-      '/rechercher',
-    )
+    expect(screen.getByRole('link', { name: 'Retour aux recettes' })).toHaveAttribute('href', '/')
   })
 
   it('says that the connection is lost, and tries again', async () => {

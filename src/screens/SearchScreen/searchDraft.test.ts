@@ -30,6 +30,10 @@ describe('searchDraft', () => {
     expect(criteriaOf(draftOf(SEARCHED), 'modified')).toEqual({ ...SEARCHED, sort: 'modified' })
   })
 
+  it('does not search for the spaces around an author either', () => {
+    expect(criteriaOf({ ...EMPTY_DRAFT, author: ' Odile ' }, 'recent').author).toBe('Odile')
+  })
+
   it('does not search for the spaces around a word', () => {
     expect(criteriaOf({ ...EMPTY_DRAFT, query: '  gratin  ' }, 'recent').query).toBe('gratin')
   })
@@ -41,6 +45,7 @@ describe('searchDraft', () => {
     ['a category', true, { ...EMPTY_DRAFT, categoryId: 'c-1' }, false],
     ['a tag', true, { ...EMPTY_DRAFT, tagId: 't-1' }, false],
     ['an author', true, { ...EMPTY_DRAFT, author: 'Odile' }, false],
+    ['spaces as an author', false, { ...EMPTY_DRAFT, author: '  ' }, false],
     ['only « this category only »', false, { ...EMPTY_DRAFT, exactCategory: true }, false],
     ['nothing, in « Mes recettes »', true, EMPTY_DRAFT, true],
   ])('with %s, can search: %s', (_what, expected, draft, mine) => {

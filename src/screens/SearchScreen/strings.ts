@@ -7,9 +7,7 @@ export const strings = {
     mine: 'Mes recettes',
   },
   field: {
-    label: 'Chercher une recette',
     landmark: 'Recherche de recettes',
-    clear: 'Effacer la recherche',
     limit: (max: number) => `${max} caractères au maximum.`,
     counter: (typed: number, max: number) => `${typed} / ${max}`,
   },

@@ -15,7 +15,7 @@ export interface FiltersColumnProps {
 
 /**
  * The filters of a desktop, in a card of 270 px beside the results: every choice applies as it is
- * made, so there is no « Voir les N recettes », only « Réinitialiser ».
+ * made, so there is no « Rechercher » to press, only « Réinitialiser ».
  */
 export function FiltersColumn({ criteria, options, showAuthor, onChange }: FiltersColumnProps) {
   return (

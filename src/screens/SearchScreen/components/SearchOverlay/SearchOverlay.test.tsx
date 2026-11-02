@@ -25,6 +25,7 @@ function renderOverlay(props: Partial<SearchOverlayProps> = {}) {
             typed=""
             focus="text"
             mine={false}
+            opener={null}
             onSearch={onSearch}
             onClose={onClose}
             {...props}
@@ -317,6 +318,7 @@ describe('SearchOverlay', () => {
       const user = userEvent.setup()
       renderOverlay({ initial: { ...EMPTY_CRITERIA, categoryId: 'plats' } })
       const sheet = await dialog()
+      await within(sheet).findByRole('radio', { name: 'Plats' })
 
       const sections = within(sheet).getByRole('navigation', { name: 'Sections des filtres' })
       expect(
@@ -331,6 +333,17 @@ describe('SearchOverlay', () => {
         'true',
       )
       expect(within(sheet).getByRole('group', { name: 'Tags' })).toHaveFocus()
+    })
+
+    it('offers no pill for a section that is not there while the filters are not loaded', async () => {
+      renderOverlay()
+      server.use(http.get(`${API_BASE_URL}/tags`, () => HttpResponse.error()))
+      const sheet = await dialog()
+
+      expect(
+        within(sheet).queryByRole('navigation', { name: 'Sections des filtres' }),
+      ).not.toBeInTheDocument()
+      expect(await within(sheet).findByText('Les filtres ne se sont pas chargés.')).toBeVisible()
     })
 
     it('has no author in « Mes recettes »: the author is the member', async () => {
@@ -360,6 +373,37 @@ describe('SearchOverlay', () => {
       await user.click(within(sheet).getByRole('button', { name: 'Réessayer' }))
 
       expect(await within(sheet).findByRole('button', { name: 'Four' })).toBeVisible()
+    })
+  })
+
+  describe('Escape', () => {
+    it('is kept by a category field that is open or holds text: it dismisses its suggestions, not the overlay', async () => {
+      const user = userEvent.setup()
+      const { onClose } = renderOverlay()
+      const sheet = await dialog()
+      await user.type(field(), 'tarte')
+      const combobox = await within(sheet).findByRole('combobox', {
+        name: 'Chercher une catégorie',
+      })
+      await user.type(combobox, 'tar')
+
+      await user.keyboard('{Escape}')
+
+      expect(onClose).not.toHaveBeenCalled()
+      expect(field()).toHaveValue('tarte')
+    })
+
+    it('closes the overlay from a field that has nothing of its own to dismiss', async () => {
+      const user = userEvent.setup()
+      const { onClose } = renderOverlay()
+      const sheet = await dialog()
+      await user.click(
+        await within(sheet).findByRole('combobox', { name: 'Chercher une catégorie' }),
+      )
+
+      await user.keyboard('{Escape}')
+
+      expect(onClose).toHaveBeenCalledOnce()
     })
   })
 

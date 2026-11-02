@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
@@ -42,6 +42,14 @@ describe('SearchLauncher', () => {
     await user.keyboard('t')
 
     expect(onOpen).toHaveBeenCalledExactlyOnceWith('t')
+  })
+
+  it('carries a character typed with AltGr, which reports Ctrl and Alt together', () => {
+    const { onOpen } = renderLauncher()
+
+    fireEvent.keyDown(launcher(), { key: '@', ctrlKey: true, altKey: true, modifierAltGraph: true })
+
+    expect(onOpen).toHaveBeenCalledExactlyOnceWith('@')
   })
 
   it.each([

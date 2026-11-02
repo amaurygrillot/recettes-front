@@ -20,7 +20,7 @@ export function draftOf(criteria: SearchCriteria): SearchDraft {
 
 /** The search a draft asks for. The order belongs to the results page, so the search keeps the one it had. */
 export function criteriaOf(draft: SearchDraft, sort: SortKey): SearchCriteria {
-  return { ...draft, query: draft.query.trim(), sort }
+  return { ...draft, query: draft.query.trim(), author: draft.author.trim(), sort }
 }
 
 /**

@@ -109,4 +109,11 @@ describe('activeFilterCount and isNarrowed', () => {
     expect(isNarrowed({ ...EMPTY_CRITERIA, query: 'tarte' })).toBe(true)
     expect(isNarrowed({ ...EMPTY_CRITERIA, tagId: 't' })).toBe(true)
   })
+
+  it('does not take spaces for a word or an author: they would list the whole library', () => {
+    const spaces = { ...EMPTY_CRITERIA, query: '  ', author: '   ' }
+
+    expect(activeFilterCount(spaces)).toBe(0)
+    expect(isNarrowed(spaces)).toBe(false)
+  })
 })

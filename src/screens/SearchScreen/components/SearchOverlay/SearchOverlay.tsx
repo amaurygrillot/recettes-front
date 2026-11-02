@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { MAX_QUERY_LENGTH, type SearchCriteria } from '../../../../app/searchCriteria'
 import { BottomSheet } from '../../../../components/BottomSheet/BottomSheet'
 import { TopPanel } from '../../../../components/TopPanel/TopPanel'
@@ -24,6 +24,8 @@ export interface SearchOverlayProps {
   focus: 'text' | 'filters'
   /** « Mes recettes »: the author is the member, so there is no author field and nothing to choose to search. */
   mine: boolean
+  /** What was focused as the search was asked for: it gets the focus back, whichever layout the overlay is in. */
+  opener: HTMLElement | null
   /** Validated: the search to make. The overlay closes itself by being unmounted. */
   onSearch: (criteria: SearchCriteria) => void
   onClose: () => void
@@ -44,6 +46,7 @@ export function SearchOverlay({
   typed,
   focus,
   mine,
+  opener,
   onSearch,
   onClose,
 }: SearchOverlayProps) {
@@ -51,15 +54,12 @@ export function SearchOverlay({
   const options = useFilterOptions()
   const [draft, setDraft] = useState(() => initialDraft(initial, typed))
   const textRef = useRef<HTMLInputElement>(null)
-  const sections = filterSectionsOf(draft, !mine)
+  // The pills jump to sections that exist: the category and tags only once the filters are there.
+  const sections = filterSectionsOf(draft, !mine).filter(
+    ({ key }) => key === 'author' || options.status === 'ready',
+  )
   const sectionPills = useFilterSections(sections)
   const searchable = canSearch(draft, mine)
-
-  // A text that starts filled (a search to refine, a key carried over) is continued, not selected or prepended to.
-  useEffect(() => {
-    const end = textRef.current?.value.length ?? 0
-    textRef.current?.setSelectionRange(end, end)
-  }, [])
 
   function search(): void {
     if (!searchable) return
@@ -111,6 +111,7 @@ export function SearchOverlay({
         onOpenChange={onOpenChange}
         title={strings.overlay.title}
         initialFocusRef={initialFocusRef}
+        returnFocusTo={opener}
         toolbar={field}
         actions={actions}
       >
@@ -125,14 +126,18 @@ export function SearchOverlay({
       onOpenChange={onOpenChange}
       title={strings.overlay.title}
       initialFocusRef={initialFocusRef}
+      returnFocusTo={opener}
+      tall
       toolbar={
         <>
           <div className="px-5 pt-1">{field}</div>
-          <SectionPills
-            sections={sections}
-            activeId={sectionPills.activeId}
-            onSelect={sectionPills.jumpTo}
-          />
+          {sections.length > 1 && (
+            <SectionPills
+              sections={sections}
+              activeId={sectionPills.activeId}
+              onSelect={sectionPills.jumpTo}
+            />
+          )}
         </>
       }
       onContentScroll={sectionPills.onScroll}

@@ -93,6 +93,24 @@ describe('the search over the page', () => {
       expect(textField()).toHaveValue('')
     })
 
+    it('goes with the page it was opened on when the history moves, and does not come back with its draft', async () => {
+      serveBackend()
+      const user = userEvent.setup()
+      const { router } = renderRoutes(routes, '/')
+      await act(() => router.navigate('/nulle-part'))
+      const tabs = await screen.findByRole('navigation', { name: 'Navigation principale' })
+      await user.click(within(tabs).getByRole('button', { name: 'Rechercher' }))
+      await overlay()
+      await user.type(textField(), 'tarte')
+
+      await act(() => router.navigate(-1))
+
+      expect(location(router)).toBe('/')
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      await act(() => router.navigate(1))
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
     it('has no accessibility violation while it is open', async () => {
       serveBackend()
       const user = userEvent.setup()
@@ -113,7 +131,7 @@ describe('the search over the page', () => {
       await screen.findByRole('link', { name: 'Recette 1' })
       const tabs = screen.getByRole('navigation', { name: 'Navigation principale' })
       const tab = within(tabs).getByRole('button', { name: 'Rechercher' })
-      expect(tab).toHaveAttribute('aria-current', 'page')
+      expect(tab).toHaveClass('font-bold')
 
       await user.click(tab)
 
@@ -127,9 +145,7 @@ describe('the search over the page', () => {
       await screen.findByRole('link', { name: 'Recette 1' })
 
       const tabs = screen.getByRole('navigation', { name: 'Navigation principale' })
-      expect(within(tabs).getByRole('button', { name: 'Rechercher' })).not.toHaveAttribute(
-        'aria-current',
-      )
+      expect(within(tabs).getByRole('button', { name: 'Rechercher' })).not.toHaveClass('font-bold')
     })
   })
 
@@ -212,6 +228,21 @@ describe('the search over the page', () => {
 
       await waitFor(() => {
         expect(location(router)).toBe('/mes-recettes')
+      })
+    })
+
+    it('drops an author written in the address: « Mes recettes » is the member’s', async () => {
+      expect(sessionStore.signIn(fakeToken())).toBe(true)
+      serveBackend()
+      const user = userEvent.setup()
+      const { router } = renderRoutes(routes, '/mes-recettes?auteur=Hugo&q=tarte')
+      await user.click(await screen.findByRole('button', { name: /^Chercher une recette/ }))
+      await overlay()
+
+      await user.click(searchButton())
+
+      await waitFor(() => {
+        expect(location(router)).toBe('/mes-recettes?q=tarte')
       })
     })
 
