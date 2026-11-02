@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import { classNames } from '../../lib/classNames'
 import { LOGO_TONES } from '../Logo/logoTones'
 import { ASLEEP, CELEBRATING, DEJECTED, HAPPY, LOST, SMITTEN, SURPRISED } from './mascotShapes'
 
@@ -42,7 +43,7 @@ export function Mascot({ mood, size }: MascotProps) {
       width={width}
       height={width * HEIGHT_RATIO}
       aria-hidden="true"
-      className={`shrink-0 ${LOGO_TONES.color} [--logo-herb:var(--color-herb)]`}
+      className={classNames('shrink-0', LOGO_TONES.color, '[--logo-herb:var(--color-herb)]')}
     >
       {DRAWINGS[mood]}
     </svg>
