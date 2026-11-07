@@ -328,14 +328,40 @@ describe('SearchOverlay', () => {
       })
     })
 
-    it('takes no more tags than the API does: at the limit the other tags are off and the field gives way', async () => {
-      const chosen = Array.from({ length: MAX_TAG_FILTERS }, (_, index) => `t-chosen-${index}`)
-      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: chosen } })
+    it('takes no more tags than the API does: at the limit the other tags are off and the field gives way, until one is dropped', async () => {
+      const user = userEvent.setup()
+      const others = Array.from({ length: MAX_TAG_FILTERS - 1 }, (_, index) => `t-chosen-${index}`)
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: [...others, 't-rapide'] } })
       const sheet = await dialog()
 
       expect(await within(sheet).findByText('20 tags au maximum.')).toBeInTheDocument()
       expect(within(sheet).queryByRole('combobox', { name: 'Chercher un tag' })).toBeNull()
-      expect(within(sheet).getByRole('button', { name: 'Rapide' })).toBeDisabled()
+      expect(within(sheet).getByRole('button', { name: 'Four' })).toBeDisabled()
+      expect(within(sheet).getByRole('button', { name: 'Fruits' })).toBeDisabled()
+      expect(within(sheet).getByRole('button', { name: 'Rapide' })).toBeEnabled()
+
+      await user.click(within(sheet).getByRole('button', { name: 'Rapide' }))
+
+      expect(within(sheet).queryByText('20 tags au maximum.')).toBeNull()
+      expect(within(sheet).getByRole('combobox', { name: 'Chercher un tag' })).toBeVisible()
+      expect(within(sheet).getByRole('button', { name: 'Four' })).toBeEnabled()
+    })
+
+    it('has no accessibility violation with several tags chosen', async () => {
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: ['t-rapide', 't-four'] } })
+      const sheet = await dialog()
+      await within(sheet).findByRole('button', { name: 'Rapide' })
+
+      await expectNoAccessibilityViolations(sheet)
+    })
+
+    it('has no accessibility violation at the limit of tags, with the other chips off', async () => {
+      const others = Array.from({ length: MAX_TAG_FILTERS - 2 }, (_, index) => `t-chosen-${index}`)
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: [...others, 't-rapide', 't-four'] } })
+      const sheet = await dialog()
+      await within(sheet).findByText('20 tags au maximum.')
+
+      await expectNoAccessibilityViolations(sheet)
     })
 
     it('finds a category by typing a start of word, with its parent, and chooses it', async () => {
