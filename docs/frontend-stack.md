@@ -15,7 +15,7 @@ the reasoning survives the conversation it came from.
 | Rich text | Lexical (+ DOMPurify at render) | Tiptap, Slate / Plate, Quill, CKEditor / TinyMCE, Markdown textarea |
 | Styling | Tailwind CSS with the design-system tokens as theme values | CSS Modules |
 | Accessible components | Radix UI primitives, unstyled | Writing focus management by hand |
-| Drag and drop | dnd-kit, plus move up / move down buttons | Native HTML5 drag and drop |
+| Reordering | Move up / move down buttons only (no dragging: R7 took it out) | dnd-kit, native HTML5 drag and drop |
 | Token storage | `sessionStorage` | `localStorage`, memory only, `HttpOnly` cookie |
 | Tests | Vitest, Testing Library, MSW, Playwright | — |
 | Lint / format | ESLint + Prettier | — |
@@ -47,7 +47,6 @@ resolved; **re-run `npm view` when scaffolding**, since newer releases may exist
 | `lexical`, `@lexical/*` | 0.52.0 | Pre-1.0: pin the exact version |
 | `dompurify` | 3.4.x | |
 | `radix-ui` | 1.8.x | Unified package |
-| `@dnd-kit/core` · `@dnd-kit/sortable` | 6.3.1 · 10.0.0 | See note on types |
 | `tailwindcss` · `@tailwindcss/vite` | 4.3.3 | |
 | `vitest` · `@vitest/coverage-v8` | 5.0.5 | Needs Node 22.12+ / 24+ / 26+ |
 | `@testing-library/react` · `/dom` · `/user-event` · `/jest-dom` | 16.3.x · 10.x · latest · latest | |
@@ -92,7 +91,7 @@ Node's `fetch` once a handler reads the body (see [api-layer.md](api-layer.md#te
 `body` while a modal is open: a test clicks the veil (the dialog's parent), not `document.body`.
 
 Not installed yet, on purpose: Playwright. A dependency is added by the milestone that uses it (dnd-kit 6.3.1 / 10.0.0 / utilities 3.2.2 came with the
-RecipeEditorScreen: pointer and keyboard sorting of photos, ingredient lines and steps, always with buttons as the other way; DOMPurify 3.4.17
+RecipeEditorScreen, for pointer and keyboard sorting of photos, ingredient lines and steps, and was removed by R7, which took the drag handles out: those lists are moved by buttons only; DOMPurify 3.4.17
 came with the RecipeScreen, for `RichTextView`; Lexical 0.52.0 came with the RichTextEditor, `lexical`, `@lexical/react`, `@lexical/list`,
 `@lexical/html`, `@lexical/history`, `@lexical/rich-text` and `@lexical/utils` all pinned to the same exact version, which is how they have to move).
 
@@ -165,10 +164,8 @@ Two peer ranges are stricter than reality. Both are lifted with npm's `overrides
 - **`openapi-fetch` binds `fetch` when the client is created**, so MSW (which patches `fetch` later) is bypassed and
   requests hit the network. Create the client with `fetch: (request) => globalThis.fetch(request)`.
 - **MSW 3 renamed `onUnhandledRequest` to `onUnhandledFrame`** in `server.listen(...)`.
-- **`@dnd-kit/core` 6.3.1 uses the global `JSX` namespace** that React 19's types removed, and
-  `@testing-library/jest-dom` types clash with Vitest 5's `Assertion` type. Both only show up with `skipLibCheck: false`;
-  keep **`skipLibCheck: true`** (Vite's default). `@dnd-kit/react` (0.5.x) is the pre-1.0 successor if the classic package
-  becomes a problem.
+- **`@testing-library/jest-dom` types clash with Vitest 5's `Assertion` type** (and dnd-kit, while it was used, relied on the global `JSX` namespace
+  that React 19's types removed). It only shows up with `skipLibCheck: false`; keep **`skipLibCheck: true`** (Vite's default).
 - **`vitest-axe` 0.1.0 was last published in January 2025** and its matcher types do not extend Vitest 5. Use
   **`axe-core` directly** through a small test helper (`expectNoAccessibilityViolations(container)`) instead of that wrapper.
   Color contrast cannot be computed by jsdom (a harmless « getContext not implemented » message appears); contrast is

@@ -108,6 +108,7 @@ padding, between cards, between sections, breathing room). They are Tailwind's o
 | card | `0 2px 0 rgba(43,29,18,.12), 0 8px 20px rgba(43,29,18,.16)` | Recipe cards |
 | stamp | `4px 4px 0 #2B1D12` | Buttons, chosen element. **Pressed: no shadow, translated 4 px** |
 | stamp-sm | `3px 3px 0 #2B1D12` | The chosen filter chip |
+| stamp-xs | `2px 2px 0 #2B1D12` | The arrows over the photos of a recipe card (R8) |
 | sheet | `0 16px 36px rgba(43,29,18,.26)` | Panels and dialogs that overlap |
 | bar | `0 -2px 6px rgba(43,29,18,.10)` | A bar fixed above the tabs (the recipe's « Cuisiner pas à pas »): the shadow falls upwards |
 
@@ -205,7 +206,7 @@ bar without covering it. No burger menu. The bar must be able to take one more t
 Own set, drawn on a 24 px grid: **stroke 2.2** (2.5 for the icon of an active tab, 2 at 48 px), round caps and joins, no fill,
 `currentColor`-friendly; filled only for an active state (a favorite, a tick). 20 px dense, **24 px default**, 32 px to stand
 out, 48 px in empty states. Names in the canvas (49): home, search, book, user, log-in, log-out, heart, plus, minus, close,
-check, edit, trash, share, filter, upload, refresh, grip, chef-hat, bold, italic, list-bullet, list-number, undo, redo,
+check, edit, trash, share, filter, upload, refresh, grip, chef-hat, bold, italic, list-bullet, list-number (redrawn by R6: taller, thinner digits), undo, redo,
 chevron-left/right/up/down, warning, alert, check-circle, info, clock, users, image, camera, lock, eye, eye-off, cutlery, grid,
 leaf, plate, cake, soup, bread, **mail, more**, and the four of R3: **text-size, underline, strike, expand**.
 **`heart`, `share`, `clock` and `users` exist in the set but their features do not exist yet** (favorites, sharing,
