@@ -114,7 +114,7 @@ export interface paths {
          *
          *     A category filter reaches the category's subcategories too, at any depth, unless `includeSubcategories=false`. `categoryId` and `categoryName` are two spellings of one filter: supplying both unions their matches.
          *
-         *     `ingredientIds` keeps the recipes that use **all** of the given ingredients, in any of their groups.
+         *     `tagIds` keeps the recipes that carry **all** of the given tags, and `ingredientIds` the recipes that use **all** of the given ingredients, in any of their groups.
          */
         get: operations["searchRecipes"];
         put?: never;
@@ -1007,8 +1007,8 @@ export interface operations {
                 categoryName?: string;
                 /** @description Whether a category filter reaches everything filed beneath the category. Absent means true. */
                 includeSubcategories?: boolean;
-                /** @description Recipes carrying this tag. */
-                tagId?: string;
+                /** @description Recipes that carry **every** one of these tags. Repeat the parameter to give several (`tagIds=a&tagIds=b`). Blank values and duplicates are dropped, an id that matches no tag matches no recipe, and at most 20 are accepted. */
+                tagIds?: string[];
                 /** @description Matched against the tag's normalized name. */
                 tagName?: string;
                 /** @description Recipes that use **every** one of these ingredients. Repeat the parameter to give several (`ingredientIds=a&ingredientIds=b`). Blank values and duplicates are dropped, an id that matches no ingredient matches no recipe, and at most 20 are accepted. */

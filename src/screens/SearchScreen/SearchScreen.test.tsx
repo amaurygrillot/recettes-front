@@ -128,7 +128,7 @@ describe('SearchScreen on a phone', () => {
       await waitFor(() => {
         expect(backend.lastQuery()).not.toHaveProperty('title')
       })
-      expect(backend.lastQuery()).toMatchObject({ tagId: 't-fruits' })
+      expect(backend.lastTagIds()).toEqual(['t-fruits'])
     })
 
     it('keeps the old answer, marked « Recherche… », while the new one comes', async () => {
@@ -169,13 +169,34 @@ describe('SearchScreen on a phone', () => {
         expect(backend.lastQuery()).toMatchObject({
           title: 'tarte',
           categoryId: 'desserts',
-          tagId: 't-fruits',
           authorName: 'Odile',
           sortBy: 'TITLE',
           direction: 'ASC',
         })
       })
+      expect(backend.lastTagIds()).toEqual(['t-fruits'])
       expect(backend.lastQuery()).not.toHaveProperty('includeSubcategories')
+    })
+
+    it('asks for every tag of the address, each shown by its name as a chip that drops it', async () => {
+      const backend = serveBackend()
+      const { router } = renderSearch('/rechercher?tag=t-fruits&tag=t-four&tag=t-rapide')
+      const user = userEvent.setup()
+
+      expect(await screen.findByRole('button', { name: 'Retirer le filtre Fruits' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Retirer le filtre Four' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Retirer le filtre Rapide' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Filtres, 3 actifs' })).toBeVisible()
+      await waitFor(() => {
+        expect(backend.lastTagIds()).toEqual(['t-fruits', 't-four', 't-rapide'])
+      })
+
+      await user.click(screen.getByRole('button', { name: 'Retirer le filtre Four' }))
+
+      expect(router.state.location.search).toBe('?tag=t-fruits&tag=t-rapide')
+      await waitFor(() => {
+        expect(backend.lastTagIds()).toEqual(['t-fruits', 't-rapide'])
+      })
     })
 
     it('asks for every ingredient of the address, each shown by its name as a chip that drops it', async () => {
@@ -235,7 +256,7 @@ describe('SearchScreen on a phone', () => {
         '?q=tarte&categorie=desserts&auteur=Odile&tri=titre-az',
       )
       await waitFor(() => {
-        expect(backend.lastQuery()).not.toHaveProperty('tagId')
+        expect(backend.lastTagIds()).toEqual([])
       })
     })
 

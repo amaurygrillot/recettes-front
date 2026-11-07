@@ -27,7 +27,7 @@ describe('toRecipeFilters', () => {
       query: '  tarte ',
       categoryId: 'c-1',
       exactCategory: false,
-      tagId: 't-1',
+      tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: ' Odile ',
       sort: 'recent',
@@ -38,10 +38,18 @@ describe('toRecipeFilters', () => {
       direction: 'DESC',
       title: 'tarte',
       categoryId: 'c-1',
-      tagId: 't-1',
+      tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       authorName: 'Odile',
     })
+  })
+
+  it('asks for the recipes that carry every tag, and for nothing when there is none', () => {
+    expect(toRecipeFilters({ ...EMPTY_CRITERIA, tagIds: ['t-1', 't-2'] }, ALL)).toHaveProperty(
+      'tagIds',
+      ['t-1', 't-2'],
+    )
+    expect(toRecipeFilters(EMPTY_CRITERIA, ALL)).not.toHaveProperty('tagIds')
   })
 
   it('asks for the recipes that use every ingredient, and for nothing when there is none', () => {

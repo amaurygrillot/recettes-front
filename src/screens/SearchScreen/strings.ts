@@ -62,6 +62,7 @@ export const strings = {
       searchLabel: 'Chercher un tag',
       suggestions: 'Suggestions de tags',
       noResult: (typed: string) => `Aucun tag pour « ${typed} »`,
+      limit: (max: number) => `${max} tags au maximum.`,
     },
     ingredients: {
       legend: 'Ingrédients',

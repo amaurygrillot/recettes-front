@@ -3,25 +3,30 @@ import type { TagChoice } from '../../useFilterOptions'
 
 export interface TagChipsProps {
   tags: readonly TagChoice[]
-  tagId: string | undefined
-  onChoose: (tagId: string | undefined) => void
+  /** The tags chosen: a recipe has to carry all of them. */
+  tagIds: readonly string[]
+  /** Nothing more can be chosen: the chips that are not chosen are off, the chosen ones can still be dropped. */
+  full: boolean
+  onToggle: (tagId: string) => void
 }
 
 /**
- * The tags as chips that wrap, the chosen one first. The API takes one tag: touching the chosen
- * one drops it, touching another replaces it.
+ * The tags as chips that wrap, the chosen ones first. Any number can be chosen: touching a chip
+ * chooses its tag or drops it.
  */
-export function TagChips({ tags, tagId, onChoose }: TagChipsProps) {
-  const chosenFirst = [...tags].sort((a, b) => Number(b.id === tagId) - Number(a.id === tagId))
+export function TagChips({ tags, tagIds, full, onToggle }: TagChipsProps) {
+  const chosen = new Set(tagIds)
+  const chosenFirst = [...tags].sort((a, b) => Number(chosen.has(b.id)) - Number(chosen.has(a.id)))
 
   return (
     <div className="flex flex-wrap gap-2.5">
       {chosenFirst.map((tag) => (
         <FilterChip
           key={tag.id}
-          selected={tag.id === tagId}
+          selected={chosen.has(tag.id)}
+          disabled={full && !chosen.has(tag.id)}
           onClick={() => {
-            onChoose(tag.id === tagId ? undefined : tag.id)
+            onToggle(tag.id)
           }}
         >
           {tag.name}

@@ -3,6 +3,8 @@ import { Button } from '../../../../components/Button/Button'
 import { Combobox } from '../../../../components/Combobox/Combobox'
 import { ErrorBanner } from '../../../../components/ErrorBanner/ErrorBanner'
 import { findCategory, type CategoryNode } from '../../../../app/categoryNodes'
+import { MAX_TAG_FILTERS } from '../../../../app/searchCriteria'
+import { logger } from '../../../../lib/logger'
 import { SECTION_IDS, type FilterChoices } from '../../filterChoices'
 import { strings } from '../../strings'
 import type { FilterOptions } from '../../useFilterOptions'
@@ -46,8 +48,8 @@ function pathTo(categories: readonly CategoryNode[], id: string | undefined): st
 }
 
 /**
- * The filters: category (a tree and a search field), tag (chips and a search field), ingredients (a search
- * field and the ones chosen), author.
+ * The filters: category (a tree and a search field), tags (chips and a search field; as many as wanted),
+ * ingredients (a search field and the ones chosen), author.
  * The same panel is the content of the search overlay and the column of a desktop's results; it
  * holds no choice of its own, so whoever shows it decides when the choices count.
  */
@@ -113,26 +115,37 @@ export function FiltersPanel({
     </Section>
   )
 
+  const tagsFull = choices.tagIds.length >= MAX_TAG_FILTERS
+
+  /** Chooses the tag, or drops it if it is chosen; at the limit nothing more is chosen. */
+  function toggleTag(tagId: string): void {
+    if (choices.tagIds.includes(tagId)) {
+      onChange({ tagIds: choices.tagIds.filter((chosen) => chosen !== tagId) })
+      return
+    }
+    if (tagsFull) return
+    logger.debug('A tag was chosen as a filter', { count: choices.tagIds.length + 1 })
+    onChange({ tagIds: [...choices.tagIds, tagId] })
+  }
+
   const tagsSection = options.status === 'ready' && (
     <Section id={SECTION_IDS.tags} legend={filters.tags.legend}>
-      <Combobox
-        label={filters.tags.searchLabel}
-        placeholder={dense ? filters.searchShort : filters.tags.searchLabel}
-        suggestionsLabel={filters.tags.suggestions}
-        options={options.tagOptions}
-        selectedIds={choices.tagId === undefined ? [] : [choices.tagId]}
-        onToggle={(option) => {
-          onChange({ tagId: option.id === choices.tagId ? undefined : option.id })
-        }}
-        noResultText={filters.tags.noResult}
-      />
-      <TagChips
-        tags={options.tags}
-        tagId={choices.tagId}
-        onChoose={(tagId) => {
-          onChange({ tagId })
-        }}
-      />
+      {tagsFull ? (
+        <p className="text-body text-ink-800">{filters.tags.limit(MAX_TAG_FILTERS)}</p>
+      ) : (
+        <Combobox
+          label={filters.tags.searchLabel}
+          placeholder={dense ? filters.searchShort : filters.tags.searchLabel}
+          suggestionsLabel={filters.tags.suggestions}
+          options={options.tagOptions}
+          selectedIds={choices.tagIds}
+          onToggle={(option) => {
+            toggleTag(option.id)
+          }}
+          noResultText={filters.tags.noResult}
+        />
+      )}
+      <TagChips tags={options.tags} tagIds={choices.tagIds} full={tagsFull} onToggle={toggleTag} />
     </Section>
   )
 
