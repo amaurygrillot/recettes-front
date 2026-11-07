@@ -1,10 +1,9 @@
-import type { ComponentProps, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { mediaUrl } from '../../../../api/media'
 import { classNames } from '../../../../lib/classNames'
 import { Icon } from '../../../../components/Icon/Icon'
 import { strings } from '../../strings'
 import { GestureButton } from '../GestureButton/GestureButton'
-import { GripButton } from '../GestureButton/GripButton'
 
 export interface PhotoTileProps {
   /** Counted from 1. */
@@ -13,36 +12,30 @@ export interface PhotoTileProps {
   mediaId: string
   /** The first photo of the recipe's cover: told apart by its yellow label. */
   cover: boolean
-  /** The grip of the drag, with what the drag needs on it. */
-  handle: ComponentProps<'button'>
   /** Where the arrows of this photo lead, which is nowhere at either end. */
   canMoveBack: boolean
   canMoveForward: boolean
   onMove: (direction: -1 | 1) => void
   onRemove: () => void
-  /** Lifted by a drag: it is drawn tilted, over the page. */
-  lifted?: boolean
   /** The field of its description. */
   children: ReactNode
 }
 
 /**
  * One photo of a list (the cover, or a step): the picture in the 4:3 frame of the recipe page, what it
- * is called (« Couverture », « Photo 2 »), how to remove it and the three ways to move it (the grip to
- * drag, the two arrows), and under it the field of its description. A photo only leaves the form when
- * the recipe is saved: removing it here deletes nothing.
+ * is called (« Couverture », « Photo 2 »), how to remove it and the two arrows that move it, and under
+ * it the field of its description. A photo only leaves the form when the recipe is saved: removing it
+ * here deletes nothing.
  */
 export function PhotoTile({
   position,
   total,
   mediaId,
   cover,
-  handle,
   canMoveBack,
   canMoveForward,
   onMove,
   onRemove,
-  lifted = false,
   children,
 }: PhotoTileProps) {
   const { photos } = strings
@@ -51,18 +44,12 @@ export function PhotoTile({
       role="group"
       aria-label={photos.group(position, total)}
       className={classNames(
-        'flex flex-col overflow-hidden rounded-l border-2 border-ink-900',
-        lifted ? 'rotate-2 bg-butter-100 shadow-sheet' : 'bg-paper-50',
-        cover && !lifted && 'shadow-stamp',
+        'flex flex-col overflow-hidden rounded-l border-2 border-ink-900 bg-paper-50',
+        cover && 'shadow-stamp',
       )}
     >
       <div className="relative aspect-4/3 border-b-2 border-ink-900 bg-paper-200">
-        <img
-          src={mediaUrl(mediaId, 'thumbnail')}
-          alt=""
-          className="size-full object-cover"
-          draggable={false}
-        />
+        <img src={mediaUrl(mediaId, 'thumbnail')} alt="" className="size-full object-cover" />
         <span
           className={classNames(
             'absolute top-2 left-2 inline-flex h-8 items-center rounded-pill border-2 border-ink-900 px-2.5 text-detail font-bold',
@@ -82,7 +69,6 @@ export function PhotoTile({
       </div>
       <div className="flex flex-col gap-2.5 px-2 pt-2 pb-3">
         <div className="flex items-center gap-1.5">
-          <GripButton label={photos.handle(position)} {...handle} />
           <GestureButton
             label={photos.moveLeft(position)}
             icon="chevron-left"

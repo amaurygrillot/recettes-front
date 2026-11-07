@@ -4,7 +4,7 @@ import { useEffect, useRef, type RefObject } from 'react'
  * After a button added an item to the end of a list, the typing starts in it: the focus goes to the
  * field of the new item that `selector` names (`[role="combobox"]` for a line's ingredient).
  *
- * `ref` is the element that holds the items, each marked `data-sortable={id}`; `items` is the list as
+ * `ref` is the element that holds the items, each marked `data-item={id}`; `items` is the list as
  * rendered. Call the function this returns right before adding.
  */
 export function useFocusNewItem(
@@ -19,7 +19,7 @@ export function useFocusNewItem(
     asked.current = false
     const added = items.at(-1)
     if (added === undefined) return
-    ref.current?.querySelector<HTMLElement>(`[data-sortable="${added.id}"] ${selector}`)?.focus()
+    ref.current?.querySelector<HTMLElement>(`[data-item="${added.id}"] ${selector}`)?.focus()
   }, [items, ref, selector])
 
   return () => {

@@ -1,4 +1,4 @@
-import { useId, type ComponentProps } from 'react'
+import { useId } from 'react'
 import { useController, useFormContext, useWatch } from 'react-hook-form'
 import { AutocompleteField } from '../../../../components/AutocompleteField/AutocompleteField'
 import { SelectField } from '../../../../components/SelectField/SelectField'
@@ -11,7 +11,6 @@ import { useReferences } from '../../references'
 import { strings } from '../../strings'
 import { useIngredientChoice } from '../../useIngredientChoice'
 import { GestureButton } from '../GestureButton/GestureButton'
-import { GripButton } from '../GestureButton/GripButton'
 import { IngredientNotice } from './IngredientNotice'
 
 const { ingredients } = strings
@@ -21,23 +20,20 @@ export interface IngredientLineProps {
   /** Where the line is in its group, from 0. */
   index: number
   total: number
-  /** The grip of the drag, with what the drag needs on it. */
-  handle: ComponentProps<'button'>
   onRemove: () => void
   onMove: (direction: -1 | 1) => void
 }
 
 /**
  * One line of an ingredient group, compact for a phone: the ingredient (chosen from the ones that
- * exist, or created on the spot) with its grip and its bin, then the quantity, the unit and a note.
- * What is wrong is said once under the whole line, wide enough to be read. Moving it up or down
- * appears when the line is being used: the grip alone would leave out those who cannot drag.
+ * exist, or created on the spot) with its bin, then the quantity, the unit and a note. What is wrong
+ * is said once under the whole line, wide enough to be read. « Monter » and « Descendre » appear when
+ * the line is being used.
  */
 export function IngredientLine({
   groupIndex,
   index,
   total,
-  handle,
   onRemove,
   onMove,
 }: IngredientLineProps) {
@@ -70,9 +66,6 @@ export function IngredientLine({
       className="group/line flex flex-col gap-2.5 rounded-l border-2 border-ink-900 bg-paper-50 px-2.5 pt-2.5 pb-3"
     >
       <div className="flex items-start gap-1.5">
-        <div className="mt-7.5 flex h-14 shrink-0 items-center">
-          <GripButton label={ingredients.grip(position)} {...handle} />
-        </div>
         <div className="min-w-0 flex-1">
           <AutocompleteField
             label={ingredients.ingredient}

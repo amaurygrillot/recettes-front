@@ -61,23 +61,13 @@ export const strings = {
     photo: (position: number) => `Photo ${position}`,
     group: (position: number, total: number) => `Photo ${position} sur ${total}`,
     remove: (position: number) => `Retirer la photo ${position}`,
-    handle: (position: number) => `Déplacer la photo ${position}`,
     moveLeft: (position: number) => `Déplacer la photo ${position} vers la gauche`,
     moveRight: (position: number) => `Déplacer la photo ${position} vers la droite`,
     altText: 'Texte alternatif',
     altTextPlaceholder: 'Décris la photo',
-    reorderHint:
-      'Glisse une photo, ou touche les flèches, pour changer l’ordre. La première est la couverture.',
-    dropHere: 'Déposer ici',
+    reorderHint: 'Touche les flèches pour changer l’ordre. La première est la couverture.',
     moved: (position: number, newPosition: number, total: number) =>
       `Photo ${position} déplacée en position ${newPosition} sur ${total}`,
-    lifted: (position: number, total: number) =>
-      `Photo ${position} prise, sur ${total}. Utilise les flèches pour la déplacer.`,
-    dropped: (position: number, total: number) => `Photo ${position} déposée, sur ${total}`,
-    dragCancelled: 'Déplacement annulé',
-    dragInstructions:
-      'Pour déplacer une photo : appuie sur espace, utilise les flèches, puis espace pour la déposer.',
-    gripRole: 'photo à déplacer',
     sending: 'Envoi…',
     sendingGroup: 'Envoi en cours',
     progress: 'Envoi de la photo',
@@ -121,18 +111,11 @@ export const strings = {
     groupMoved: (position: number, newPosition: number, total: number) =>
       `Groupe ${position} déplacé en position ${newPosition} sur ${total}`,
     line: (position: number) => `Ingrédient ${position}`,
-    grip: (position: number) => `Déplacer l’ingrédient ${position}`,
-    gripRole: 'ingrédient à déplacer',
     remove: (position: number) => `Retirer l’ingrédient ${position}`,
     moveUp: (position: number) => `Monter l’ingrédient ${position}`,
     moveDown: (position: number) => `Descendre l’ingrédient ${position}`,
     lineMoved: (position: number, newPosition: number, total: number) =>
       `Ingrédient ${position} déplacé en position ${newPosition} sur ${total}`,
-    lineLifted: (position: number, total: number) =>
-      `Ingrédient ${position} pris, sur ${total}. Utilise les flèches pour le déplacer.`,
-    lineDropped: (position: number, total: number) => `Ingrédient ${position} déposé, sur ${total}`,
-    dragInstructions:
-      'Pour déplacer un ingrédient : appuie sur espace, utilise les flèches, puis espace pour le déposer.',
     ingredient: 'Ingrédient',
     ingredientPlaceholder: 'Ex. farine de blé',
     suggestions: 'Ingrédients existants',
@@ -157,8 +140,6 @@ export const strings = {
     textPlaceholder: 'Ex. Fais fondre le beurre à feu doux.',
     photosLabel: 'Photos de l’étape',
     add: 'Ajouter une étape',
-    grip: (position: number) => `Déplacer l’étape ${position}`,
-    gripRole: 'étape à déplacer',
     moveUp: (position: number) => `Monter l’étape ${position}`,
     moveDown: (position: number) => `Descendre l’étape ${position}`,
     remove: (position: number) => `Retirer l’étape ${position}`,
@@ -166,12 +147,6 @@ export const strings = {
     undo: 'Annuler',
     moved: (position: number, newPosition: number, total: number) =>
       `Étape ${position} déplacée en position ${newPosition} sur ${total}`,
-    lifted: (position: number, total: number) =>
-      `Étape ${position} prise, sur ${total}. Utilise les flèches pour la déplacer.`,
-    dropped: (position: number, total: number) => `Étape ${position} déposée, sur ${total}`,
-    dragInstructions:
-      'Pour déplacer une étape : appuie sur espace, utilise les flèches, puis espace pour la déposer.',
-    dropHint: 'Relâche la carte pour la déposer. Les numéros se mettent à jour en direct.',
   },
 
   // Said when a text field's writing mode is closed on a phone.

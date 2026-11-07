@@ -1,4 +1,3 @@
-import type { ComponentProps } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { RichTextEditor } from '../../../../components/RichTextEditor/RichTextEditor'
 import type { EditorValues } from '../../editorModel'
@@ -7,7 +6,6 @@ import { useSaving } from '../../savingContext'
 import { useWritingDone } from '../../useWritingDone'
 import { strings } from '../../strings'
 import { GestureButton } from '../GestureButton/GestureButton'
-import { GripButton } from '../GestureButton/GripButton'
 import { NumberBadge } from '../NumberBadge/NumberBadge'
 import { PhotoGallery } from '../PhotoGallery/PhotoGallery'
 
@@ -17,18 +15,16 @@ export interface StepCardProps {
   /** Where the step is, from 0: its number is this plus one, and follows it wherever it is moved. */
   index: number
   total: number
-  /** The grip of the drag, with what the drag needs on it. */
-  handle: ComponentProps<'button'>
   onMove: (direction: -1 | 1) => void
   onRemove: () => void
 }
 
 /**
- * One step of the preparation: its number (the rank, never typed), the grip and the buttons that move
- * or remove it, its rich text, and its photos, which are optional and may be several. The text is
- * required: an empty step says so in its field.
+ * One step of the preparation: its number (the rank, never typed), the buttons that move or remove it,
+ * its rich text, and its photos, which are optional and may be several. The text is required: an empty
+ * step says so in its field.
  */
-export function StepCard({ index, total, handle, onMove, onRemove }: StepCardProps) {
+export function StepCard({ index, total, onMove, onRemove }: StepCardProps) {
   const { control } = useFormContext<EditorValues>()
   const saving = useSaving()
   const writingDone = useWritingDone(strings.writingDone.step)
@@ -40,7 +36,6 @@ export function StepCard({ index, total, handle, onMove, onRemove }: StepCardPro
       className="flex flex-col gap-3.5 rounded-frame border-2 border-ink-900 bg-paper-50 px-3.5 pt-3 pb-3.5"
     >
       <div className="flex items-center gap-1.5">
-        <GripButton label={steps.grip(position)} {...handle} />
         <NumberBadge number={position} />
         <h3 className="ml-0.5 min-w-0 flex-1 font-title text-label font-bold whitespace-nowrap">
           {steps.step(position)}

@@ -60,7 +60,7 @@ export function IngredientsSection() {
           </div>
         ) : (
           fields.map((field, index) => (
-            <div key={field.id} data-sortable={field.id}>
+            <div key={field.id} data-item={field.id}>
               <IngredientGroup
                 index={index}
                 total={fields.length}

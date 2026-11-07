@@ -9,7 +9,7 @@ export type MoveDirection = 'back' | 'forward'
  * the item that moved (or on the other one when the item reached the end of the list and this one is
  * not usable any more), so that the same button can be pressed again.
  *
- * `ref` goes on the element that holds the items; each item has `data-sortable={id}` and its two
+ * `ref` goes on the element that holds the items; each item has `data-item={id}` and its two
  * buttons `data-move="back"` and `data-move="forward"`. `items` is the list as rendered.
  */
 export function useFollowedMove(items: readonly unknown[]): {
@@ -23,7 +23,7 @@ export function useFollowedMove(items: readonly unknown[]): {
     const target = followed.current
     followed.current = undefined
     if (target === undefined) return
-    const item = ref.current?.querySelector(`[data-sortable="${target.id}"]`)
+    const item = ref.current?.querySelector(`[data-item="${target.id}"]`)
     const button = (direction: MoveDirection) =>
       item?.querySelector<HTMLButtonElement>(`[data-move="${direction}"]`)
     const same = button(target.direction)
