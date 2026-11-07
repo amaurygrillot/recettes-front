@@ -113,6 +113,8 @@ export interface paths {
          * @description A page of recipe summaries, newest first unless `sortBy` says otherwise. **Every criterion is optional, and so is all of them**: an unfiltered call is the home page. Supplied criteria are combined with AND. A blank value is treated as absent.
          *
          *     A category filter reaches the category's subcategories too, at any depth, unless `includeSubcategories=false`. `categoryId` and `categoryName` are two spellings of one filter: supplying both unions their matches.
+         *
+         *     `ingredientIds` keeps the recipes that use **all** of the given ingredients, in any of their groups.
          */
         get: operations["searchRecipes"];
         put?: never;
@@ -437,6 +439,8 @@ export interface paths {
         /**
          * Upload one image
          * @description JPEG or PNG only, judged by the file's magic bytes and never by its name or declared type. The image is re-encoded, so what is stored is not what was sent. Upload first and independently, then reference the returned id when creating or updating a recipe. Requires the `USER` role.
+         *
+         *     Rate limited per account (`app.media.upload-limit` uploads per `app.media.upload-limit-window`, answering 429 with `Retry-After` beyond it). Admins are not limited.
          */
         post: operations["uploadMedia"];
         delete?: never;
@@ -672,6 +676,8 @@ export interface components {
             title?: string;
             /** @description The first cover picture, as the thumbnail. */
             coverMediaId?: string | null;
+            /** @description Every cover picture, in order, for a card that shows them as a small slider. Empty without a cover; otherwise it starts with `coverMediaId`. */
+            coverMediaIds?: string[];
             categories?: components["schemas"]["CategoryResponse"][];
             tags?: components["schemas"]["TagResponse"][];
             author?: components["schemas"]["RecipeAuthorResponse"];
@@ -1005,6 +1011,8 @@ export interface operations {
                 tagId?: string;
                 /** @description Matched against the tag's normalized name. */
                 tagName?: string;
+                /** @description Recipes that use **every** one of these ingredients. Repeat the parameter to give several (`ingredientIds=a&ingredientIds=b`). Blank values and duplicates are dropped, an id that matches no ingredient matches no recipe, and at most 20 are accepted. */
+                ingredientIds?: string[];
                 /** @description The column to order by, from a closed set. Defaults to `CREATED_AT`. Any other value is a 400. */
                 sortBy?: "CREATED_AT" | "UPDATED_AT" | "TITLE";
                 /** @description Defaults to `DESC`. */
