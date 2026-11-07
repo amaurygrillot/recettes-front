@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
 import { Combobox, type ComboboxOption } from './Combobox'
 
@@ -183,6 +183,68 @@ describe('Combobox', () => {
 
     expect(field()).toHaveValue('')
     expect(screen.queryByRole('button', { name: 'Effacer la recherche' })).not.toBeInTheDocument()
+  })
+
+  describe('with options that are a server answer to the text (onTyped)', () => {
+    const ANSWER: readonly ComboboxOption[] = [{ id: 'i-1', label: 'Pommes de terre' }]
+
+    function Remote({
+      searching = false,
+      answer = ANSWER,
+    }: {
+      searching?: boolean
+      answer?: readonly ComboboxOption[]
+    }) {
+      const [typedText, setTypedText] = useState('')
+      return (
+        <>
+          <output aria-label="Dernier texte">{typedText}</output>
+          <Combobox
+            label="Chercher un ingrédient"
+            placeholder="Chercher un ingrédient"
+            suggestionsLabel="Suggestions"
+            // What the server answered: not narrowed by the typing, it does not start with it here.
+            options={answer}
+            selectedIds={[]}
+            onToggle={vi.fn()}
+            onTyped={setTypedText}
+            searching={searching}
+            noResultText={(typed) => `Aucun ingrédient pour « ${typed} »`}
+          />
+        </>
+      )
+    }
+
+    it('tells what is typed, and shows the options as they are, without narrowing them', async () => {
+      const user = userEvent.setup()
+      render(<Remote />)
+
+      await user.type(screen.getByRole('combobox', { name: 'Chercher un ingrédient' }), 'xyz')
+
+      expect(screen.getByLabelText('Dernier texte')).toHaveTextContent('xyz')
+      expect(screen.getByRole('option', { name: 'Pommes de terre' })).toBeVisible()
+    })
+
+    it('says nothing is missing only when the answer is in', async () => {
+      const user = userEvent.setup()
+      const { rerender } = render(<Remote searching answer={[]} />)
+
+      await user.type(screen.getByRole('combobox', { name: 'Chercher un ingrédient' }), 'xyz')
+      expect(screen.queryByText(/^Aucun ingrédient pour/)).not.toBeInTheDocument()
+
+      rerender(<Remote searching={false} answer={[]} />)
+      expect(screen.getByText('Aucun ingrédient pour « xyz »')).toBeVisible()
+    })
+
+    it('tells the field was emptied when a suggestion is chosen', async () => {
+      const user = userEvent.setup()
+      render(<Remote />)
+      await user.type(screen.getByRole('combobox', { name: 'Chercher un ingrédient' }), 'po')
+
+      await user.click(screen.getByRole('option', { name: 'Pommes de terre' }))
+
+      expect(screen.getByLabelText('Dernier texte')).toHaveTextContent('')
+    })
   })
 
   it('has no accessibility violation, closed, open and with no result', async () => {

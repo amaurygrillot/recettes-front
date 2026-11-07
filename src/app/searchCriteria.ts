@@ -6,10 +6,13 @@ export const DEFAULT_SORT: SortKey = 'recent'
 /** The most the API takes for a title search (`@Size(max = 200)`), and so the most the field takes. */
 export const MAX_QUERY_LENGTH = 200
 
+/** The most ingredients the API takes in one search (`ingredientIds`, `@Size(max = 20)`). */
+export const MAX_INGREDIENT_FILTERS = 20
+
 /**
  * Everything a search is made of. The URL is its home (`/rechercher?q=tarte&categorie=…`): a search
  * can be linked, reloaded, and walked back through. The API takes one category and one tag, and
- * has no ingredient criterion, so neither does this.
+ * any number of ingredients (up to twenty) of which a recipe must use every one.
  */
 export interface SearchCriteria {
   /** Matched against the titles. */
@@ -18,6 +21,8 @@ export interface SearchCriteria {
   /** Only the recipes filed under the category itself, not beneath it. */
   exactCategory: boolean
   tagId: string | undefined
+  /** The ingredients a recipe has to use, all of them, in the order they were chosen. Ids: the names are looked up. */
+  ingredientIds: readonly string[]
   /** Matched against the authors' usernames. */
   author: string
   sort: SortKey
@@ -28,6 +33,7 @@ export const EMPTY_CRITERIA: SearchCriteria = {
   categoryId: undefined,
   exactCategory: false,
   tagId: undefined,
+  ingredientIds: [],
   author: '',
   sort: DEFAULT_SORT,
 }
@@ -37,6 +43,7 @@ const PARAMETERS = {
   category: 'categorie',
   exactCategory: 'exacte',
   tag: 'tag',
+  ingredient: 'ingredient',
   author: 'auteur',
   sort: 'tri',
 } as const
@@ -57,6 +64,12 @@ function nonEmpty(value: string | null): string | undefined {
   return value === null || value === '' ? undefined : value
 }
 
+/** Each ingredient once, in the order of the address, without the empty ones, and no more than the API takes. */
+function ingredientIdsFrom(params: URLSearchParams): string[] {
+  const ids = params.getAll(PARAMETERS.ingredient).filter((id) => id !== '')
+  return [...new Set(ids)].slice(0, MAX_INGREDIENT_FILTERS)
+}
+
 /** The criteria a URL asks for. What it does not say, or says wrongly, is the default. */
 export function criteriaFromParams(params: URLSearchParams): SearchCriteria {
   const categoryId = nonEmpty(params.get(PARAMETERS.category))
@@ -66,6 +79,7 @@ export function criteriaFromParams(params: URLSearchParams): SearchCriteria {
     // « Only this category » means nothing without a category.
     exactCategory: categoryId !== undefined && params.get(PARAMETERS.exactCategory) === '1',
     tagId: nonEmpty(params.get(PARAMETERS.tag)),
+    ingredientIds: ingredientIdsFrom(params),
     author: params.get(PARAMETERS.author) ?? '',
     sort: SORT_BY_PARAMETER.get(params.get(PARAMETERS.sort) ?? '') ?? DEFAULT_SORT,
   }
@@ -80,6 +94,7 @@ export function criteriaToParams(criteria: SearchCriteria): URLSearchParams {
     if (criteria.exactCategory) params.set(PARAMETERS.exactCategory, '1')
   }
   if (criteria.tagId !== undefined) params.set(PARAMETERS.tag, criteria.tagId)
+  for (const id of criteria.ingredientIds) params.append(PARAMETERS.ingredient, id)
   if (criteria.author !== '') params.set(PARAMETERS.author, criteria.author)
   const sortParameter = PARAMETER_BY_SORT.get(criteria.sort)
   if (criteria.sort !== DEFAULT_SORT && sortParameter !== undefined) {
@@ -88,11 +103,12 @@ export function criteriaToParams(criteria: SearchCriteria): URLSearchParams {
   return params
 }
 
-/** How many filters are chosen: what the « Filtres » button counts. The title text is not one. */
+/** How many filters are chosen (each ingredient is one): what the « Filtres » button counts. The title text is not one. */
 export function activeFilterCount(criteria: SearchCriteria): number {
   return (
     Number(criteria.categoryId !== undefined) +
     Number(criteria.tagId !== undefined) +
+    criteria.ingredientIds.length +
     Number(criteria.author.trim() !== '')
   )
 }

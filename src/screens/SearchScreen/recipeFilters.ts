@@ -26,6 +26,8 @@ export function toRecipeFilters(criteria: SearchCriteria, scope: SearchScope): R
     ...(criteria.categoryId !== undefined &&
       criteria.exactCategory && { includeSubcategories: false }),
     ...(criteria.tagId !== undefined && { tagId: criteria.tagId }),
+    // The API keeps the recipes that use every one of them.
+    ...(criteria.ingredientIds.length > 0 && { ingredientIds: [...criteria.ingredientIds] }),
     ...(scope.kind === 'mine' && { authorId: scope.authorId }),
     ...(scope.kind === 'all' && author !== '' && { authorName: author }),
   }

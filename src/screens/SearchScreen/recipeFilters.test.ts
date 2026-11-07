@@ -28,6 +28,7 @@ describe('toRecipeFilters', () => {
       categoryId: 'c-1',
       exactCategory: false,
       tagId: 't-1',
+      ingredientIds: ['i-1', 'i-2'],
       author: ' Odile ',
       sort: 'recent',
     }
@@ -38,8 +39,17 @@ describe('toRecipeFilters', () => {
       title: 'tarte',
       categoryId: 'c-1',
       tagId: 't-1',
+      ingredientIds: ['i-1', 'i-2'],
       authorName: 'Odile',
     })
+  })
+
+  it('asks for the recipes that use every ingredient, and for nothing when there is none', () => {
+    expect(toRecipeFilters({ ...EMPTY_CRITERIA, ingredientIds: ['i-1'] }, ALL)).toHaveProperty(
+      'ingredientIds',
+      ['i-1'],
+    )
+    expect(toRecipeFilters(EMPTY_CRITERIA, ALL)).not.toHaveProperty('ingredientIds')
   })
 
   it('leaves out a blank text or author rather than filtering on nothing', () => {

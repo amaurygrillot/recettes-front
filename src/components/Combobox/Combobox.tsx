@@ -22,6 +22,14 @@ export interface ComboboxProps {
   noResultText: (typed: string) => string
   /** Five by default, as designed. */
   maxSuggestions?: number
+  /**
+   * For options that are a server's answer to what is typed rather than a list known in advance: told
+   * on every change of the text, the owner asks and hands the answer in `options`, which are then shown
+   * as they are instead of being narrowed here.
+   */
+  onTyped?: (typed: string) => void
+  /** With `onTyped`: the answer is not in yet, so "nothing found" is not said. */
+  searching?: boolean
 }
 
 /** The letters typed are bold in each suggestion, as designed. */
@@ -52,9 +60,18 @@ export function Combobox({
   onToggle,
   noResultText,
   maxSuggestions = 5,
+  onTyped,
+  searching = false,
 }: ComboboxProps) {
   const inputId = useId()
-  const combobox = useCombobox({ options, selectedIds, onToggle, maxSuggestions })
+  const combobox = useCombobox({
+    options,
+    selectedIds,
+    onToggle,
+    maxSuggestions,
+    onTyped,
+    searching,
+  })
   const optionId = (index: number) => `${combobox.listboxId}-${index}`
   const activeId = combobox.activeIndex >= 0 ? optionId(combobox.activeIndex) : undefined
   const message = combobox.hasNoResult ? noResultText(combobox.typed.trim()) : combobox.announcement

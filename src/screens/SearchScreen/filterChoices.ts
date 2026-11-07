@@ -4,13 +4,14 @@ import { strings } from './strings'
 /** The part of a search that the « Filtres » choose: not the title text, not the order. */
 export type FilterChoices = Pick<
   SearchCriteria,
-  'categoryId' | 'exactCategory' | 'tagId' | 'author'
+  'categoryId' | 'exactCategory' | 'tagId' | 'ingredientIds' | 'author'
 >
 
 export const NO_FILTERS: FilterChoices = {
   categoryId: undefined,
   exactCategory: false,
   tagId: undefined,
+  ingredientIds: [],
   author: '',
 }
 
@@ -18,17 +19,19 @@ export function filterChoicesOf({
   categoryId,
   exactCategory,
   tagId,
+  ingredientIds,
   author,
 }: SearchCriteria): FilterChoices {
-  return { categoryId, exactCategory, tagId, author }
+  return { categoryId, exactCategory, tagId, ingredientIds, author }
 }
 
-export type SectionKey = 'category' | 'tags' | 'author'
+export type SectionKey = 'category' | 'tags' | 'ingredients' | 'author'
 
 /** Where each section of the filters is, for the pills that jump to them. The overlay's panel and a desktop's column can both be in the page, but the page behind a modal overlay is inert. */
 export const SECTION_IDS: Record<SectionKey, string> = {
   category: 'filter-section-category',
   tags: 'filter-section-tags',
+  ingredients: 'filter-section-ingredients',
   author: 'filter-section-author',
 }
 
@@ -54,6 +57,12 @@ export function filterSectionsOf(choices: FilterChoices, showAuthor: boolean): F
       id: SECTION_IDS.tags,
       label: strings.filters.tags.legend,
       count: Number(choices.tagId !== undefined),
+    },
+    {
+      key: 'ingredients',
+      id: SECTION_IDS.ingredients,
+      label: strings.filters.ingredients.legend,
+      count: choices.ingredientIds.length,
     },
   ]
   if (showAuthor) {

@@ -1,6 +1,6 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { API_BASE_URL } from '../../../../api/apiConfig'
 import { EMPTY_CRITERIA, type SearchCriteria } from '../../../../app/searchCriteria'
@@ -12,7 +12,7 @@ import { server } from '../../../../test/server'
 import { SearchOverlay, type SearchOverlayProps } from './SearchOverlay'
 
 function renderOverlay(props: Partial<SearchOverlayProps> = {}) {
-  serveBackend()
+  const backend = serveBackend()
   const onSearch = vi.fn<(criteria: SearchCriteria) => void>()
   const onClose = vi.fn()
   const view = renderRoutes(
@@ -35,7 +35,7 @@ function renderOverlay(props: Partial<SearchOverlayProps> = {}) {
     ],
     '/',
   )
-  return { onSearch, onClose, ...view }
+  return { onSearch, onClose, backend, ...view }
 }
 
 const dialog = () => screen.findByRole('dialog', { name: 'Rechercher' })
@@ -325,7 +325,7 @@ describe('SearchOverlay', () => {
         within(sections)
           .getAllByRole('button')
           .map((pill) => pill.getAttribute('aria-label') ?? pill.textContent),
-      ).toEqual(['Catégorie, 1 choix actif', 'Tags', 'Auteur'])
+      ).toEqual(['Catégorie, 1 choix actif', 'Tags', 'Ingrédients', 'Auteur'])
       await user.click(within(sections).getByRole('button', { name: 'Tags' }))
 
       expect(within(sections).getByRole('button', { name: 'Tags' })).toHaveAttribute(
@@ -335,14 +335,17 @@ describe('SearchOverlay', () => {
       expect(within(sheet).getByRole('group', { name: 'Tags' })).toHaveFocus()
     })
 
-    it('offers no pill for a section that is not there while the filters are not loaded', async () => {
+    it('offers no pill for the category and the tags while the filters are not loaded, only for what does not wait for them', async () => {
       renderOverlay()
       server.use(http.get(`${API_BASE_URL}/tags`, () => HttpResponse.error()))
       const sheet = await dialog()
 
+      const sections = within(sheet).getByRole('navigation', { name: 'Sections des filtres' })
       expect(
-        within(sheet).queryByRole('navigation', { name: 'Sections des filtres' }),
-      ).not.toBeInTheDocument()
+        within(sections)
+          .getAllByRole('button')
+          .map((pill) => pill.textContent),
+      ).toEqual(['Ingrédients', 'Auteur'])
       expect(await within(sheet).findByText('Les filtres ne se sont pas chargés.')).toBeVisible()
     })
 
@@ -373,6 +376,199 @@ describe('SearchOverlay', () => {
       await user.click(within(sheet).getByRole('button', { name: 'Réessayer' }))
 
       expect(await within(sheet).findByRole('button', { name: 'Four' })).toBeVisible()
+    })
+  })
+
+  describe('the ingredients', () => {
+    const ingredientField = (sheet: HTMLElement) =>
+      within(sheet).getByRole('combobox', { name: 'Chercher un ingrédient' })
+    const chip = (sheet: HTMLElement, name: string) =>
+      within(sheet).getByRole('button', { name: `Retirer l’ingrédient ${name}` })
+
+    it('say that none is chosen, and that every recipe is kept', async () => {
+      renderOverlay()
+      const sheet = await dialog()
+
+      expect(
+        within(sheet).getByText('Aucun ingrédient choisi : toutes les recettes sont retenues.'),
+      ).toBeVisible()
+      expect(within(sheet).queryByRole('list', { name: 'Ingrédients choisis' })).toBeNull()
+    })
+
+    it('are searched as one types, among those that start like the text, and chosen as a chip', async () => {
+      const user = userEvent.setup()
+      renderOverlay()
+      const sheet = await dialog()
+
+      await user.type(ingredientField(sheet), 'pom')
+      const suggestions = await within(sheet).findAllByRole('option')
+      expect(suggestions.map((option) => option.textContent)).toEqual([
+        'Pommes',
+        'Pommes de terre',
+        'Pomelo',
+      ])
+      await user.click(within(sheet).getByRole('option', { name: 'Pommes' }))
+
+      expect(chip(sheet, 'Pommes')).toBeVisible()
+      expect(within(sheet).getByText('Recettes avec tous ces ingrédients.')).toBeVisible()
+      expect(within(sheet).queryByText(/^Aucun ingrédient choisi/)).toBeNull()
+      expect(ingredientField(sheet)).toHaveValue('')
+      expect(within(sheet).getByText('Pommes ajouté')).toBeVisible()
+      expect(searchButton()).toBeEnabled()
+    })
+
+    it('asks the back end only once the typing has paused, for the text typed', async () => {
+      const user = userEvent.setup()
+      const { backend } = renderOverlay()
+      const sheet = await dialog()
+
+      await user.type(ingredientField(sheet), 'pomm')
+      await within(sheet).findAllByRole('option')
+
+      expect(backend.ingredientQueries.map((query) => query.get('namePrefix'))).not.toContain('p')
+      expect(backend.ingredientQueries.at(-1)?.get('namePrefix')).toBe('pomm')
+    })
+
+    it('are all required, in the order they were chosen, by the search', async () => {
+      const user = userEvent.setup()
+      const { onSearch } = renderOverlay()
+      const sheet = await dialog()
+
+      await user.type(ingredientField(sheet), 'far')
+      await user.click(await within(sheet).findByRole('option', { name: 'Farine' }))
+      await user.type(ingredientField(sheet), 'pommes')
+      await user.click(await within(sheet).findByRole('option', { name: 'Pommes' }))
+      await user.click(searchButton())
+
+      expect(onSearch).toHaveBeenCalledExactlyOnceWith({
+        ...EMPTY_CRITERIA,
+        ingredientIds: ['i-farine', 'i-pommes'],
+      })
+    })
+
+    it('start from the ingredients of the search the overlay is given, whose names are looked up', async () => {
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, ingredientIds: ['i-pommes', 'i-farine'] } })
+      const sheet = await dialog()
+
+      expect(
+        await within(sheet).findByRole('button', { name: 'Retirer l’ingrédient Pommes' }),
+      ).toBeVisible()
+      expect(chip(sheet, 'Farine')).toBeVisible()
+      expect(
+        within(within(sheet).getByRole('navigation', { name: 'Sections des filtres' })).getByRole(
+          'button',
+          { name: 'Ingrédients, 2 choix actifs' },
+        ),
+      ).toBeVisible()
+    })
+
+    it('show no chip for an ingredient that does not exist any more, but are still asked for', async () => {
+      const user = userEvent.setup()
+      const { onSearch } = renderOverlay({
+        initial: { ...EMPTY_CRITERIA, ingredientIds: ['i-disparu', 'i-farine'] },
+      })
+      const sheet = await dialog()
+
+      await within(sheet).findByRole('button', { name: 'Retirer l’ingrédient Farine' })
+      expect(within(sheet).getAllByRole('button', { name: /^Retirer l’ingrédient/ })).toHaveLength(
+        1,
+      )
+      await user.click(searchButton())
+
+      expect(onSearch).toHaveBeenCalledWith(
+        expect.objectContaining({ ingredientIds: ['i-disparu', 'i-farine'] }),
+      )
+    })
+
+    it('are dropped one by one with their chip, and all by « Réinitialiser »', async () => {
+      const user = userEvent.setup()
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, ingredientIds: ['i-pommes', 'i-farine'] } })
+      const sheet = await dialog()
+
+      await user.click(
+        await within(sheet).findByRole('button', { name: 'Retirer l’ingrédient Pommes' }),
+      )
+      expect(
+        within(sheet).queryByRole('button', { name: 'Retirer l’ingrédient Pommes' }),
+      ).toBeNull()
+      expect(chip(sheet, 'Farine')).toBeVisible()
+
+      await user.click(within(sheet).getByRole('button', { name: 'Réinitialiser' }))
+      expect(within(sheet).queryByRole('button', { name: /^Retirer l’ingrédient/ })).toBeNull()
+      expect(
+        within(sheet).getByText('Aucun ingrédient choisi : toutes les recettes sont retenues.'),
+      ).toBeVisible()
+    })
+
+    it('are dropped by choosing a suggestion that is already chosen', async () => {
+      const user = userEvent.setup()
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, ingredientIds: ['i-pommes'] } })
+      const sheet = await dialog()
+      await within(sheet).findByRole('button', { name: 'Retirer l’ingrédient Pommes' })
+
+      await user.type(ingredientField(sheet), 'pommes')
+      const chosen = await within(sheet).findByRole('option', { name: 'Pommes' })
+      expect(chosen).toHaveAttribute('aria-selected', 'true')
+      await user.click(chosen)
+
+      expect(
+        within(sheet).queryByRole('button', { name: 'Retirer l’ingrédient Pommes' }),
+      ).toBeNull()
+    })
+
+    it('say that none matches what is typed, once the back end has answered', async () => {
+      const user = userEvent.setup()
+      renderOverlay()
+      const sheet = await dialog()
+
+      await user.type(ingredientField(sheet), 'zzz')
+
+      expect(await within(sheet).findByText('Aucun ingrédient pour « zzz »')).toBeVisible()
+    })
+
+    it('do not say that none matches while the answer is still on its way', async () => {
+      const user = userEvent.setup()
+      renderOverlay()
+      server.use(
+        http.get(`${API_BASE_URL}/ingredients`, async () => {
+          await delay(150)
+          return HttpResponse.json({ content: [] })
+        }),
+      )
+      const sheet = await dialog()
+
+      await user.type(ingredientField(sheet), 'z')
+
+      expect(within(sheet).queryByText(/^Aucun ingrédient pour/)).toBeNull()
+      expect(await within(sheet).findByText('Aucun ingrédient pour « z »')).toBeVisible()
+    })
+
+    it('say that the search failed rather than that nothing matches, and the word search still works', async () => {
+      const user = userEvent.setup()
+      const { onSearch } = renderOverlay()
+      server.use(http.get(`${API_BASE_URL}/ingredients`, () => HttpResponse.error()))
+      const sheet = await dialog()
+
+      await user.type(ingredientField(sheet), 'pom')
+
+      expect(
+        await within(sheet).findByText(
+          'La recherche d’ingrédients ne marche pas pour le moment. Réessaie dans un instant.',
+        ),
+      ).toBeVisible()
+      expect(within(sheet).queryByText(/^Aucun ingrédient pour/)).toBeNull()
+      await user.type(field(), 'tarte')
+      await user.click(searchButton())
+      expect(onSearch).toHaveBeenCalledWith(expect.objectContaining({ query: 'tarte' }))
+    })
+
+    it('stop at twenty, the most the API takes, and say so instead of offering the field', async () => {
+      const ids = Array.from({ length: 20 }, (_, index) => `i-${index}`)
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, ingredientIds: ids } })
+      const sheet = await dialog()
+
+      expect(await within(sheet).findByText('20 ingrédients au maximum.')).toBeVisible()
+      expect(within(sheet).queryByRole('combobox', { name: 'Chercher un ingrédient' })).toBeNull()
     })
   })
 
