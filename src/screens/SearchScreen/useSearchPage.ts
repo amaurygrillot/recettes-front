@@ -5,6 +5,7 @@ import { useSearchCriteria } from '../../app/useSearchCriteria'
 import { activeFiltersOf } from './activeFilters'
 import type { FilterChoices } from './filterChoices'
 import { toRecipeFilters, type SearchScope } from './recipeFilters'
+import { useDropUnknownTags } from './useDropUnknownTags'
 import { useFilterOptions } from './useFilterOptions'
 
 /**
@@ -26,6 +27,7 @@ export function useSearchPage(scope: SearchScope) {
   const changeFilters = (changes: Partial<FilterChoices>) => {
     update(changes)
   }
+  useDropUnknownTags(requested.tagIds, options, changeFilters)
 
   return {
     criteria,

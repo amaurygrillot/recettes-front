@@ -3,15 +3,13 @@ import { Button } from '../../../../components/Button/Button'
 import { Combobox } from '../../../../components/Combobox/Combobox'
 import { ErrorBanner } from '../../../../components/ErrorBanner/ErrorBanner'
 import { findCategory, type CategoryNode } from '../../../../app/categoryNodes'
-import { MAX_TAG_FILTERS } from '../../../../app/searchCriteria'
-import { logger } from '../../../../lib/logger'
 import { SECTION_IDS, type FilterChoices } from '../../filterChoices'
 import { strings } from '../../strings'
 import type { FilterOptions } from '../../useFilterOptions'
 import { AuthorField } from './AuthorField'
 import { CategoryTree } from './CategoryTree'
 import { IngredientFilter } from './IngredientFilter'
-import { TagChips } from './TagChips'
+import { TagFilter } from './TagFilter'
 
 const { filters } = strings
 
@@ -115,37 +113,17 @@ export function FiltersPanel({
     </Section>
   )
 
-  const tagsFull = choices.tagIds.length >= MAX_TAG_FILTERS
-
-  /** Chooses the tag, or drops it if it is chosen; at the limit nothing more is chosen. */
-  function toggleTag(tagId: string): void {
-    if (choices.tagIds.includes(tagId)) {
-      onChange({ tagIds: choices.tagIds.filter((chosen) => chosen !== tagId) })
-      return
-    }
-    if (tagsFull) return
-    logger.debug('A tag was chosen as a filter', { count: choices.tagIds.length + 1 })
-    onChange({ tagIds: [...choices.tagIds, tagId] })
-  }
-
   const tagsSection = options.status === 'ready' && (
     <Section id={SECTION_IDS.tags} legend={filters.tags.legend}>
-      {tagsFull ? (
-        <p className="text-body text-ink-800">{filters.tags.limit(MAX_TAG_FILTERS)}</p>
-      ) : (
-        <Combobox
-          label={filters.tags.searchLabel}
-          placeholder={dense ? filters.searchShort : filters.tags.searchLabel}
-          suggestionsLabel={filters.tags.suggestions}
-          options={options.tagOptions}
-          selectedIds={choices.tagIds}
-          onToggle={(option) => {
-            toggleTag(option.id)
-          }}
-          noResultText={filters.tags.noResult}
-        />
-      )}
-      <TagChips tags={options.tags} tagIds={choices.tagIds} full={tagsFull} onToggle={toggleTag} />
+      <TagFilter
+        tags={options.tags}
+        tagOptions={options.tagOptions}
+        tagIds={choices.tagIds}
+        onChange={(tagIds) => {
+          onChange({ tagIds })
+        }}
+        dense={dense}
+      />
     </Section>
   )
 

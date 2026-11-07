@@ -311,6 +311,20 @@ describe('SearchOverlay', () => {
       })
     })
 
+    it('says what the tags mean for the list: none chosen keeps every recipe, chosen ones are all required', async () => {
+      const user = userEvent.setup()
+      renderOverlay()
+      const sheet = await dialog()
+
+      expect(
+        await within(sheet).findByText('Aucun tag choisi : toutes les recettes sont retenues.'),
+      ).toBeVisible()
+      await user.click(within(sheet).getByRole('button', { name: 'Fruits' }))
+
+      expect(within(sheet).getByText('Recettes avec tous ces tags.')).toBeVisible()
+      expect(within(sheet).queryByText(/Aucun tag choisi/)).toBeNull()
+    })
+
     it('chooses several tags through the search field too', async () => {
       const user = userEvent.setup()
       const { onSearch } = renderOverlay()

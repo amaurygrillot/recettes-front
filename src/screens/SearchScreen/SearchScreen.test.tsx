@@ -1,8 +1,9 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { delay, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { Outlet } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { API_BASE_URL } from '../../api/apiConfig'
 import { sessionStore } from '../../api/sessionStore'
 import { SearchOverlayContext } from '../../app/useSearchOverlay'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
@@ -11,6 +12,7 @@ import { page, serveBackend } from '../../test/fakeRecipeBackend'
 import { installMatchMedia, removeMatchMedia } from '../../test/matchMedia'
 import { problemResponse } from '../../test/problem'
 import { renderRoutes } from '../../test/renderRoutes'
+import { server } from '../../test/server'
 import { MyRecipesScreen } from './MyRecipesScreen'
 import { SearchScreen } from './SearchScreen'
 
@@ -293,16 +295,39 @@ describe('SearchScreen on a phone', () => {
       })
     })
 
-    it('show no chip for a tag that does not exist, but still filter', async () => {
+    it('lose a tag that does not exist once the tags are known: it leaves the address and the request', async () => {
       const backend = serveBackend()
-      renderSearch('/rechercher?tag=t-fruits&tag=t-disparu')
+      const { router } = renderSearch('/rechercher?tag=t-fruits&tag=t-disparu')
 
       expect(await screen.findByRole('button', { name: 'Retirer le filtre Fruits' })).toBeVisible()
 
-      expect(screen.getAllByRole('button', { name: /Retirer le filtre/ })).toHaveLength(1)
       await waitFor(() => {
-        expect(backend.lastTagIds()).toEqual(['t-fruits', 't-disparu'])
+        expect(router.state.location.search).toBe('?tag=t-fruits')
       })
+      await waitFor(() => {
+        expect(backend.lastTagIds()).toEqual(['t-fruits'])
+      })
+      expect(screen.getAllByRole('button', { name: /Retirer le filtre/ })).toHaveLength(1)
+    })
+
+    it('keeps the tags of the address when the tags could not be loaded', async () => {
+      const backend = serveBackend()
+      let tagRequests = 0
+      server.use(
+        http.get(`${API_BASE_URL}/tags`, () => {
+          tagRequests += 1
+          return HttpResponse.error()
+        }),
+      )
+      const { router } = renderSearch('/rechercher?tag=t-fruits&tag=t-disparu')
+
+      await screen.findByRole('link', { name: 'Recette 1' })
+      await waitFor(() => {
+        expect(tagRequests).toBeGreaterThan(0)
+      })
+
+      expect(router.state.location.search).toBe('?tag=t-fruits&tag=t-disparu')
+      expect(backend.lastTagIds()).toEqual(['t-fruits', 't-disparu'])
     })
 
     it('show no chip for a category that does not exist, but still filter', async () => {
