@@ -153,6 +153,7 @@ What the first extraction did not spell out, read from the `Boutons-champs`, `Re
 - **Create link** (`CreateLink`): the yellow « + », 64 px tall, round alone or extended with « Nouvelle recette ».
 - **Skeleton**: `skeleton` color pulsing between opacity 1 and .55 over 1.4 s (no animation under `prefers-reduced-motion`), announced as
   « Chargement… » by one status region, shown only after 300 ms, at most 6 per list.
+- **Party colours** (`party-pink` #F4727F, `-teal` #4FC7A4, `-blue` #62B6F0, `-yellow` #FFD43F, `-orange` #FF9B45, `-violet` #B596F0): only the striped hat and the confetti of the celebrating mascot.
 - **Empty state**: dashed ink-500 frame, radius 24, 240 px mascot (R4; it was a 176 px ink-line bowl), state title, 18 px text, one 64 px button.
   **Compact size** (`size="compact"`, drawn on `Accueil-etats` for a block among others): padding 20 / 18, gap 12, 160 px mascot (R4; it was a 140 px bowl),
   title 26 / 32; the error block likewise has a 64 px badge (icon 32) instead of 80 px.

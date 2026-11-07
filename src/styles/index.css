@@ -55,6 +55,13 @@
   --color-disabled-text: #7d6d58;
   --color-disabled-border: #b8a98f;
   --color-skeleton: #efe3c6;
+  /* The party colours of Mijotine's hat and confetti (R4): used nowhere else. */
+  --color-party-pink: #f4727f;
+  --color-party-teal: #4fc7a4;
+  --color-party-blue: #62b6f0;
+  --color-party-yellow: #ffd43f;
+  --color-party-orange: #ff9b45;
+  --color-party-violet: #b596f0;
 
   --font-title: 'Fraunces Variable', Georgia, serif;
   --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;

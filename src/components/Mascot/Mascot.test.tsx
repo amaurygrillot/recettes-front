@@ -14,6 +14,22 @@ const MOODS: readonly MascotMood[] = [
 ]
 
 describe('Mascot', () => {
+  it('gives each party hat its own clip path, so several mascots in a page never share an id', () => {
+    const { container } = render(
+      <>
+        <Mascot mood="celebrating" size="medium" />
+        <Mascot mood="celebrating" size="small" />
+      </>,
+    )
+
+    const ids = [...container.querySelectorAll('clipPath')].map((clip) => clip.id)
+    expect(ids).toHaveLength(2)
+    expect(new Set(ids).size).toBe(2)
+    ids.forEach((id) => {
+      expect(container.querySelector(`[clip-path="url(#${id})"]`)).not.toBeNull()
+    })
+  })
+
   it('is decorative: no image for assistive technology, whatever the mood', () => {
     const { container } = render(
       <>

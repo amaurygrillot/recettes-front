@@ -390,7 +390,7 @@ The logo's cocotte, grown, with a name (Mijotine), seven moods and four sizes, p
 - **`Mascot`** (`src/components/Mascot`): `mood` is `happy` (contente) · `dejected` (dépitée) · `smitten` (coup de cœur) · `surprised` · `lost`
   (perdue) · `asleep` (endormie) · `celebrating` (en fête); `size` is `xl` (240 px wide: empty states and error pages) · `large` (160: cards
   without a photo) · `medium` (96: messages and dialogs) · `small` (64: stamp, avatar). The seven drawings are the board's symbols (`ms-*`),
-  copied as they are into `mascotShapes.tsx` with their colours as `--logo-*` variables (plus `--logo-herb` for the party hat). It is
+  copied as they are into `mascotShapes.tsx` with their colours as `--logo-*` variables (plus `--logo-herb` and the six `--logo-party-*`, from the `party-*` tokens, for the striped party hat and the confetti). **The faces were redrawn on the board after the first build** (a wider mouth with its tongue, a new party hat, other details), so `mascotShapes.tsx` was regenerated from the symbols as they are now; the hat's stripes are clipped by a clip path whose id comes from the `Mascot` that draws it (`useId`). It is
   **decorative** (`aria-hidden`): every place that shows it also says what it means in words, and the mood is never the only signal.
 - **Small sizes**: the board's prose says the steam and the accessories disappear at 64 px and under, but its own drawings at 64 and 40 px are
   the same symbols simply scaled. No smaller drawings exist, so the same drawing is scaled (the most conservative reading: nothing is invented).
