@@ -36,15 +36,16 @@ export function activeFiltersOf(
     }
   }
 
-  if (criteria.tagId !== undefined && options.status === 'ready') {
-    const name = options.tags.find((tag) => tag.id === criteria.tagId)?.name
-    if (name !== undefined) {
+  if (options.status === 'ready') {
+    for (const id of criteria.tagIds) {
+      const name = options.tags.find((tag) => tag.id === id)?.name
+      if (name === undefined) continue
       chips.push({
-        key: 'tag',
+        key: `tag-${id}`,
         label: name,
         removeLabel: active.removeFilter(name),
         onRemove: () => {
-          change({ tagId: undefined })
+          change({ tagIds: criteria.tagIds.filter((chosen) => chosen !== id) })
         },
       })
     }

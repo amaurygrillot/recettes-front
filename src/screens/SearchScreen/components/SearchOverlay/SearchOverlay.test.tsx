@@ -3,7 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { delay, http, HttpResponse } from 'msw'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { API_BASE_URL } from '../../../../api/apiConfig'
-import { EMPTY_CRITERIA, type SearchCriteria } from '../../../../app/searchCriteria'
+import {
+  EMPTY_CRITERIA,
+  MAX_TAG_FILTERS,
+  type SearchCriteria,
+} from '../../../../app/searchCriteria'
 import { serveBackend } from '../../../../test/fakeRecipeBackend'
 import { expectNoAccessibilityViolations } from '../../../../test/expectNoAccessibilityViolations'
 import { installMatchMedia, removeMatchMedia } from '../../../../test/matchMedia'
@@ -68,7 +72,7 @@ describe('SearchOverlay', () => {
           ...EMPTY_CRITERIA,
           query: 'tarte',
           categoryId: 'plats',
-          tagId: 't-four',
+          tagIds: ['t-four'],
           author: 'Odile',
         },
       })
@@ -178,7 +182,7 @@ describe('SearchOverlay', () => {
     it('empties the draft, the word and the filters, and leaves the overlay open', async () => {
       const user = userEvent.setup()
       const { onSearch, onClose } = renderOverlay({
-        initial: { ...EMPTY_CRITERIA, query: 'tarte', categoryId: 'plats', tagId: 't-four' },
+        initial: { ...EMPTY_CRITERIA, query: 'tarte', categoryId: 'plats', tagIds: ['t-four'] },
       })
       const sheet = await dialog()
       expect(await within(sheet).findByRole('radio', { name: 'Plats' })).toBeChecked()
@@ -248,7 +252,7 @@ describe('SearchOverlay', () => {
         ...EMPTY_CRITERIA,
         categoryId: 'desserts',
         exactCategory: true,
-        tagId: 't-fruits',
+        tagIds: ['t-fruits'],
         author: 'Odile',
       })
     })
@@ -266,7 +270,7 @@ describe('SearchOverlay', () => {
 
     it('shows a tag already chosen first, and drops it with a touch', async () => {
       const user = userEvent.setup()
-      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagId: 't-rapide' } })
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: ['t-rapide'] } })
       const sheet = await dialog()
 
       await within(sheet).findByRole('button', { name: 'Rapide' })
@@ -281,6 +285,83 @@ describe('SearchOverlay', () => {
         'aria-pressed',
         'false',
       )
+    })
+
+    it('chooses as many tags as wanted, each kept when another is chosen or dropped', async () => {
+      const user = userEvent.setup()
+      const { onSearch } = renderOverlay()
+      const sheet = await dialog()
+
+      await user.click(await within(sheet).findByRole('button', { name: 'Fruits' }))
+      await user.click(within(sheet).getByRole('button', { name: 'Four' }))
+      await user.click(within(sheet).getByRole('button', { name: 'Rapide' }))
+      await user.click(within(sheet).getByRole('button', { name: 'Four' }))
+
+      for (const [name, pressed] of [
+        ['Fruits', 'true'],
+        ['Four', 'false'],
+        ['Rapide', 'true'],
+      ] as const) {
+        expect(within(sheet).getByRole('button', { name })).toHaveAttribute('aria-pressed', pressed)
+      }
+      await user.click(searchButton())
+      expect(onSearch).toHaveBeenCalledExactlyOnceWith({
+        ...EMPTY_CRITERIA,
+        tagIds: ['t-fruits', 't-rapide'],
+      })
+    })
+
+    it('chooses several tags through the search field too', async () => {
+      const user = userEvent.setup()
+      const { onSearch } = renderOverlay()
+      const sheet = await dialog()
+      const tagField = await within(sheet).findByRole('combobox', { name: 'Chercher un tag' })
+
+      await user.type(tagField, 'fr{ArrowDown}{Enter}')
+      await user.clear(tagField)
+      await user.type(tagField, 'fo{ArrowDown}{Enter}')
+      await user.click(searchButton())
+
+      expect(onSearch).toHaveBeenCalledExactlyOnceWith({
+        ...EMPTY_CRITERIA,
+        tagIds: ['t-fruits', 't-four'],
+      })
+    })
+
+    it('takes no more tags than the API does: at the limit the other tags are off and the field gives way, until one is dropped', async () => {
+      const user = userEvent.setup()
+      const others = Array.from({ length: MAX_TAG_FILTERS - 1 }, (_, index) => `t-chosen-${index}`)
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: [...others, 't-rapide'] } })
+      const sheet = await dialog()
+
+      expect(await within(sheet).findByText('20 tags au maximum.')).toBeInTheDocument()
+      expect(within(sheet).queryByRole('combobox', { name: 'Chercher un tag' })).toBeNull()
+      expect(within(sheet).getByRole('button', { name: 'Four' })).toBeDisabled()
+      expect(within(sheet).getByRole('button', { name: 'Fruits' })).toBeDisabled()
+      expect(within(sheet).getByRole('button', { name: 'Rapide' })).toBeEnabled()
+
+      await user.click(within(sheet).getByRole('button', { name: 'Rapide' }))
+
+      expect(within(sheet).queryByText('20 tags au maximum.')).toBeNull()
+      expect(within(sheet).getByRole('combobox', { name: 'Chercher un tag' })).toBeVisible()
+      expect(within(sheet).getByRole('button', { name: 'Four' })).toBeEnabled()
+    })
+
+    it('has no accessibility violation with several tags chosen', async () => {
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: ['t-rapide', 't-four'] } })
+      const sheet = await dialog()
+      await within(sheet).findByRole('button', { name: 'Rapide' })
+
+      await expectNoAccessibilityViolations(sheet)
+    })
+
+    it('has no accessibility violation at the limit of tags, with the other chips off', async () => {
+      const others = Array.from({ length: MAX_TAG_FILTERS - 2 }, (_, index) => `t-chosen-${index}`)
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: [...others, 't-rapide', 't-four'] } })
+      const sheet = await dialog()
+      await within(sheet).findByText('20 tags au maximum.')
+
+      await expectNoAccessibilityViolations(sheet)
     })
 
     it('finds a category by typing a start of word, with its parent, and chooses it', async () => {

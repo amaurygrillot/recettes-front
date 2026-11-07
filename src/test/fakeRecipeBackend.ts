@@ -72,6 +72,8 @@ export interface FakeBackend {
   lastQuery: () => Record<string, string>
   /** What the list was last asked for in `ingredientIds`: the parameter repeated. */
   lastIngredientIds: () => string[]
+  /** What the list was last asked for in `tagIds`: the parameter repeated. */
+  lastTagIds: () => string[]
 }
 
 /**
@@ -110,5 +112,6 @@ export function serveBackend(
     ingredientQueries,
     lastQuery: () => Object.fromEntries(recipeQueries.at(-1) ?? []),
     lastIngredientIds: () => recipeQueries.at(-1)?.getAll('ingredientIds') ?? [],
+    lastTagIds: () => recipeQueries.at(-1)?.getAll('tagIds') ?? [],
   }
 }

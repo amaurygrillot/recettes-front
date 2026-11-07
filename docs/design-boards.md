@@ -81,7 +81,7 @@ Built from `Accueil-mobile`, `Accueil-etats`, `Carte-accueil`, `Accueil-tablette
 ## SearchScreen (`/rechercher` and `/mes-recettes`)
 
 Built from `Rechercher-entrees`, `-filtres`, `-etats`, `-mes-recettes`, `-tablette` and `-ordinateur`. **The URL is the state**:
-`?q=` (title text, 200 characters at most) `&categorie=<id>` `&exacte=1` (only that category) `&tag=<id>` `&ingredient=<id>` (repeated, one per ingredient, twenty at most) `&auteur=<text>`
+`?q=` (title text, 200 characters at most) `&categorie=<id>` `&exacte=1` (only that category) `&tag=<id>` (repeated, one per tag, twenty at most) `&ingredient=<id>` (repeated, one per ingredient, twenty at most) `&auteur=<text>`
 `&tri=recentes|modifiees|titre-az|titre-za`; only what differs from the default is written (`app/searchCriteria.ts`). Changes replace
 the history entry, so « back » returns to where the reader came from. **Since R1 (below) the title text is typed in the search overlay,
 not in the page: the field of the page only shows it, and the overlay's `Rechercher` writes it into the address.**
@@ -89,11 +89,14 @@ not in the page: the field of the page only shows it, and the overlay's `Recherc
 **Where the boards ask for more than the API gives** (decided, not asked: the board itself says so on `Rechercher-filtres`):
 
 - **The ingredient filter** was first left out (`GET /recipes` had no such criterion); the back end now takes `ingredientIds` and it is built, see [the ingredient filter](#the-ingredient-filter-retouche-1-follow-up) below.
-- **One category and one tag at a time** (the API takes a single `categoryId` and `tagId`): the category tree uses radio buttons
-  with « Toutes les catégories » to choose none; tags are chips of which one is pressed. A category includes what is filed
-  beneath it, which is the API's default; « Uniquement cette catégorie » (a checkbox under the chosen parent) asks for
-  `includeSubcategories=false`. The badge of a section is therefore 0 or 1. **What the back end would need** for the boards as drawn: a
-  list of category ids and of tag ids (with an AND/OR rule) and an ingredient criterion.
+- **One category at a time** (the API takes a single `categoryId`): the category tree uses radio buttons
+  with « Toutes les catégories » to choose none. A category includes what is filed beneath it, which is the API's default;
+  « Uniquement cette catégorie » (a checkbox under the chosen parent) asks for `includeSubcategories=false`. The badge of the
+  category section is therefore 0 or 1. **What the back end would still need** for the boards as drawn: a list of category ids
+  (with an AND/OR rule).
+- **As many tags as wanted**: tags are chips that are each pressed or not, and the search field adds to them. The API first took a single
+  `tagId`, so only one could be chosen; it now takes `tagIds` (repeated, at most 20) and keeps the recipes that carry **every** one of them,
+  like the ingredients. See [the tags](#the-tags-any-number-of-them) below.
 - « Les plus utilisés »: the API has no usage count, so the tags are all shown (chosen first) and the field narrows them.
 
 Other decisions: filters on a phone and a tablet are, since R1, part of the search overlay's `BottomSheet`, working on a **draft**
@@ -512,11 +515,30 @@ recettes »), 24 and 25 (the overlay is a centred panel on a tablet and a panel 
   field, now 56 px tall like every other field (it was 52 px).
 - **« Retour aux recettes », « Voir les recettes » and the way back of a recipe opened first lead to the home page** (the feed), no longer to
   `/rechercher`: that page is never a list of everything. Spaces alone are neither a word nor an author (`isNarrowed`, `criteriaOf`).
-- **Not built, and why**: the board's several categories and tags (the API takes one of each, the model is unchanged). The **ingredient
+- **Not built, and why**: the board's several categories (the API takes one, the model is unchanged); several tags were left out for the same
+  reason and **built afterwards**, see [the tags](#the-tags-any-number-of-them). The **ingredient
   filter** (section, pill, chip and sentence) was left out for lack of a criterion in the API, and **built afterwards**, see
   [the ingredient filter](#the-ingredient-filter-retouche-1-follow-up).
 - **À valider** (the board asks too): the missing live count; the tablet header; the removed desktop link; the desktop two-column panel; the
   carried key being appended to the word of a results page; the invitation's button label.
+
+
+### The tags: any number of them
+
+Choosing a second tag used to replace the first, because **`GET /recipes` took a single `tagId`**. It now takes **`tagIds`** (repeated, at most 20; the
+single `tagId` was replaced, not kept beside it) and keeps the recipes that carry **every** one of them, counted the same way as the ingredients
+(the back's `docs/recipes-domain-model.md` explains the query). « Végétarien » and « Rapide » therefore mean the recipes that are both.
+
+- **The criterion holds ids**: `SearchCriteria.tagIds` (in the order they were chosen, each once, at most `MAX_TAG_FILTERS` = 20, whatever a hand-written
+  address says), `&tag=<id>` repeated in the address (a link with a single `&tag=` still reads the same), `tagIds` in the request (`toRecipeFilters`).
+  Each chosen tag is **one filter** for the « Filtres » count, for the badge of its pill and for « Rechercher » being enabled.
+- **Chips and field both add**: a chip (`TagChips`) chooses its tag or drops it, the chosen ones first; the search field of the section toggles in the
+  same way (`FiltersPanel.toggleTag`), so the two cannot disagree.
+- **On the results page** every chosen tag is a removable chip of its own (« Retirer le filtre Fruits »); the names come with the loaded tag list, so a tag
+  that no longer exists has no chip but still filters, like a category that does not exist.
+- **Twenty at most**: the API refuses more, so at twenty the field is replaced by « 20 tags au maximum. », the tags not chosen are off, and the chosen
+  ones still drop. Nobody is expected to get there: it is there so that a 21st touch can never become a `400`.
+- **À valider**: "all of them" (AND) is what is built, like the ingredients, since each tag narrows the list; "any of them" would be a different parameter.
 
 
 ### The ingredient filter (R1 follow-up)

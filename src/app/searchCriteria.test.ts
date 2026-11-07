@@ -7,6 +7,7 @@ import {
   isNarrowed,
   MAX_INGREDIENT_FILTERS,
   MAX_QUERY_LENGTH,
+  MAX_TAG_FILTERS,
   type SearchCriteria,
 } from './searchCriteria'
 
@@ -20,13 +21,13 @@ describe('criteriaFromParams', () => {
   it('reads every criterion', () => {
     expect(
       from(
-        'q=tarte&categorie=c-1&exacte=1&tag=t-1&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-az',
+        'q=tarte&categorie=c-1&exacte=1&tag=t-1&tag=t-2&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-az',
       ),
     ).toEqual({
       query: 'tarte',
       categoryId: 'c-1',
       exactCategory: true,
-      tagId: 't-1',
+      tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',
       sort: 'title-asc',
@@ -54,7 +55,17 @@ describe('criteriaFromParams', () => {
   })
 
   it('treats an empty category or tag as none', () => {
-    expect(from('categorie=&tag=')).toMatchObject({ categoryId: undefined, tagId: undefined })
+    expect(from('categorie=&tag=')).toMatchObject({ categoryId: undefined, tagIds: [] })
+  })
+
+  it('reads as many tags as the address has, each once, in its order, without the empty ones', () => {
+    expect(from('tag=t-2&tag=&tag=t-1&tag=t-3&tag=t-2').tagIds).toEqual(['t-2', 't-1', 't-3'])
+  })
+
+  it('keeps no more tags than the API takes', () => {
+    const many = Array.from({ length: MAX_TAG_FILTERS + 5 }, (_, index) => `tag=t-${index}`)
+
+    expect(from(many.join('&')).tagIds).toHaveLength(MAX_TAG_FILTERS)
   })
 
   it('reads each ingredient once, in the order of the address, without the empty ones', () => {
@@ -88,14 +99,14 @@ describe('criteriaToParams', () => {
       query: 'tarte & crème',
       categoryId: 'c-1',
       exactCategory: true,
-      tagId: 't-1',
+      tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',
       sort: 'title-desc',
     }
 
     expect(criteriaToParams(criteria).toString()).toBe(
-      'q=tarte+%26+cr%C3%A8me&categorie=c-1&exacte=1&tag=t-1&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-za',
+      'q=tarte+%26+cr%C3%A8me&categorie=c-1&exacte=1&tag=t-1&tag=t-2&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-za',
     )
   })
 
@@ -108,7 +119,7 @@ describe('criteriaToParams', () => {
       query: 'crème brûlée',
       categoryId: 'c-1',
       exactCategory: false,
-      tagId: undefined,
+      tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',
       sort: 'modified',
@@ -119,12 +130,13 @@ describe('criteriaToParams', () => {
 })
 
 describe('activeFilterCount and isNarrowed', () => {
-  it('counts the category, the tag, each ingredient and the author, not the text or the order', () => {
+  it('counts the category, each tag, each ingredient and the author, not the text or the order', () => {
     expect(activeFilterCount(EMPTY_CRITERIA)).toBe(0)
     expect(activeFilterCount({ ...EMPTY_CRITERIA, query: 'tarte', sort: 'title-asc' })).toBe(0)
     expect(
-      activeFilterCount({ ...EMPTY_CRITERIA, categoryId: 'c', tagId: 't', author: 'Odile' }),
+      activeFilterCount({ ...EMPTY_CRITERIA, categoryId: 'c', tagIds: ['t'], author: 'Odile' }),
     ).toBe(3)
+    expect(activeFilterCount({ ...EMPTY_CRITERIA, tagIds: ['t-1', 't-2', 't-3'] })).toBe(3)
     expect(activeFilterCount({ ...EMPTY_CRITERIA, ingredientIds: ['i-1', 'i-2'] })).toBe(2)
   })
 
@@ -132,7 +144,7 @@ describe('activeFilterCount and isNarrowed', () => {
     expect(isNarrowed(EMPTY_CRITERIA)).toBe(false)
     expect(isNarrowed({ ...EMPTY_CRITERIA, sort: 'modified' })).toBe(false)
     expect(isNarrowed({ ...EMPTY_CRITERIA, query: 'tarte' })).toBe(true)
-    expect(isNarrowed({ ...EMPTY_CRITERIA, tagId: 't' })).toBe(true)
+    expect(isNarrowed({ ...EMPTY_CRITERIA, tagIds: ['t'] })).toBe(true)
     expect(isNarrowed({ ...EMPTY_CRITERIA, ingredientIds: ['i-1'] })).toBe(true)
   })
 

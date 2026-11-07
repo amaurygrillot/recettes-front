@@ -92,8 +92,9 @@ Things the generated client does not hide:
 - `POST /auth/login` returns the JWT as a **raw `text/plain` body**, not JSON. Wrap it once, in the auth module.
 - Errors are `application/problem+json` (`ProblemDetail`). Map them in one place; screens never parse error bodies.
 - `GET /recipes` and `GET /ingredients` are hand-written on the back (paged responses). Their schemas are still in the
-  YAML; the page shape is Spring Data's `PageImpl`. `GET /recipes` takes one `categoryId` and one `tagId` but any number of
-  `ingredientIds` (repeated, twenty at most), and keeps the recipes that use **all** of them. A recipe summary lists all its
+  YAML; the page shape is Spring Data's `PageImpl`. `GET /recipes` takes one `categoryId` but any number of
+  `tagIds` and of `ingredientIds` (each repeated, twenty at most), and keeps the recipes that carry **all** of the tags and use
+  **all** of the ingredients. A recipe summary lists all its
   cover pictures in `coverMediaIds` (`coverMediaId` is the first): the cards show them as a small slider.
 - Creation answers carry a `Location` header; `429` and `503` carry `Retry-After`. The back exposes both through CORS.
   Use `Retry-After` for messages such as « réessaie dans 30 secondes ».

@@ -128,7 +128,7 @@ describe('SearchScreen on a phone', () => {
       await waitFor(() => {
         expect(backend.lastQuery()).not.toHaveProperty('title')
       })
-      expect(backend.lastQuery()).toMatchObject({ tagId: 't-fruits' })
+      expect(backend.lastTagIds()).toEqual(['t-fruits'])
     })
 
     it('keeps the old answer, marked « Recherche… », while the new one comes', async () => {
@@ -169,13 +169,34 @@ describe('SearchScreen on a phone', () => {
         expect(backend.lastQuery()).toMatchObject({
           title: 'tarte',
           categoryId: 'desserts',
-          tagId: 't-fruits',
           authorName: 'Odile',
           sortBy: 'TITLE',
           direction: 'ASC',
         })
       })
+      expect(backend.lastTagIds()).toEqual(['t-fruits'])
       expect(backend.lastQuery()).not.toHaveProperty('includeSubcategories')
+    })
+
+    it('asks for every tag of the address, each shown by its name as a chip that drops it', async () => {
+      const backend = serveBackend()
+      const { router } = renderSearch('/rechercher?tag=t-fruits&tag=t-four&tag=t-rapide')
+      const user = userEvent.setup()
+
+      expect(await screen.findByRole('button', { name: 'Retirer le filtre Fruits' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Retirer le filtre Four' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Retirer le filtre Rapide' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Filtres, 3 actifs' })).toBeVisible()
+      await waitFor(() => {
+        expect(backend.lastTagIds()).toEqual(['t-fruits', 't-four', 't-rapide'])
+      })
+
+      await user.click(screen.getByRole('button', { name: 'Retirer le filtre Four' }))
+
+      expect(router.state.location.search).toBe('?tag=t-fruits&tag=t-rapide')
+      await waitFor(() => {
+        expect(backend.lastTagIds()).toEqual(['t-fruits', 't-rapide'])
+      })
     })
 
     it('asks for every ingredient of the address, each shown by its name as a chip that drops it', async () => {
@@ -235,7 +256,7 @@ describe('SearchScreen on a phone', () => {
         '?q=tarte&categorie=desserts&auteur=Odile&tri=titre-az',
       )
       await waitFor(() => {
-        expect(backend.lastQuery()).not.toHaveProperty('tagId')
+        expect(backend.lastTagIds()).toEqual([])
       })
     })
 
@@ -258,6 +279,30 @@ describe('SearchScreen on a phone', () => {
       await screen.findByRole('button', { name: 'Retirer le filtre Fruits' })
 
       expect(screen.queryByRole('button', { name: 'Tout effacer' })).not.toBeInTheDocument()
+    })
+
+    it('are all dropped by « Tout effacer » when they are two tags alone', async () => {
+      const backend = serveBackend()
+      const { router } = renderSearch('/rechercher?q=tarte&tag=t-fruits&tag=t-four')
+
+      await userEvent.setup().click(await screen.findByRole('button', { name: 'Tout effacer' }))
+
+      expect(router.state.location.search).toBe('?q=tarte')
+      await waitFor(() => {
+        expect(backend.lastTagIds()).toEqual([])
+      })
+    })
+
+    it('show no chip for a tag that does not exist, but still filter', async () => {
+      const backend = serveBackend()
+      renderSearch('/rechercher?tag=t-fruits&tag=t-disparu')
+
+      expect(await screen.findByRole('button', { name: 'Retirer le filtre Fruits' })).toBeVisible()
+
+      expect(screen.getAllByRole('button', { name: /Retirer le filtre/ })).toHaveLength(1)
+      await waitFor(() => {
+        expect(backend.lastTagIds()).toEqual(['t-fruits', 't-disparu'])
+      })
     })
 
     it('show no chip for a category that does not exist, but still filter', async () => {
@@ -658,6 +703,30 @@ describe('SearchScreen on a desktop', () => {
     expect(await screen.findByRole('button', { name: 'Retirer le filtre Farine' })).toBeVisible()
     await waitFor(() => {
       expect(backend.lastIngredientIds()).toEqual(['i-farine'])
+    })
+  })
+
+  it('keeps every tag chosen in the column, each written into the address and asked of the API', async () => {
+    installMatchMedia(1280)
+    const backend = serveBackend()
+    const { router } = renderSearch('/rechercher?q=tarte')
+    const column = await screen.findByRole('complementary', { name: 'Filtres' })
+    const user = userEvent.setup()
+
+    await user.click(await within(column).findByRole('button', { name: 'Fruits' }))
+    await user.click(within(column).getByRole('button', { name: 'Four' }))
+
+    expect(router.state.location.search).toBe('?q=tarte&tag=t-fruits&tag=t-four')
+    expect(within(column).getByRole('button', { name: 'Fruits' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(within(column).getByRole('button', { name: 'Four' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    await waitFor(() => {
+      expect(backend.lastTagIds()).toEqual(['t-fruits', 't-four'])
     })
   })
 

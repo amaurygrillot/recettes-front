@@ -25,8 +25,8 @@ export function toRecipeFilters(criteria: SearchCriteria, scope: SearchScope): R
     // Absent means « with the subcategories »: only the exact reading has to be asked for.
     ...(criteria.categoryId !== undefined &&
       criteria.exactCategory && { includeSubcategories: false }),
-    ...(criteria.tagId !== undefined && { tagId: criteria.tagId }),
-    // The API keeps the recipes that use every one of them.
+    // The API keeps the recipes that carry every one of the tags and use every one of the ingredients.
+    ...(criteria.tagIds.length > 0 && { tagIds: [...criteria.tagIds] }),
     ...(criteria.ingredientIds.length > 0 && { ingredientIds: [...criteria.ingredientIds] }),
     ...(scope.kind === 'mine' && { authorId: scope.authorId }),
     ...(scope.kind === 'all' && author !== '' && { authorName: author }),
