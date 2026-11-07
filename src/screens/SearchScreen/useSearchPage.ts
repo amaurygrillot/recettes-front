@@ -1,3 +1,4 @@
+import { useIngredientNames } from '../../api/ingredients'
 import { activeFilterCount, isNarrowed, type SearchCriteria } from '../../app/searchCriteria'
 import { useRecipeFeed } from '../../app/useRecipeFeed'
 import { useSearchCriteria } from '../../app/useSearchCriteria'
@@ -20,6 +21,7 @@ export function useSearchPage(scope: SearchScope) {
   const searching = scope.kind === 'mine' || isNarrowed(criteria)
   const feed = useRecipeFeed(toRecipeFilters(criteria, scope), { enabled: searching })
   const options = useFilterOptions()
+  const ingredientNames = useIngredientNames(criteria.ingredientIds)
 
   const changeFilters = (changes: Partial<FilterChoices>) => {
     update(changes)
@@ -32,7 +34,7 @@ export function useSearchPage(scope: SearchScope) {
     options,
     showAuthor,
     hasFilters: activeFilterCount(criteria) > 0,
-    activeFilters: activeFiltersOf(criteria, options, changeFilters, showAuthor),
+    activeFilters: activeFiltersOf(criteria, options, ingredientNames, changeFilters, showAuthor),
     changeFilters,
     changeSort: (sort: SearchCriteria['sort']) => {
       update({ sort })

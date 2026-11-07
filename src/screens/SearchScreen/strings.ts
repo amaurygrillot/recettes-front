@@ -63,6 +63,19 @@ export const strings = {
       suggestions: 'Suggestions de tags',
       noResult: (typed: string) => `Aucun tag pour « ${typed} »`,
     },
+    ingredients: {
+      legend: 'Ingrédients',
+      searchLabel: 'Chercher un ingrédient',
+      suggestions: 'Suggestions d’ingrédients',
+      noResult: (typed: string) => `Aucun ingrédient pour « ${typed} »`,
+      searchFailed:
+        'La recherche d’ingrédients ne marche pas pour le moment. Réessaie dans un instant.',
+      chosen: 'Ingrédients choisis',
+      remove: (name: string) => `Retirer l’ingrédient ${name}`,
+      none: 'Aucun ingrédient choisi : toutes les recettes sont retenues.',
+      all: 'Recettes avec tous ces ingrédients.',
+      limit: (max: number) => `${max} ingrédients au maximum.`,
+    },
     author: {
       legend: 'Auteur',
       label: "Nom de l'auteur",

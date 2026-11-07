@@ -14,18 +14,26 @@ interface UseComboboxOptions {
   selectedIds: readonly string[]
   onToggle: (option: ComboboxOption) => void
   maxSuggestions: number
+  /** Told what is typed, for options that are a server's answer to it (see `Combobox`). */
+  onTyped: ((typed: string) => void) | undefined
+  /** The answer to what is typed is not in yet: nothing is declared missing meanwhile. */
+  searching: boolean
 }
 
 /**
  * The behaviour of a field that suggests as one types: what to suggest, which suggestion is
  * active, how the keyboard moves through them, and what is announced when one is chosen. A
- * suggestion is never chosen on its own: the reader always validates.
+ * suggestion is never chosen on its own: the reader always validates. Options are narrowed here as
+ * one types, unless `onTyped` is given: then they are already the answer to the text, and are shown as
+ * they are.
  */
 export function useCombobox({
   options,
   selectedIds,
   onToggle,
   maxSuggestions,
+  onTyped,
+  searching,
 }: UseComboboxOptions) {
   const listboxId = useId()
   const [typed, setTyped] = useState('')
@@ -34,15 +42,16 @@ export function useCombobox({
   const [announcement, setAnnouncement] = useState('')
 
   const hasText = typed.trim() !== ''
-  const suggestions = hasText
-    ? options.filter((option) => startsAWord(option.label, typed)).slice(0, maxSuggestions)
-    : []
+  const matching =
+    onTyped === undefined ? options.filter((option) => startsAWord(option.label, typed)) : options
+  const suggestions = hasText ? matching.slice(0, maxSuggestions) : []
   const open = hasText && !dismissed && suggestions.length > 0
-  const hasNoResult = hasText && suggestions.length === 0
+  const hasNoResult = hasText && suggestions.length === 0 && !searching
   const activeOption = open ? suggestions[activeIndex] : undefined
 
   function type(text: string): void {
     setTyped(text)
+    onTyped?.(text)
     setDismissed(false)
     setActiveIndex(-1)
     setAnnouncement('')
@@ -55,6 +64,7 @@ export function useCombobox({
     // Choosing empties the field to add another; removing keeps the list open on what was typed.
     if (!wasSelected) {
       setTyped('')
+      onTyped?.('')
       setActiveIndex(-1)
     }
   }

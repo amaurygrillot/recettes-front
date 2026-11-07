@@ -15,7 +15,7 @@ values are in [design-tokens.md](design-tokens.md); the canvas remains the sourc
 | RecipeEditorScreen | `Editeur-cadre` · `Editeur-texte-riche` · `Editeur-categories-tags` · `Editeur-photos` · `Editeur-ingredients` · `Editeur-etapes-conseil` · `Editeur-validation` · `Editeur-session-droits` · `Editeur-grands-ecrans` |
 | Auth screens | `Marque-ecrans` (sign-in) · `Compte-inscription` · `Compte-mot-de-passe-oublie` · `Compte-nouveau-mot-de-passe` · `Compte-public-grands-ecrans` |
 | AccountScreen | `Compte-page` · `Compte-etats` · `Compte-grands-ecrans` |
-| Retouches (the canvas page « Retouches ») | R1 `Retouche-1-principe` · `Retouche-1-mobile` · `Retouche-1-grands-ecrans` · `Retouche-1-resultats`; R2 `Retouche-2-cocotte`; R3 `Retouche-3-texte-riche-mobile` · `Retouche-3-texte-riche-grands-ecrans`; R4 `Retouche-4-mascotte` · `Retouche-4-situations` · `Retouche-4-logo-en-situation`; R5 `Retouche-5-etape-sans-badge` |
+| Retouches (the canvas page « Retouches ») | R1 `Retouche-1-principe` · `Retouche-1-mobile` · `Retouche-1-grands-ecrans` · `Retouche-1-resultats`; R2 `Retouche-2-cocotte`; R3 `Retouche-3-texte-riche-mobile` · `Retouche-3-texte-riche-grands-ecrans`; R4 `Retouche-4-mascotte` · `Retouche-4-situations` · `Retouche-4-logo-en-situation`; R5 `Retouche-5-etape-sans-badge` · `Retouche-5-fin-sans-badge` · `Retouche-5-etats-sans-badge` · `Retouche-5-grands-ecrans-sans-badge`; R6 `Retouche-6-icone-liste`; R7 `Retouche-7-photos` · `Retouche-7-ingredients` · `Retouche-7-etapes` · `Retouche-7-grands-ecrans`; R8 `Retouche-8-miniatures-slider` |
 
 The **Retouches** boards are design changes applied on top of the screens above; where they name an older board (« ce qui change »),
 the newer board wins, and the older one is marked with « replaced by R… » as each retouche is built (see [Retouches](#retouches)).
@@ -81,14 +81,14 @@ Built from `Accueil-mobile`, `Accueil-etats`, `Carte-accueil`, `Accueil-tablette
 ## SearchScreen (`/rechercher` and `/mes-recettes`)
 
 Built from `Rechercher-entrees`, `-filtres`, `-etats`, `-mes-recettes`, `-tablette` and `-ordinateur`. **The URL is the state**:
-`?q=` (title text, 200 characters at most) `&categorie=<id>` `&exacte=1` (only that category) `&tag=<id>` `&auteur=<text>`
+`?q=` (title text, 200 characters at most) `&categorie=<id>` `&exacte=1` (only that category) `&tag=<id>` `&ingredient=<id>` (repeated, one per ingredient, twenty at most) `&auteur=<text>`
 `&tri=recentes|modifiees|titre-az|titre-za`; only what differs from the default is written (`app/searchCriteria.ts`). Changes replace
 the history entry, so « back » returns to where the reader came from. **Since R1 (below) the title text is typed in the search overlay,
 not in the page: the field of the page only shows it, and the overlay's `Rechercher` writes it into the address.**
 
 **Where the boards ask for more than the API gives** (decided, not asked: the board itself says so on `Rechercher-filtres`):
 
-- **No ingredient filter** (`GET /recipes` has no such criterion): the « Ingrédients » section, chip and sentence are not built.
+- **The ingredient filter** was first left out (`GET /recipes` had no such criterion); the back end now takes `ingredientIds` and it is built, see [the ingredient filter](#the-ingredient-filter-retouche-1-follow-up) below.
 - **One category and one tag at a time** (the API takes a single `categoryId` and `tagId`): the category tree uses radio buttons
   with « Toutes les catégories » to choose none; tags are chips of which one is pressed. A category includes what is filed
   beneath it, which is the API's default; « Uniquement cette catégorie » (a checkbox under the chosen parent) asks for
@@ -275,11 +275,9 @@ endpoint it calls, including `POST /media` and `POST /ingredients`).
 - **Leaving with changes asks** (`useBlocker` for the cross, « Annuler » and the browser's back, `beforeunload` for a tab that closes): « Quitter
   sans enregistrer ? », the first answer (« Continuer à modifier ») the primary one, since nothing is destroyed either way. Saved: the editor
   leaves for the recipe by replacing its entry, so « retour » does not come back to a form.
-- **Reordering has three ways everywhere**: the grip (dnd-kit: pointer with a 6 px threshold so a tap on the grip is not a drag, and keyboard, space
-  to take, arrows, space to drop), two buttons (arrows on a photo, « Monter » / « Descendre » on a group, a line and a step), and French
-  announcements for both. After a button moved an item the focus follows it. Photos and steps are numbered by rank, so reordering renumbers.
-  A line stays in its group (no drag between groups, as the board says). The lifted item is drawn tilted over the page and its place says
-  « Déposer ici »; **there is no drop animation** (it waits for an animation frame, which a hidden tab or `prefers-reduced-motion` never gives).
+- **Reordering is by two buttons, never by dragging (R7 below)**: arrows on a photo, « Monter » / « Descendre » on a group, a line and a step,
+  with a French announcement of where the item went. After a button moved an item the focus follows it. Photos and steps are numbered by rank, so
+  reordering renumbers. A line stays in its group. (The first build also had a grip to drag by, with dnd-kit; R7 took it out.)
 - **Photos** (`PhotoGallery`, the same tiles for the cover and for each step): JPEG or PNG of 8 MB at most, checked before anything is sent; sent
   one after the other so the list keeps the order they were chosen in; a refusal stays in its place under its words (`413` « 8 Mo maximum »,
   `429` the button counts down the `Retry-After`, `503` « Service momentanément saturé », a lost connection) until it is sent again or given
@@ -313,8 +311,8 @@ link (like the recipe, no login). Checked in the browser pane at 390, 768 and 12
   (`app/recipeView`, moved there from the recipe screen since both read it). A recipe that is not there, that cannot be loaded (`RecipeProblem`,
   moved to `app/` for the same reason, with its « Réessayer ») or that has **no step** is said on a page of its own: the mode is never opened empty
   (the entry button does not exist for such a recipe, this is for a typed address).
-- **A step** (`Cooking`): the top (« Quitter », the title on up to two lines, « Étape 3 sur 8 » and the progress), the stamp (`StepNumber` with its word: brick,
-  104 px, tilted; **replaced by R5 on a phone: no stamp under 600 px**), the instruction in the 22/34 text (`RichTextView`, sanitised like everywhere), the photos, a full-width « Ingrédients » row, and the
+- **A step** (`Cooking`): the top (« Quitter », the title on up to two lines, « Étape 3 sur 8 » and the progress), ~~the stamp (`StepNumber` with its word: brick,
+  104 px, tilted)~~ (**gone since R5, on every screen**: the number is in the bar), the instruction in the 22/34 text (`RichTextView`, sanitised like everywhere), the photos, a full-width « Ingrédients » row, and the
   foot with « Précédent » and « Suivant » (64 px, the second twice as wide, « Terminer » with a tick on the last step). Only the instruction scrolls, from its
   top for each step; a fade at the foot says when there is more below. A recipe of one step has no progress and no « Précédent ».
 - **Progress** (`StepProgress`): a segment per step up to twelve (done in ink, current in yellow with an ink outline, to come in cream with a lighter outline: three signs, not
@@ -344,22 +342,23 @@ The canvas page « Retouches » holds five design changes applied on top of the 
 built; the newest board wins over an older one, and the API contract wins over any board. Where a board is ambiguous the most
 conservative reading is taken (it changes the least, invents no data and keeps the existing behaviour) and written down.
 
-### R5 · the cooking step without the stamp (`Retouche-5-etape-sans-badge`)
+### R5 · the cooking step without the stamp (`Retouche-5-etape-sans-badge`, `-fin-sans-badge`, `-etats-sans-badge`, `-grands-ecrans-sans-badge`)
 
-Replaces, **on a phone only** (under 600 px, the `tablet` breakpoint), the stamp of `Pas-a-pas-etape`: the brick « ÉTAPE n » seal of
-104 px that sat above the instruction. The number is already in the bar (« Étape 3 sur 8 » and the segment), so the instruction and the
-photos move up by the 118 px (104 + the 14 px gap) the stamp took. **Tablet and desktop keep the stamp.**
+Replaces the stamp of `Pas-a-pas-etape`: the brick « ÉTAPE n » seal of 104 px that sat above the instruction. The number is already in the bar
+(« Étape 3 sur 8 » and the segment), so the instruction and the photos move up by the 118 px (104 + the 14 px gap) the stamp took.
+**It was first drawn for a phone only; the board was then changed to remove it on every screen** (phone, tablet and desktop: the three other R5
+boards show the ingredients sheet, the end screen, the limit cases and the tablet and desktop layouts without it), and that is what is built.
 
-- **Nothing else moves**: the bar, the 22/34 instruction, the photos (one 4:3 frame or a row of thumbnails), « Ingrédients », « Précédent »,
-  « Suivant » and the swipe hint keep their sizes and places. The padding under the bar stays 14 px, as the board draws it. The swipe hint stays at the foot of the reading area, just above
-  « Ingrédients », also when the instruction is short (the reading area is a column whose text fills it, so the hint's sticky row ends at the bottom).
-- **Built in `StepContent`**: it takes `showStamp`, which `Cooking` gives from the media query it already uses to tell a phone from a
-  tablet (`tabletOrMore`), so there is one place that decides what a phone looks like, and a phone does not render a stamp it hides. The
-  stamp is decorative (`aria-hidden`), so nothing is lost for a screen reader: the step is named by the `section` label and the live
-  « Étape 3 sur 8 ».
+- **Nothing else moves**: the bar, the 22/34 instruction (560 px at most on a tablet, in a 560 px column, and 680 px on a desktop), the photos
+  (one 4:3 frame or a row of thumbnails), « Ingrédients », « Précédent », « Suivant » and the swipe hint keep their sizes and places. The
+  padding under the bar stays 14 px. The swipe hint stays at the foot of the reading area, just above « Ingrédients », also when the instruction
+  is short (the reading area is a column whose text fills it, so the hint's sticky row ends at the bottom).
+- **Built in `StepContent`**, which no longer has a `showStamp` (it had one while the stamp stayed on a tablet): the instruction, then the photos.
+  `StepNumber` lost its `word` variant, the 104 px stamp, and is only the 64 px number of a step of the recipe page; the `stamp` string is gone.
+- **Stays**: the « bon appétit ! » stamp of the end screen (another stamp: it repeats nothing).
 - **The six states of the board** (no photo, one photo, several, first with its swipe hint, last with « Terminer », very long step) are the
-  existing states of the screen; no new string, no new token. The board's fourth « ce qui change » (a 32 px « ÉTAPE 3 » pill, « si tu
-  préfères le garder ») is an alternative offered to the user, not a decision: not built.
+  existing states of the screen. The first version's fourth « ce qui change » (a 32 px « ÉTAPE 3 » pill, « si tu préfères le garder ») was an
+  alternative offered to the user and is not built.
 
 ### R2 · the cocotte logo (`Retouche-2-cocotte`)
 
@@ -391,7 +390,7 @@ The logo's cocotte, grown, with a name (Mijotine), seven moods and four sizes, p
 - **`Mascot`** (`src/components/Mascot`): `mood` is `happy` (contente) · `dejected` (dépitée) · `smitten` (coup de cœur) · `surprised` · `lost`
   (perdue) · `asleep` (endormie) · `celebrating` (en fête); `size` is `xl` (240 px wide: empty states and error pages) · `large` (160: cards
   without a photo) · `medium` (96: messages and dialogs) · `small` (64: stamp, avatar). The seven drawings are the board's symbols (`ms-*`),
-  copied as they are into `mascotShapes.tsx` with their colours as `--logo-*` variables (plus `--logo-herb` for the party hat). It is
+  copied as they are into `mascotShapes.tsx` with their colours as `--logo-*` variables (plus `--logo-herb` and the six `--logo-party-*`, from the `party-*` tokens, for the striped party hat and the confetti). **The faces were redrawn on the board after the first build** (a wider mouth with its tongue, a new party hat, other details), so `mascotShapes.tsx` was regenerated from the symbols as they are now; the hat's stripes are clipped by a clip path whose id comes from the `Mascot` that draws it (`useId`). It is
   **decorative** (`aria-hidden`): every place that shows it also says what it means in words, and the mood is never the only signal.
 - **Small sizes**: the board's prose says the steam and the accessories disappear at 64 px and under, but its own drawings at 64 and 40 px are
   the same symbols simply scaled. No smaller drawings exist, so the same drawing is scaled (the most conservative reading: nothing is invented).
@@ -513,8 +512,81 @@ recettes »), 24 and 25 (the overlay is a centred panel on a tablet and a panel 
   field, now 56 px tall like every other field (it was 52 px).
 - **« Retour aux recettes », « Voir les recettes » and the way back of a recipe opened first lead to the home page** (the feed), no longer to
   `/rechercher`: that page is never a list of everything. Spaces alone are neither a word nor an author (`isNarrowed`, `criteriaOf`).
-- **Not built, and why**: the **ingredient filter** (section, pill, chip and sentence): `GET /recipes` still has no ingredient criterion (see
-  SearchScreen above), so the board's « Ingrédients » is left out, as it was in the old sheet; and the board's several categories and tags (the
-  API takes one of each, the model is unchanged).
+- **Not built, and why**: the board's several categories and tags (the API takes one of each, the model is unchanged). The **ingredient
+  filter** (section, pill, chip and sentence) was left out for lack of a criterion in the API, and **built afterwards**, see
+  [the ingredient filter](#the-ingredient-filter-retouche-1-follow-up).
 - **À valider** (the board asks too): the missing live count; the tablet header; the removed desktop link; the desktop two-column panel; the
   carried key being appended to the word of a results page; the invitation's button label.
+
+
+### The ingredient filter (R1 follow-up)
+
+The « Ingrédients » block of the R1 boards (a search field with suggestions, the ones chosen as chips, « Recettes avec tous ces ingrédients. »,
+« Aucun ingrédient choisi : toutes les recettes sont retenues. », a pill with its count) is built, in the overlay's phone sheet and its desktop
+panel and in the results page's desktop column. It needed the back end: **`GET /recipes` now takes `ingredientIds`** (repeated, at most 20) and keeps
+the recipes that use **every** one of them, in any group (the back's `docs/recipes-domain-model.md` explains the query).
+
+- **The criterion holds ids**, like the category and the tag: `SearchCriteria.ingredientIds` (in the order they were chosen, each once, at most
+  `MAX_INGREDIENT_FILTERS` = 20, whatever a hand-written address says), `&ingredient=<id>` repeated in the address, `ingredientIds` in the request
+  (`toRecipeFilters`). Each chosen ingredient is **one filter** for the « Filtres » count and for « Rechercher » being enabled.
+- **Names are looked up, not carried**: the address has ids, so a chip's name comes from `useIngredientNames` (`GET /ingredients/{id}`, one cached
+  query per ingredient). Choosing a suggestion **remembers** the name (`useRememberIngredient`), so a chip never waits for a request it does not
+  need. An ingredient that cannot be found (deleted since the link was made) has **no chip but still filters**, like a category that does not exist;
+  « Réinitialiser » or « Tout effacer » clears it.
+- **Suggestions are asked of the back end** as the typing pauses (200 ms, `namePrefix`, six at most), unlike the category and the tags, which are
+  loaded whole: there are too many ingredients. `Combobox` takes `onTyped` for that (its options are then the server's answer and are shown as they
+  are) and `searching` (« Aucun ingrédient pour « x » » is only said once the answer is in). Only ingredients that start like the text are offered,
+  so a previous answer kept on screen while the next comes never offers what no longer matches. If the search itself fails, the field says so
+  (« La recherche d’ingrédients ne marche pas pour le moment… ») instead of claiming that nothing matches; the word search still works.
+- **Not waiting for the other filters**: the section (and its pill) shows while the category tree and the tags are still loading or failed to load,
+  since it needs none of them, like the author field.
+- **Twenty at most**: the API refuses more, so at twenty the field is replaced by « 20 ingrédients au maximum. » and the chips still drop.
+- **On the results page** a chosen ingredient is a removable chip like the others (« Retirer le filtre Pommes »); removing the last criterion shows
+  the invitation, as for any filter. The chip in the overlay has the cutlery icon the board draws (`RemovableChip` `icon`).
+- **À valider**: "all of them" (AND) is what is built, from the board's sentence « Recettes avec tous ces ingrédients. »; "any of them" would be
+  another parameter. The suggestions match the start of the ingredient's name, as the editor's field does, not a word inside it.
+
+### R6 · the numbered-list icon (`Retouche-6-icone-liste`)
+
+The « liste numérotée » icon is redrawn so that 1, 2 and 3 can be told apart from 24 px up: the digits are taller (5 units, well separated) and drawn
+thinner (1.4) than the rest of the icon, and the three lines of text stay at the usual weight. It is the `list-number` shape of `iconShapes.tsx`, so
+the rich-text toolbar and the styleguide use it. The board says to adopt it everywhere and does not replace its own « Icônes » board (11), whose
+drawing stays the old one.
+
+### R7 · the editor without drag handles (`Retouche-7-photos`, `-ingredients`, `-etapes`, `-grands-ecrans`)
+
+The cover photos, the steps and the ingredient lines **lose their handle to drag by**, and with it the « glisser une photo / une étape » screens: they
+are reordered with their buttons only (the left and right arrows of a photo, « Monter » and « Descendre » of a step, of a line and of a group). It
+replaces the reordering paragraph of the editor above and the `Editeur-photos`, `-ingredients`, `-etapes-conseil` and `-grands-ecrans` boards on that
+point only.
+
+- **Built**: `SortableList`, the `GripButton`, the carried item drawn over the page, « Déposer ici », the drag announcements and instructions, and the
+  `grip` strings are deleted; the lists are a plain `ItemList` / `Item` (a layout: grid, scrolling row or stack). **dnd-kit is no longer a
+  dependency** ([frontend-stack.md](frontend-stack.md)). Nothing in the editor catches a finger any more, so the page scrolls freely over the lists.
+- **What stays**: the arrows' announcement (« Photo 2 déplacée en position 1 sur 2 »), the focus that follows a moved item, the numbering by rank, the
+  disabled arrows at the ends, a line that never leaves its group. The hint under the cover photos reads as the board has it: « Touche les flèches
+  pour changer l’ordre. La première est la couverture. ». The `grip` icon stays in the icon set (as `heart` and `share` do), used by nothing.
+- **Not touched**: the ingredient line is two lines on a phone and a tablet and one line on a desktop, as it already was. The boards' other open points
+  (« le petit conseil » against « le conseil de la cuisinière ») are the earlier questions, left as they are.
+
+### R8 · the recipe cards as small sliders (`Retouche-8-miniatures-slider`)
+
+A recipe with **several photos** shows them on its card as a small slider; with one photo or none, the card is what it was. It needed the back end:
+**the summary of a recipe now lists `coverMediaIds`** (every cover picture, in order; `coverMediaId` is still the first).
+
+- **What is drawn**: under the photo a pill of dots (one per photo, the filled one is the photo shown) and, top right, a dark counter « 1 / 3 ». Both
+  are decoration (`aria-hidden`). On a phone and a tablet the photos **follow the finger** sideways and the next one takes over on release (a fifth
+  of the photo, 60 px at most, is enough; past the first or the last they give only a third of the way); on a desktop two 44 px arrows appear over
+  the photo, halfway down so never over the title, when the pointer is over the card or the card has the focus; ← and → do the same while the card has
+  the focus.
+- **A tap anywhere still opens the recipe**, the photo included: the card stays one link. The arrows are **beside** the link, over the photo, not in it
+  (a button cannot be inside a link), out of the tab order (the keys are the keyboard's way) but named (« Photo précédente », « Photo suivante »). The
+  click that ends a drag is swallowed, and the next touch is a tap again.
+- **The direction is decided by the first movement** (`useCoverSlider`): sideways is the photo's, up or down is the list's, so a diagonal one goes on
+  scrolling the list. A mouse never drags (it would fight with selecting text); `touch-action: pan-y` keeps the page scrolling. **Never automatic.**
+- **Each card has its own state** and keeps it while it is on the page; leaving for the recipe and coming back shows the first photo again (the cards
+  are rebuilt with the list). The buttons and keys go round the ends; a swipe stops at them.
+- **Announced**: a change by a button, a key or a swipe says « Photo 2 sur 3 » in a polite live region of the card.
+- **Differences from the board**: the arrows show on the **card's** hover, not only the photo's; the counter's text is 15 px (the `caption` token)
+  where the board has 14; the arrows' shadow is a new `stamp-xs` token (2 px). Until the back end that sends `coverMediaIds` runs, the card falls back
+  to the first photo.

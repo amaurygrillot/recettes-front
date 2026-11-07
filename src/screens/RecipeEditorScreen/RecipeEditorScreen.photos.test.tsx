@@ -382,10 +382,19 @@ describe('RecipeEditorScreen: the cover photos', () => {
       await findForm()
 
       expect(
-        screen.getByText(
-          'Glisse une photo, ou touche les flèches, pour changer l’ordre. La première est la couverture.',
-        ),
+        screen.getByText('Touche les flèches pour changer l’ordre. La première est la couverture.'),
       ).toBeVisible()
+    })
+
+    it('has no handle to drag a photo, a step or an ingredient: the arrows are the only way (R7)', async () => {
+      useEditorBackend()
+      renderEditor('/recettes/r-1/modifier')
+      await findForm()
+
+      expect(
+        screen.queryByRole('button', { name: /^Déplacer (la photo|l’étape|l’ingrédient) \d+$/ }),
+      ).not.toBeInTheDocument()
+      expect(screen.queryByText(/à déplacer/)).not.toBeInTheDocument()
     })
   })
 

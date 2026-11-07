@@ -9,12 +9,13 @@ const { active } = strings
 
 /**
  * The chips for the filters in force, each able to drop its filter. The names of a category and a
- * tag come with the options: until they are loaded their chips are not shown (the filter itself
- * is already applied), rather than showing an id.
+ * tag come with the options, those of the ingredients from their own lookup: until they are loaded
+ * their chips are not shown (the filter itself is already applied), rather than showing an id.
  */
 export function activeFiltersOf(
   criteria: SearchCriteria,
   options: FilterOptions,
+  ingredientNames: ReadonlyMap<string, string>,
   change: (changes: Partial<FilterChoices>) => void,
   showAuthor: boolean,
 ): ActiveFilter[] {
@@ -47,6 +48,19 @@ export function activeFiltersOf(
         },
       })
     }
+  }
+
+  for (const id of criteria.ingredientIds) {
+    const name = ingredientNames.get(id)
+    if (name === undefined) continue
+    chips.push({
+      key: `ingredient-${id}`,
+      label: name,
+      removeLabel: active.removeFilter(name),
+      onRemove: () => {
+        change({ ingredientIds: criteria.ingredientIds.filter((chosen) => chosen !== id) })
+      },
+    })
   }
 
   const author = criteria.author.trim()

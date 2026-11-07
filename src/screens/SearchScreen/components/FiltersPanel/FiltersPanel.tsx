@@ -8,6 +8,7 @@ import { strings } from '../../strings'
 import type { FilterOptions } from '../../useFilterOptions'
 import { AuthorField } from './AuthorField'
 import { CategoryTree } from './CategoryTree'
+import { IngredientFilter } from './IngredientFilter'
 import { TagChips } from './TagChips'
 
 const { filters } = strings
@@ -45,7 +46,8 @@ function pathTo(categories: readonly CategoryNode[], id: string | undefined): st
 }
 
 /**
- * The filters: category (a tree and a search field), tag (chips and a search field), author.
+ * The filters: category (a tree and a search field), tag (chips and a search field), ingredients (a search
+ * field and the ones chosen), author.
  * The same panel is the content of the search overlay and the column of a desktop's results; it
  * holds no choice of its own, so whoever shows it decides when the choices count.
  */
@@ -134,6 +136,19 @@ export function FiltersPanel({
     </Section>
   )
 
+  // Not waiting for the category tree and the tags: the ingredients are searched as one types, whatever the others did.
+  const ingredientsSection = (
+    <Section id={SECTION_IDS.ingredients} legend={filters.ingredients.legend}>
+      <IngredientFilter
+        ingredientIds={choices.ingredientIds}
+        onChange={(ingredientIds) => {
+          onChange({ ingredientIds })
+        }}
+        dense={dense}
+      />
+    </Section>
+  )
+
   const authorSection = showAuthor && (
     <Section id={SECTION_IDS.author} legend={filters.author.legend}>
       <AuthorField
@@ -165,6 +180,7 @@ export function FiltersPanel({
           <div>{categorySection}</div>
           <div className="flex flex-col gap-7">
             {tagsSection}
+            {ingredientsSection}
             {authorSection}
           </div>
         </div>
@@ -172,6 +188,7 @@ export function FiltersPanel({
         <>
           {categorySection}
           {tagsSection}
+          {ingredientsSection}
           {authorSection}
         </>
       )}

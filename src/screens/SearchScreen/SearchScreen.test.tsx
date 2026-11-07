@@ -178,6 +178,36 @@ describe('SearchScreen on a phone', () => {
       expect(backend.lastQuery()).not.toHaveProperty('includeSubcategories')
     })
 
+    it('asks for every ingredient of the address, each shown by its name as a chip that drops it', async () => {
+      const backend = serveBackend()
+      const { router } = renderSearch('/rechercher?ingredient=i-pommes&ingredient=i-farine')
+      const user = userEvent.setup()
+
+      expect(await screen.findByRole('button', { name: 'Retirer le filtre Pommes' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Retirer le filtre Farine' })).toBeVisible()
+      expect(screen.getByRole('button', { name: 'Filtres, 2 actifs' })).toBeVisible()
+      await waitFor(() => {
+        expect(backend.lastIngredientIds()).toEqual(['i-pommes', 'i-farine'])
+      })
+
+      await user.click(screen.getByRole('button', { name: 'Retirer le filtre Pommes' }))
+
+      expect(router.state.location.search).toBe('?ingredient=i-farine')
+      await waitFor(() => {
+        expect(backend.lastIngredientIds()).toEqual(['i-farine'])
+      })
+    })
+
+    it('show no chip for an ingredient that does not exist, but still filter', async () => {
+      const backend = serveBackend()
+      renderSearch('/rechercher?ingredient=i-disparu')
+
+      await screen.findByRole('link', { name: 'Recette 1' })
+
+      expect(screen.queryByRole('button', { name: /Retirer le filtre/ })).not.toBeInTheDocument()
+      expect(backend.lastIngredientIds()).toEqual(['i-disparu'])
+    })
+
     it('asks for the exact category only', async () => {
       const backend = serveBackend()
       renderSearch('/rechercher?categorie=desserts&exacte=1')
@@ -609,6 +639,26 @@ describe('SearchScreen on a desktop', () => {
 
     expect(openSearch).toHaveBeenCalledOnce()
     expect(backend.recipeQueries).toHaveLength(0)
+  })
+
+  it('lists again as soon as an ingredient is chosen in the column, by searching it as one types', async () => {
+    installMatchMedia(1280)
+    const backend = serveBackend()
+    const { router } = renderSearch('/rechercher?q=tarte')
+    const column = await screen.findByRole('complementary', { name: 'Filtres' })
+    const user = userEvent.setup()
+
+    await user.type(
+      await within(column).findByRole('combobox', { name: 'Chercher un ingrédient' }),
+      'far',
+    )
+    await user.click(await within(column).findByRole('option', { name: 'Farine' }))
+
+    expect(router.state.location.search).toBe('?q=tarte&ingredient=i-farine')
+    expect(await screen.findByRole('button', { name: 'Retirer le filtre Farine' })).toBeVisible()
+    await waitFor(() => {
+      expect(backend.lastIngredientIds()).toEqual(['i-farine'])
+    })
   })
 
   it('lists again as soon as a filter of the column is chosen', async () => {

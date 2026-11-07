@@ -21,7 +21,7 @@ says otherwise. Follow clean-code principles (DRY, KISS, SRP) as in my global `~
 ## Status
 
 **Milestones M1 (skeleton and guardrails), M2 (theme and base components), M3 (API client and authentication), M4
-(router and shell) and M5 (the home screen, the quality template for the others) are done**; SearchScreen (`/rechercher`, `/mes-recettes`), RecipeScreen (`/recettes/:id`), the auth screens (sign-in, registration, forgotten and new password) AccountScreen (`/compte`), RecipeEditorScreen (`/recettes/nouvelle`, `/recettes/:id/modifier`) and CookingScreen (`/recettes/:id/pas-a-pas`) are done too: every product screen of the boards exists (next would be the admin screens, not designed yet). The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
+(router and shell) and M5 (the home screen, the quality template for the others) are done**; SearchScreen (`/rechercher`, `/mes-recettes`), RecipeScreen (`/recettes/:id`), the auth screens (sign-in, registration, forgotten and new password) AccountScreen (`/compte`), RecipeEditorScreen (`/recettes/nouvelle`, `/recettes/:id/modifier`) and CookingScreen (`/recettes/:id/pas-a-pas`) are done too: every product screen of the boards exists (next would be the admin screens, not designed yet). The canvas's « Retouches » page (R1 to R8) is applied, including the ingredient filter of the search and the photo slider of the recipe cards, which needed two additions to the back end. The plan, with the status of each milestone, is [docs/setup-plan.md](docs/setup-plan.md); the ready-to-paste
 prompts are in [docs/kickoff-prompt.md](docs/kickoff-prompt.md) (agents follow
 [docs/agent-operating-rules.md](docs/agent-operating-rules.md); canvas boards per screen are in
 [docs/design-boards.md](docs/design-boards.md)). Package manager: **npm**; Node: **26** (about to become LTS), pinned in
@@ -36,7 +36,7 @@ one error union, the session and token module, query hooks per resource, MSW in 
 the router, the shell (phone tab bar with the « + », desktop top bar from 1024 px with a search field and the member's avatar,
 login-protected routes that come back after the login, the session-expired dialog, a 404 and error boundaries), a first **LoginScreen** (finished later with the other auth screens). M5: the **HomeScreen** (`src/screens/HomeScreen`: feed with « Voir plus », category shortcuts, every state), the
 extended « + » (`useCreateButtonMode`), `CreateLink`, `Spinner`, `Button busy`. `RecipeCard`, the grid and « Voir plus » are shared components; the desktop « Nouvelle recette » lives in each page's header, not in the bar. The RichTextEditor (Lexical 0.52.0, pinned, extension API) is a shared component (the recipe editor uses it for the introduction, the steps and the tip). AccountScreen added `Toast` (with `ToastsProvider` / `useToasts` in `RootLayout`), `SectionIndex` and `useMember`; the back end has no way to read the signed-in account, so the page only knows what a registration or a change in the same visit returned (`useKnownAccount`). The auth screens added `AuthFrame`, `PasswordField`, `StateBadge` and the `auth` strings / `authValidation` shared by the entry forms. RecipeScreen added `PhotoSlider`, `PhotoViewer`, `RichTextView` (DOMPurify: the only place stored HTML is rendered), the `TabBar` slot (`BottomSlotContext`) for a page's bottom bar, `useGoBack`, `canManageRecipe` and `cookingProgress`. CookingScreen added `useSwipe`, `useWakeLock`, the stamp of `StepNumber` and the thin `ProgressBar`; `AdviceNote`, `RecipeProblem` and `recipeView` are shared between it and the recipe page. RecipeEditorScreen added `AutocompleteField`, `SelectField`,
-`TextArea`, `ChoiceField`, `ProgressBar`, the shared recipe deletion (`DeleteRecipeDialog`, `useRecipeDeletion`) and dnd-kit; its drafts, uploads and reordering are described in [docs/design-boards.md](docs/design-boards.md#recipeeditorscreen-recettesnouvelle-and-recettesidmodifier). The search is an overlay over the page, not a page of its own (retouche R1): `SearchOverlayProvider` in `RootLayout`, opened through `useSearchOverlay()` from `SearchLauncher` buttons, as a `BottomSheet` or, on a desktop, a `TopPanel`; the results page (`/rechercher`, `/mes-recettes`) only reopens it and lists what it was asked, never the whole library ([R1 decisions](docs/design-boards.md#r1--the-search-opens-as-an-overlay-retouche-1-principe--mobile--grands-ecrans--resultats)).
+`TextArea`, `ChoiceField`, `ProgressBar`, the shared recipe deletion (`DeleteRecipeDialog`, `useRecipeDeletion`); its drafts, uploads and reordering (by buttons: no dragging, no dnd-kit since R7) are described in [docs/design-boards.md](docs/design-boards.md#recipeeditorscreen-recettesnouvelle-and-recettesidmodifier). The search is an overlay over the page, not a page of its own (retouche R1): `SearchOverlayProvider` in `RootLayout`, opened through `useSearchOverlay()` from `SearchLauncher` buttons, as a `BottomSheet` or, on a desktop, a `TopPanel`; the results page (`/rechercher`, `/mes-recettes`) only reopens it and lists what it was asked, never the whole library ([R1 decisions](docs/design-boards.md#r1--the-search-opens-as-an-overlay-retouche-1-principe--mobile--grands-ecrans--resultats)).
 
 ```bash
 npm run dev            # Vite dev server, http://localhost:5173 (port is fixed: strictPort); /styleguide shows the components
@@ -55,7 +55,7 @@ change with it.
 
 Vite · React · TypeScript (strict) · React Router v8 (data mode, `createBrowserRouter`) · TanStack Query ·
 `openapi-typescript` + `openapi-fetch` · React Hook Form + Zod · Lexical (rich text) + DOMPurify · Tailwind CSS ·
-Radix UI primitives (unstyled, accessible) · dnd-kit · Vitest + Testing Library + MSW · Playwright · ESLint + Prettier.
+Radix UI primitives (unstyled, accessible) · Vitest + Testing Library + MSW · Playwright · ESLint + Prettier.
 
 Versions: always the latest stable of each, **verified together** (see the table in
 [docs/frontend-stack.md](docs/frontend-stack.md#versions)). Notably **TypeScript is `~6.0.3`, not 7**, until
@@ -92,7 +92,9 @@ Things the generated client does not hide:
 - `POST /auth/login` returns the JWT as a **raw `text/plain` body**, not JSON. Wrap it once, in the auth module.
 - Errors are `application/problem+json` (`ProblemDetail`). Map them in one place; screens never parse error bodies.
 - `GET /recipes` and `GET /ingredients` are hand-written on the back (paged responses). Their schemas are still in the
-  YAML; the page shape is Spring Data's `PageImpl`.
+  YAML; the page shape is Spring Data's `PageImpl`. `GET /recipes` takes one `categoryId` and one `tagId` but any number of
+  `ingredientIds` (repeated, twenty at most), and keeps the recipes that use **all** of them. A recipe summary lists all its
+  cover pictures in `coverMediaIds` (`coverMediaId` is the first): the cards show them as a small slider.
 - Creation answers carry a `Location` header; `429` and `503` carry `Retry-After`. The back exposes both through CORS.
   Use `Retry-After` for messages such as « réessaie dans 30 secondes ».
 - Status codes mean something: `400` validation, `401` missing/invalid/expired token, `403` not allowed (also wrong

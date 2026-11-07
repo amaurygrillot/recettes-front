@@ -56,7 +56,7 @@ export function SearchOverlay({
   const textRef = useRef<HTMLInputElement>(null)
   // The pills jump to sections that exist: the category and tags only once the filters are there.
   const sections = filterSectionsOf(draft, !mine).filter(
-    ({ key }) => key === 'author' || options.status === 'ready',
+    ({ key }) => key === 'ingredients' || key === 'author' || options.status === 'ready',
   )
   const sectionPills = useFilterSections(sections)
   const searchable = canSearch(draft, mine)

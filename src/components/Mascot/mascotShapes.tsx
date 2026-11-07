@@ -3,7 +3,9 @@ import type { ReactElement } from 'react'
 /**
  * The seven moods of the mascot, copied from the symbols `ms-*` of the canvas board `Retouche-4-mascotte` (200 x 220). Every
  * colour is a `--logo-*` variable set by `Mascot`, from the design tokens; the steam, the lid and the accessories are
- * hand-drawn polylines kept as the board has them.
+ * hand-drawn polylines kept as the board has them. The party hat's stripes and the confetti use the six party colours
+ * (`--logo-party-1` to `-6`). The hat's stripes are clipped to the hat, by a clip path whose id belongs to the `Mascot`
+ * instance that draws it: ids must be unique in a page, and several mascots can be on one.
  */
 
 /** Contente: lid open at 18°, three steam lines, a big smile. */
@@ -122,30 +124,13 @@ export const HAPPY: ReactElement = (
         <circle cx="75.5" cy="139.5" r="2.3" fill="var(--logo-cream)" />
         <circle cx="119.5" cy="139.5" r="2.3" fill="var(--logo-cream)" />
         <path
-          d="M66 154 Q100.0 161.0 134 154 C132 183.3 68 183.3 66 154 Z"
+          d="M64 152 Q100.0 160.3 136 152 C134 186.7 66 186.7 64 152 Z"
           fill="var(--logo-brick)"
-          stroke="none"
-        />
-        <path
-          d="M66 154 Q100.0 161.0 134 154 C132 183.3 68 183.3 66 154 Z"
-          fill="none"
           stroke="var(--logo-ink)"
           strokeWidth="3.7"
           strokeLinejoin="round"
         />
-        <path
-          d="M64.0 147.0 L63.2 147.1 L62.5 147.4 L61.7 147.7 L61.1 148.0 L60.4 148.4 L59.8 148.8 L59.2 149.2 L58.7 149.7 L58.2 150.2 L57.7 150.7 L57.3 151.3 L56.9 151.8 L56.5 152.4 L56.2 153.0 L55.9 153.7 L55.7 154.3 L55.5 154.9 L55.4 155.6 L55.3 156.3 L55.2 156.9 L55.2 157.6 L55.3 158.3 L55.4 158.9 L55.5 159.6 L55.7 160.2 L55.9 160.9 L56.2 161.5 L56.5 162.1 L56.9 162.6 L57.2 163.2 L57.7 163.7 L58.1 164.2 L58.6 164.7 L59.2 165.1 L59.7 165.6 L60.3 165.9 L60.9 166.3 L61.6 166.6 L62.3 166.8 L63.0 167.0 L63.0 167.0 L62.6 166.4 L62.1 165.8 L61.7 165.3 L61.4 164.8 L61.0 164.3 L60.7 163.7 L60.5 163.2 L60.2 162.7 L60.0 162.2 L59.8 161.7 L59.6 161.3 L59.5 160.8 L59.3 160.3 L59.2 159.8 L59.2 159.4 L59.1 158.9 L59.1 158.4 L59.0 158.0 L59.0 157.5 L59.0 157.1 L59.0 156.6 L59.1 156.2 L59.1 155.7 L59.2 155.2 L59.3 154.8 L59.4 154.3 L59.6 153.8 L59.7 153.3 L59.9 152.8 L60.1 152.3 L60.4 151.8 L60.7 151.3 L61.0 150.8 L61.3 150.3 L61.7 149.8 L62.1 149.2 L62.5 148.7 L63.0 148.2 L63.5 147.6 L64.0 147.0 Z"
-          fill="var(--logo-ink)"
-        />
-        <path
-          d="M136.0 147.0 L136.5 147.6 L137.0 148.2 L137.5 148.7 L137.9 149.2 L138.3 149.8 L138.7 150.3 L139.0 150.8 L139.3 151.3 L139.6 151.8 L139.9 152.3 L140.1 152.8 L140.3 153.3 L140.4 153.8 L140.6 154.3 L140.7 154.8 L140.8 155.2 L140.9 155.7 L140.9 156.2 L141.0 156.6 L141.0 157.1 L141.0 157.5 L141.0 158.0 L140.9 158.4 L140.9 158.9 L140.8 159.4 L140.8 159.8 L140.7 160.3 L140.5 160.8 L140.4 161.3 L140.2 161.7 L140.0 162.2 L139.8 162.7 L139.5 163.2 L139.3 163.7 L139.0 164.3 L138.6 164.8 L138.3 165.3 L137.9 165.8 L137.4 166.4 L137.0 167.0 L137.0 167.0 L137.7 166.8 L138.4 166.6 L139.1 166.3 L139.7 165.9 L140.3 165.6 L140.8 165.1 L141.4 164.7 L141.9 164.2 L142.3 163.7 L142.8 163.2 L143.1 162.6 L143.5 162.1 L143.8 161.5 L144.1 160.9 L144.3 160.2 L144.5 159.6 L144.6 158.9 L144.7 158.3 L144.8 157.6 L144.8 156.9 L144.7 156.3 L144.6 155.6 L144.5 154.9 L144.3 154.3 L144.1 153.7 L143.8 153.0 L143.5 152.4 L143.1 151.8 L142.7 151.3 L142.3 150.7 L141.8 150.2 L141.3 149.7 L140.8 149.2 L140.2 148.8 L139.6 148.4 L138.9 148.0 L138.3 147.7 L137.5 147.4 L136.8 147.1 L136.0 147.0 Z"
-          fill="var(--logo-ink)"
-        />
-        <path
-          d="M85.0 169 Q100.0 155 115.0 169 Q100.0 175 85.0 169 Z"
-          fill="var(--logo-blush)"
-          stroke="none"
-        />
+        <path d="M85.0 171 Q100.0 157 115.0 171 Q100.0 177 85.0 171 Z" fill="var(--logo-blush)" />
         <circle
           cx="32"
           cy="103.5"
@@ -367,27 +352,10 @@ export const DEJECTED: ReactElement = (
           strokeLinejoin="round"
         />
         <path
-          d="M76 170 Q100 150 124 170"
-          fill="none"
+          d="M70 174 C78 148 122 148 130 174 C118 163 82 163 70 174 Z"
+          fill="var(--logo-brick)"
           stroke="var(--logo-ink)"
-          strokeWidth="5.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M70 163 Q72 170 76 174"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="3.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M130 163 Q128 170 124 174"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="3.6"
-          strokeLinecap="round"
+          strokeWidth="3.7"
           strokeLinejoin="round"
         />
         <circle
@@ -492,33 +460,132 @@ export const SMITTEN: ReactElement = (
     <g transform="translate(110 134) scale(0.74) translate(-100 -100)">
       <g transform="rotate(-3 100 190)">
         <path
-          d="M14 84.7 C2.1 77.3 7.0 69.2 14 75.5 C21.0 69.2 25.9 77.3 14 84.7 Z"
+          d="M14 86.7 C2.1 79.3 7.0 71.2 14 77.5 C21.0 71.2 25.9 79.3 14 86.7 Z"
           fill="var(--logo-brick)"
           stroke="var(--logo-ink)"
           strokeWidth="2.6"
           strokeLinejoin="round"
+          transform="rotate(-12 14 80)"
         />
         <path
-          d="M-6 55.7 C-16.2 49.4 -12.0 42.5 -6 47.9 C0.0 42.5 4.2 49.4 -6 55.7 Z"
+          d="M-8 57.7 C-18.2 51.4 -14.0 44.5 -8 49.9 C-2.0 44.5 2.2 51.4 -8 57.7 Z"
           fill="var(--logo-brick)"
           stroke="var(--logo-ink)"
           strokeWidth="2.6"
           strokeLinejoin="round"
+          transform="rotate(10 -8 52)"
         />
         <path
-          d="M16 30.8 C7.5 25.5 11.0 19.8 16 24.2 C21.0 19.8 24.5 25.5 16 30.8 Z"
+          d="M14 32.8 C5.5 27.5 9.0 21.8 14 26.2 C19.0 21.8 22.5 27.5 14 32.8 Z"
           fill="var(--logo-brick)"
           stroke="var(--logo-ink)"
           strokeWidth="2.6"
           strokeLinejoin="round"
+          transform="rotate(-8 14 28)"
         />
         <path
-          d="M30 100 Q8 96 12 86"
-          fill="none"
+          d="M-22 22.3 C-29.6 17.6 -26.5 12.4 -22 16.4 C-17.5 12.4 -14.4 17.6 -22 22.3 Z"
+          fill="var(--logo-brick)"
           stroke="var(--logo-ink)"
-          strokeWidth="3.4"
-          strokeLinecap="round"
+          strokeWidth="2.6"
           strokeLinejoin="round"
+          transform="rotate(14 -22 18)"
+        />
+        <path
+          d="M40 -0.3 C29.8 -6.6 34.0 -13.5 40 -8.1 C46.0 -13.5 50.2 -6.6 40 -0.3 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(8 40 -6)"
+        />
+        <path
+          d="M74 -17.2 C65.5 -22.5 69.0 -28.2 74 -23.8 C79.0 -28.2 82.5 -22.5 74 -17.2 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(-10 74 -22)"
+        />
+        <path
+          d="M112 -6.4 C98.4 -14.8 104.0 -24.0 112 -16.8 C120.0 -24.0 125.6 -14.8 112 -6.4 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(6 112 -14)"
+        />
+        <path
+          d="M150 -16.8 C140.7 -22.6 144.5 -28.9 150 -23.9 C155.5 -28.9 159.3 -22.6 150 -16.8 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(12 150 -22)"
+        />
+        <path
+          d="M178 4.6 C166.1 -2.7 171.0 -10.8 178 -4.4 C185.0 -10.8 189.9 -2.7 178 4.6 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(-8 178 -2)"
+        />
+        <path
+          d="M196 38.8 C187.5 33.5 191.0 27.8 196 32.2 C201.0 27.8 204.5 33.5 196 38.8 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(10 196 34)"
+        />
+        <path
+          d="M-18 104.3 C-25.6 99.5 -22.5 94.4 -18 98.4 C-13.5 94.4 -10.4 99.5 -18 104.3 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(-6 -18 100)"
+        />
+        <path
+          d="M44 87.8 C37.2 83.6 40.0 79.0 44 82.6 C48.0 79.0 50.8 83.6 44 87.8 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(8 44 84)"
+        />
+        <path
+          d="M172 86.8 C163.5 81.5 167.0 75.8 172 80.2 C177.0 75.8 180.5 81.5 172 86.8 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(-10 172 82)"
+        />
+        <path
+          d="M194 79.8 C187.2 75.6 190.0 71.0 194 74.6 C198.0 71.0 200.8 75.6 194 79.8 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(12 194 76)"
+        />
+        <path
+          d="M92 83.8 C85.2 79.6 88.0 75.0 92 78.6 C96.0 75.0 98.8 79.6 92 83.8 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(-8 92 80)"
+        />
+        <path
+          d="M130 81.8 C123.2 77.6 126.0 73.0 130 76.6 C134.0 73.0 136.8 77.6 130 81.8 Z"
+          fill="var(--logo-brick)"
+          stroke="var(--logo-ink)"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+          transform="rotate(10 130 78)"
         />
         <g transform="rotate(28 30 122)">
           <path
@@ -731,30 +798,6 @@ export const SMITTEN: ReactElement = (
           <circle cx="82.5" cy="53" r="1.9" fill="var(--logo-cream)" />
           <circle cx="95.5" cy="30.5" r="2.6" fill="var(--logo-cream)" />
         </g>
-        <path
-          d="M56 84 L50 94"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="3.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M100 80 L100 92"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="3.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M144 84 L150 94"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="3.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
       </g>
     </g>
   </>
@@ -1025,22 +1068,14 @@ export const LOST: ReactElement = (
     <g transform="translate(110 134) scale(0.74) translate(-100 -100)">
       <g transform="rotate(5 100 190)">
         <path
-          d="M-8 64 C-8 46 18 46 18 64 C18 76 4 76 4 90"
+          d="M-40 70 C-40 52 -14 52 -14 70 C-14 82 -27 82 -27 96"
           fill="none"
           stroke="var(--logo-ink)"
-          strokeWidth="6"
+          strokeWidth="6.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx="4" cy="104" r="4.2" fill="var(--logo-ink)" />
-        <path
-          d="M40 100 Q22 98 24 84"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="3.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <circle cx="-27" cy="111" r="4.6" fill="var(--logo-ink)" />
         <g transform="rotate(0 30 122)">
           <path
             d="M30 106 L12 106 Q4 106 4 122.0 Q4 138 12 138 L30 138"
@@ -1501,146 +1536,58 @@ export const ASLEEP: ReactElement = (
   </>
 )
 
-/** En fête: a lopsided lid with a party hat, confetti, eyes squeezed with joy, a wide mouth. */
-export const CELEBRATING: ReactElement = (
-  <>
-    <g transform="translate(110 134) scale(0.74) translate(-100 -100)">
-      <g transform="rotate(-4 100 190)">
-        <g transform="rotate(58 30 122)">
+/** En fête: a lopsided lid with a striped party hat, confetti, eyes squeezed with joy, a wide mouth. */
+export function celebrating(hatClipId: string): ReactElement {
+  return (
+    <>
+      <g transform="translate(110 134) scale(0.74) translate(-100 -100)">
+        <g transform="rotate(-4 100 190)">
+          <g transform="rotate(58 30 122)">
+            <path
+              d="M30 106 L12 106 Q4 106 4 122.0 Q4 138 12 138 L30 138"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="21"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M30 106 L12 106 Q4 106 4 122.0 Q4 138 12 138 L30 138"
+              fill="none"
+              stroke="var(--logo-gold-deep)"
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              transform="translate(2.2 2.2)"
+            />
+          </g>
+          <g transform="rotate(-58 170 122)">
+            <path
+              d="M170 106 L188 106 Q196 106 196 122.0 Q196 138 188 138 L170 138"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="21"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M170 106 L188 106 Q196 106 196 122.0 Q196 138 188 138 L170 138"
+              fill="none"
+              stroke="var(--logo-gold-deep)"
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              transform="translate(2.2 2.2)"
+            />
+          </g>
           <path
-            d="M30 106 L12 106 Q4 106 4 122.0 Q4 138 12 138 L30 138"
-            fill="none"
-            stroke="var(--logo-ink)"
-            strokeWidth="21"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M30 106 L12 106 Q4 106 4 122.0 Q4 138 12 138 L30 138"
-            fill="none"
-            stroke="var(--logo-gold-deep)"
-            strokeWidth="9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            transform="translate(2.2 2.2)"
-          />
-        </g>
-        <g transform="rotate(-58 170 122)">
-          <path
-            d="M170 106 L188 106 Q196 106 196 122.0 Q196 138 188 138 L170 138"
-            fill="none"
-            stroke="var(--logo-ink)"
-            strokeWidth="21"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M170 106 L188 106 Q196 106 196 122.0 Q196 138 188 138 L170 138"
-            fill="none"
-            stroke="var(--logo-gold-deep)"
-            strokeWidth="9"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            transform="translate(2.2 2.2)"
-          />
-        </g>
-        <path
-          d="M64 182 L136 182 L132 194 L68 194 Z"
-          fill="var(--logo-gold-deep)"
-          stroke="none"
-          transform="translate(2.2 2.2)"
-        />
-        <path
-          d="M64 182 L136 182 L132 194 L68 194 Z"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="6"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        <path
-          d="M32 100 L168 100 C186 124 186 160 162 176 Q146 184 100 184 Q54 184 38 176 C14 160 14 124 32 100 Z"
-          fill="var(--logo-gold)"
-          stroke="none"
-          transform="translate(2.2 2.2)"
-        />
-        <path
-          d="M32 100 L168 100 C186 124 186 160 162 176 Q146 184 100 184 Q54 184 38 176 C14 160 14 124 32 100 Z"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="6"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        <path
-          d="M20 97 L180 97 Q184 97 184 101 L184 106 Q184 110 180 110 L20 110 Q16 110 16 106 L16 101 Q16 97 20 97 Z"
-          fill="var(--logo-gold-deep)"
-          stroke="none"
-          transform="translate(2.2 2.2)"
-        />
-        <path
-          d="M20 97 L180 97 Q184 97 184 101 L184 106 Q184 110 180 110 L20 110 Q16 110 16 106 L16 101 Q16 97 20 97 Z"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="6"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        <ellipse cx="50" cy="158" rx="9" ry="5.5" fill="var(--logo-blush)" />
-        <ellipse cx="150" cy="158" rx="9" ry="5.5" fill="var(--logo-blush)" />
-        <path
-          d="M68 146 Q78 132 88 146"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="5.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M112 146 Q122 132 132 146"
-          fill="none"
-          stroke="var(--logo-ink)"
-          strokeWidth="5.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M60 150 Q100.0 159.6 140 150 C138 190.0 62 190.0 60 150 Z"
-          fill="var(--logo-brick)"
-          stroke="var(--logo-ink)"
-          strokeWidth="3.7"
-          strokeLinejoin="round"
-        />
-        <path d="M85.0 173 Q100.0 159 115.0 173 Q100.0 179 85.0 173 Z" fill="var(--logo-blush)" />
-        <circle
-          cx="32"
-          cy="103.5"
-          r="3.3"
-          fill="var(--logo-cream)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-        />
-        <circle
-          cx="168"
-          cy="103.5"
-          r="3.3"
-          fill="var(--logo-cream)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-        />
-        <path
-          d="M30.0 124.0 L29.2 125.2 L28.6 126.5 L28.1 127.8 L27.7 129.1 L27.2 130.5 L26.9 131.8 L26.6 133.1 L26.3 134.4 L26.1 135.7 L26.0 137.1 L25.8 138.4 L25.8 139.7 L25.8 141.0 L25.8 142.3 L25.9 143.6 L26.1 144.9 L26.3 146.1 L26.5 147.4 L26.8 148.6 L27.2 149.8 L27.6 151.0 L28.1 152.2 L28.6 153.4 L29.1 154.5 L29.7 155.6 L30.4 156.7 L31.1 157.8 L31.8 158.8 L32.6 159.8 L33.5 160.7 L34.3 161.6 L35.3 162.5 L36.2 163.4 L37.2 164.2 L38.2 165.0 L39.3 165.7 L40.4 166.4 L41.5 167.0 L42.7 167.6 L44.0 168.0 L44.0 168.0 L43.2 166.9 L42.4 165.9 L41.6 164.9 L40.9 164.0 L40.1 163.0 L39.4 162.0 L38.8 161.1 L38.1 160.1 L37.5 159.1 L36.9 158.2 L36.4 157.2 L35.9 156.2 L35.4 155.2 L34.9 154.2 L34.5 153.2 L34.0 152.2 L33.6 151.2 L33.2 150.2 L32.9 149.2 L32.5 148.2 L32.2 147.1 L31.9 146.1 L31.6 145.0 L31.4 143.9 L31.2 142.8 L30.9 141.7 L30.7 140.6 L30.6 139.4 L30.4 138.3 L30.3 137.1 L30.2 135.9 L30.1 134.6 L30.0 133.4 L30.0 132.1 L29.9 130.8 L29.9 129.5 L30.0 128.2 L30.0 126.8 L30.0 125.4 L30.0 124.0 Z"
-          fill="var(--logo-cream)"
-        />
-        <g transform="rotate(7 184 98)">
-          <path
-            d="M24 86 C24 56 62 48 100 48 C138 48 176 56 176 86 Z"
+            d="M64 182 L136 182 L132 194 L68 194 Z"
             fill="var(--logo-gold-deep)"
             stroke="none"
             transform="translate(2.2 2.2)"
           />
           <path
-            d="M24 86 C24 56 62 48 100 48 C138 48 176 56 176 86 Z"
+            d="M64 182 L136 182 L132 194 L68 194 Z"
             fill="none"
             stroke="var(--logo-ink)"
             strokeWidth="6"
@@ -1648,13 +1595,13 @@ export const CELEBRATING: ReactElement = (
             strokeLinecap="round"
           />
           <path
-            d="M18 86 L182 86 Q186 86 186 90 L186 94 Q186 98 182 98 L18 98 Q14 98 14 94 L14 90 Q14 86 18 86 Z"
+            d="M32 100 L168 100 C186 124 186 160 162 176 Q146 184 100 184 Q54 184 38 176 C14 160 14 124 32 100 Z"
             fill="var(--logo-gold)"
             stroke="none"
             transform="translate(2.2 2.2)"
           />
           <path
-            d="M18 86 L182 86 Q186 86 186 90 L186 94 Q186 98 182 98 L18 98 Q14 98 14 94 L14 90 Q14 86 18 86 Z"
+            d="M32 100 L168 100 C186 124 186 160 162 176 Q146 184 100 184 Q54 184 38 176 C14 160 14 124 32 100 Z"
             fill="none"
             stroke="var(--logo-ink)"
             strokeWidth="6"
@@ -1662,157 +1609,379 @@ export const CELEBRATING: ReactElement = (
             strokeLinecap="round"
           />
           <path
-            d="M93 50 L107 50 L105 43 L95 43 Z"
+            d="M20 97 L180 97 Q184 97 184 101 L184 106 Q184 110 180 110 L20 110 Q16 110 16 106 L16 101 Q16 97 20 97 Z"
             fill="var(--logo-gold-deep)"
             stroke="none"
             transform="translate(2.2 2.2)"
           />
           <path
-            d="M93 50 L107 50 L105 43 L95 43 Z"
+            d="M20 97 L180 97 Q184 97 184 101 L184 106 Q184 110 180 110 L20 110 Q16 110 16 106 L16 101 Q16 97 20 97 Z"
             fill="none"
             stroke="var(--logo-ink)"
             strokeWidth="6"
             strokeLinejoin="round"
             strokeLinecap="round"
           />
+          <ellipse cx="50" cy="158" rx="9" ry="5.5" fill="var(--logo-blush)" />
+          <ellipse cx="150" cy="158" rx="9" ry="5.5" fill="var(--logo-blush)" />
           <path
-            d="M90 34 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 Z"
-            fill="var(--logo-gold)"
-            stroke="none"
-            transform="translate(2.2 2.2)"
-          />
-          <path
-            d="M90 34 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 Z"
+            d="M68 146 Q78 132 88 146"
             fill="none"
             stroke="var(--logo-ink)"
-            strokeWidth="6"
-            strokeLinejoin="round"
+            strokeWidth="5.5"
             strokeLinecap="round"
+            strokeLinejoin="round"
           />
           <path
-            d="M37.0 77.0 L37.5 76.2 L37.8 75.5 L38.2 74.8 L38.6 74.1 L39.0 73.4 L39.5 72.7 L39.9 72.1 L40.4 71.5 L40.9 70.9 L41.4 70.2 L41.9 69.7 L42.5 69.1 L43.1 68.5 L43.7 67.9 L44.4 67.4 L45.0 66.8 L45.7 66.2 L46.5 65.7 L47.2 65.1 L48.0 64.6 L48.9 64.0 L49.7 63.5 L50.6 62.9 L51.6 62.4 L52.5 61.8 L53.6 61.3 L54.6 60.7 L55.7 60.2 L56.8 59.7 L58.0 59.1 L59.2 58.6 L60.5 58.1 L61.8 57.6 L63.1 57.1 L64.5 56.6 L65.9 56.1 L67.4 55.6 L68.9 55.1 L70.4 54.6 L72.0 54.0 L72.0 54.0 L70.3 53.9 L68.7 53.9 L67.1 53.9 L65.5 54.1 L64.0 54.2 L62.4 54.4 L61.0 54.6 L59.5 54.9 L58.1 55.2 L56.8 55.5 L55.4 55.8 L54.1 56.2 L52.9 56.6 L51.7 57.1 L50.5 57.6 L49.4 58.1 L48.3 58.6 L47.2 59.2 L46.2 59.8 L45.2 60.4 L44.3 61.1 L43.4 61.8 L42.6 62.5 L41.8 63.2 L41.1 64.0 L40.4 64.8 L39.8 65.6 L39.2 66.4 L38.7 67.3 L38.2 68.1 L37.8 69.0 L37.4 69.9 L37.1 70.8 L36.9 71.7 L36.7 72.6 L36.6 73.5 L36.6 74.4 L36.6 75.2 L36.7 76.1 L37.0 77.0 Z"
-            fill="var(--logo-cream)"
+            d="M112 146 Q122 132 132 146"
+            fill="none"
+            stroke="var(--logo-ink)"
+            strokeWidth="5.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <circle cx="82.5" cy="53" r="1.9" fill="var(--logo-cream)" />
-          <circle cx="95.5" cy="30.5" r="2.6" fill="var(--logo-cream)" />
           <path
-            d="M100 22 L84 50 L116 50 Z"
+            d="M60 150 Q100.0 159.6 140 150 C138 190.0 62 190.0 60 150 Z"
             fill="var(--logo-brick)"
             stroke="var(--logo-ink)"
-            strokeWidth="5"
+            strokeWidth="3.7"
             strokeLinejoin="round"
           />
+          <path d="M85.0 173 Q100.0 159 115.0 173 Q100.0 179 85.0 173 Z" fill="var(--logo-blush)" />
           <circle
-            cx="100"
-            cy="20"
-            r="5.5"
+            cx="32"
+            cy="103.5"
+            r="3.3"
             fill="var(--logo-cream)"
             stroke="var(--logo-ink)"
-            strokeWidth="3.5"
+            strokeWidth="2.2"
+          />
+          <circle
+            cx="168"
+            cy="103.5"
+            r="3.3"
+            fill="var(--logo-cream)"
+            stroke="var(--logo-ink)"
+            strokeWidth="2.2"
           />
           <path
-            d="M91 40 L109 40 M95 31 L105 31"
-            stroke="var(--logo-cream)"
-            strokeWidth="3.2"
-            strokeLinecap="round"
+            d="M30.0 124.0 L29.2 125.2 L28.6 126.5 L28.1 127.8 L27.7 129.1 L27.2 130.5 L26.9 131.8 L26.6 133.1 L26.3 134.4 L26.1 135.7 L26.0 137.1 L25.8 138.4 L25.8 139.7 L25.8 141.0 L25.8 142.3 L25.9 143.6 L26.1 144.9 L26.3 146.1 L26.5 147.4 L26.8 148.6 L27.2 149.8 L27.6 151.0 L28.1 152.2 L28.6 153.4 L29.1 154.5 L29.7 155.6 L30.4 156.7 L31.1 157.8 L31.8 158.8 L32.6 159.8 L33.5 160.7 L34.3 161.6 L35.3 162.5 L36.2 163.4 L37.2 164.2 L38.2 165.0 L39.3 165.7 L40.4 166.4 L41.5 167.0 L42.7 167.6 L44.0 168.0 L44.0 168.0 L43.2 166.9 L42.4 165.9 L41.6 164.9 L40.9 164.0 L40.1 163.0 L39.4 162.0 L38.8 161.1 L38.1 160.1 L37.5 159.1 L36.9 158.2 L36.4 157.2 L35.9 156.2 L35.4 155.2 L34.9 154.2 L34.5 153.2 L34.0 152.2 L33.6 151.2 L33.2 150.2 L32.9 149.2 L32.5 148.2 L32.2 147.1 L31.9 146.1 L31.6 145.0 L31.4 143.9 L31.2 142.8 L30.9 141.7 L30.7 140.6 L30.6 139.4 L30.4 138.3 L30.3 137.1 L30.2 135.9 L30.1 134.6 L30.0 133.4 L30.0 132.1 L29.9 130.8 L29.9 129.5 L30.0 128.2 L30.0 126.8 L30.0 125.4 L30.0 124.0 Z"
+            fill="var(--logo-cream)"
+          />
+          <g transform="rotate(7 184 98)">
+            <path
+              d="M24 86 C24 56 62 48 100 48 C138 48 176 56 176 86 Z"
+              fill="var(--logo-gold-deep)"
+              stroke="none"
+              transform="translate(2.2 2.2)"
+            />
+            <path
+              d="M24 86 C24 56 62 48 100 48 C138 48 176 56 176 86 Z"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            <path
+              d="M18 86 L182 86 Q186 86 186 90 L186 94 Q186 98 182 98 L18 98 Q14 98 14 94 L14 90 Q14 86 18 86 Z"
+              fill="var(--logo-gold)"
+              stroke="none"
+              transform="translate(2.2 2.2)"
+            />
+            <path
+              d="M18 86 L182 86 Q186 86 186 90 L186 94 Q186 98 182 98 L18 98 Q14 98 14 94 L14 90 Q14 86 18 86 Z"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            <path
+              d="M93 50 L107 50 L105 43 L95 43 Z"
+              fill="var(--logo-gold-deep)"
+              stroke="none"
+              transform="translate(2.2 2.2)"
+            />
+            <path
+              d="M93 50 L107 50 L105 43 L95 43 Z"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            <path
+              d="M90 34 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 Z"
+              fill="var(--logo-gold)"
+              stroke="none"
+              transform="translate(2.2 2.2)"
+            />
+            <path
+              d="M90 34 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 Z"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            <path
+              d="M37.0 77.0 L37.5 76.2 L37.8 75.5 L38.2 74.8 L38.6 74.1 L39.0 73.4 L39.5 72.7 L39.9 72.1 L40.4 71.5 L40.9 70.9 L41.4 70.2 L41.9 69.7 L42.5 69.1 L43.1 68.5 L43.7 67.9 L44.4 67.4 L45.0 66.8 L45.7 66.2 L46.5 65.7 L47.2 65.1 L48.0 64.6 L48.9 64.0 L49.7 63.5 L50.6 62.9 L51.6 62.4 L52.5 61.8 L53.6 61.3 L54.6 60.7 L55.7 60.2 L56.8 59.7 L58.0 59.1 L59.2 58.6 L60.5 58.1 L61.8 57.6 L63.1 57.1 L64.5 56.6 L65.9 56.1 L67.4 55.6 L68.9 55.1 L70.4 54.6 L72.0 54.0 L72.0 54.0 L70.3 53.9 L68.7 53.9 L67.1 53.9 L65.5 54.1 L64.0 54.2 L62.4 54.4 L61.0 54.6 L59.5 54.9 L58.1 55.2 L56.8 55.5 L55.4 55.8 L54.1 56.2 L52.9 56.6 L51.7 57.1 L50.5 57.6 L49.4 58.1 L48.3 58.6 L47.2 59.2 L46.2 59.8 L45.2 60.4 L44.3 61.1 L43.4 61.8 L42.6 62.5 L41.8 63.2 L41.1 64.0 L40.4 64.8 L39.8 65.6 L39.2 66.4 L38.7 67.3 L38.2 68.1 L37.8 69.0 L37.4 69.9 L37.1 70.8 L36.9 71.7 L36.7 72.6 L36.6 73.5 L36.6 74.4 L36.6 75.2 L36.7 76.1 L37.0 77.0 Z"
+              fill="var(--logo-cream)"
+            />
+            <circle cx="82.5" cy="53" r="1.9" fill="var(--logo-cream)" />
+            <circle cx="95.5" cy="30.5" r="2.6" fill="var(--logo-cream)" />
+            <g transform="rotate(12 104 52)">
+              <clipPath id={hatClipId}>
+                <path d="M74 54 L106 -14 L132 54 Q103 67 74 54 Z" />
+              </clipPath>
+              <path d="M74 54 L106 -14 L132 54 Q103 67 74 54 Z" fill="var(--logo-party-1)" />
+              <g clipPath={`url(#${hatClipId})`}>
+                <path
+                  d="M95.6 8 Q105.0 15.5 114.4 8.0 L116.7 14 Q104.8 23.6 92.8 14.0 Z"
+                  fill="var(--logo-party-4)"
+                />
+                <path
+                  d="M89.5 21 Q104.5 32.9 119.4 21.0 L122.1 28 Q104.1 42.3 86.2 28.0 Z"
+                  fill="var(--logo-party-3)"
+                />
+                <path
+                  d="M83.4 34 Q103.9 50.4 124.4 34.0 L127.0 41 Q103.6 59.8 80.1 41.0 Z"
+                  fill="var(--logo-party-2)"
+                />
+                <path
+                  d="M77.8 46 Q103.4 66.5 128.9 46.0 L131.2 52 Q103.1 74.5 74.9 52.0 Z"
+                  fill="var(--logo-party-6)"
+                />
+              </g>
+              <path
+                d="M74 54 L106 -14 L132 54 Q103 67 74 54 Z"
+                fill="none"
+                stroke="var(--logo-ink)"
+                strokeWidth="5.5"
+                strokeLinejoin="round"
+              />
+              <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path
+                  d="M106 -14 C100 -22 88 -22 88 -34"
+                  stroke="var(--logo-ink)"
+                  strokeWidth="8"
+                />
+                <path
+                  d="M106 -14 C100 -22 88 -22 88 -34"
+                  stroke="var(--logo-party-5)"
+                  strokeWidth="4"
+                />
+                <path
+                  d="M106 -14 C112 -22 124 -22 124 -34"
+                  stroke="var(--logo-ink)"
+                  strokeWidth="8"
+                />
+                <path
+                  d="M106 -14 C112 -22 124 -22 124 -34"
+                  stroke="var(--logo-party-2)"
+                  strokeWidth="4"
+                />
+              </g>
+            </g>
+          </g>
+          <rect
+            x="-24"
+            y="36"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-1)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(20 -18 39)"
+          />
+          <rect
+            x="8"
+            y="6"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-2)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(-30 14 9)"
+          />
+          <rect
+            x="36"
+            y="-22"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-3)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(55 42 -19)"
+          />
+          <rect
+            x="-34"
+            y="70"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-4)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(65 -28 73)"
+          />
+          <rect
+            x="26"
+            y="-44"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-5)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(-50 32 -41)"
+          />
+          <rect
+            x="160"
+            y="-20"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-6)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(-20 166 -17)"
+          />
+          <rect
+            x="168"
+            y="34"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-1)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(40 174 37)"
+          />
+          <rect
+            x="186"
+            y="-50"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-2)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(25 192 -47)"
+          />
+          <rect
+            x="212"
+            y="90"
+            width="13"
+            height="5.5"
+            rx="2"
+            fill="var(--logo-party-3)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            transform="rotate(-35 218 93)"
+          />
+          <g transform="rotate(0 -30 50)">
+            <path
+              d="M-30 50 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6.4"
+              strokeLinecap="round"
+            />
+            <path
+              d="M-30 50 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-party-2)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </g>
+          <g transform="rotate(40 -6 -14)">
+            <path
+              d="M-6 -14 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6.4"
+              strokeLinecap="round"
+            />
+            <path
+              d="M-6 -14 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-party-4)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </g>
+          <g transform="rotate(-15 150 -40)">
+            <path
+              d="M150 -40 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6.4"
+              strokeLinecap="round"
+            />
+            <path
+              d="M150 -40 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-party-4)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </g>
+          <g transform="rotate(70 196 14)">
+            <path
+              d="M196 14 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-ink)"
+              strokeWidth="6.4"
+              strokeLinecap="round"
+            />
+            <path
+              d="M196 14 q5 -9 10 0 t10 0 t10 0"
+              fill="none"
+              stroke="var(--logo-party-2)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </g>
+          <path
+            d="M16 -30 l9 3 l-6 8 Z"
+            fill="var(--logo-party-4)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+            transform="rotate(20 20 -26)"
+          />
+          <path
+            d="M188 -14 l9 3 l-6 8 Z"
+            fill="var(--logo-party-1)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+            transform="rotate(-25 192 -10)"
+          />
+          <path
+            d="M-18 10 l9 3 l-6 8 Z"
+            fill="var(--logo-party-1)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+            transform="rotate(10 -14 14)"
+          />
+          <path
+            d="M206 60 l9 3 l-6 8 Z"
+            fill="var(--logo-party-4)"
+            stroke="var(--logo-ink)"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+            transform="rotate(-15 210 64)"
           />
         </g>
-        <circle
-          cx="-20"
-          cy="30"
-          r="4.6"
-          fill="var(--logo-brick)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-        />
-        <rect
-          x="6"
-          y="4"
-          width="9"
-          height="9"
-          rx="2"
-          fill="var(--logo-herb)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-          transform="rotate(37 10 8)"
-        />
-        <circle
-          cx="40"
-          cy="-14"
-          r="4.6"
-          fill="var(--logo-gold-deep)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-        />
-        <rect
-          x="150"
-          y="-6"
-          width="9"
-          height="9"
-          rx="2"
-          fill="var(--logo-brick)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-          transform="rotate(71 154 -2)"
-        />
-        <circle
-          cx="176"
-          cy="20"
-          r="4.6"
-          fill="var(--logo-herb)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-        />
-        <rect
-          x="196"
-          y="56"
-          width="9"
-          height="9"
-          rx="2"
-          fill="var(--logo-gold-deep)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-          transform="rotate(105 200 60)"
-        />
-        <circle
-          cx="-30"
-          cy="84"
-          r="4.6"
-          fill="var(--logo-gold-deep)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-        />
-        <rect
-          x="206"
-          y="96"
-          width="9"
-          height="9"
-          rx="2"
-          fill="var(--logo-brick)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-          transform="rotate(139 210 100)"
-        />
-        <circle
-          cx="24"
-          cy="-34"
-          r="4.6"
-          fill="var(--logo-brick)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-        />
-        <rect
-          x="170"
-          y="-34"
-          width="9"
-          height="9"
-          rx="2"
-          fill="var(--logo-herb)"
-          stroke="var(--logo-ink)"
-          strokeWidth="2.2"
-          transform="rotate(173 174 -30)"
-        />
       </g>
-    </g>
-  </>
-)
+    </>
+  )
+}

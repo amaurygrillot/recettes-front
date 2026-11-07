@@ -7,6 +7,7 @@ const SEARCHED: SearchCriteria = {
   categoryId: 'c-1',
   exactCategory: true,
   tagId: 't-1',
+  ingredientIds: ['i-1', 'i-2'],
   author: 'Odile',
   sort: 'title-asc',
 }
@@ -18,6 +19,7 @@ describe('searchDraft', () => {
       categoryId: 'c-1',
       exactCategory: true,
       tagId: 't-1',
+      ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',
     })
   })
@@ -44,6 +46,7 @@ describe('searchDraft', () => {
     ['a word', true, { ...EMPTY_DRAFT, query: 'tarte' }, false],
     ['a category', true, { ...EMPTY_DRAFT, categoryId: 'c-1' }, false],
     ['a tag', true, { ...EMPTY_DRAFT, tagId: 't-1' }, false],
+    ['an ingredient', true, { ...EMPTY_DRAFT, ingredientIds: ['i-1'] }, false],
     ['an author', true, { ...EMPTY_DRAFT, author: 'Odile' }, false],
     ['spaces as an author', false, { ...EMPTY_DRAFT, author: '  ' }, false],
     ['only « this category only »', false, { ...EMPTY_DRAFT, exactCategory: true }, false],

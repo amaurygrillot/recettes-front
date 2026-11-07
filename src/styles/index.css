@@ -55,6 +55,13 @@
   --color-disabled-text: #7d6d58;
   --color-disabled-border: #b8a98f;
   --color-skeleton: #efe3c6;
+  /* The party colours of Mijotine's hat and confetti (R4): used nowhere else. */
+  --color-party-pink: #f4727f;
+  --color-party-teal: #4fc7a4;
+  --color-party-blue: #62b6f0;
+  --color-party-yellow: #ffd43f;
+  --color-party-orange: #ff9b45;
+  --color-party-violet: #b596f0;
 
   --font-title: 'Fraunces Variable', Georgia, serif;
   --font-body: 'Atkinson Hyperlegible', system-ui, sans-serif;
@@ -154,6 +161,7 @@
   --shadow-card: 0 2px 0 rgb(43 29 18 / 0.12), 0 8px 20px rgb(43 29 18 / 0.16);
   --shadow-stamp: 4px 4px 0 var(--color-ink-900);
   --shadow-stamp-sm: 3px 3px 0 var(--color-ink-900);
+  --shadow-stamp-xs: 2px 2px 0 var(--color-ink-900);
   --shadow-sheet: 0 16px 36px rgb(43 29 18 / 0.26);
   /* A bar fixed to the bottom of the page, above the tabs: its shadow falls upwards. */
   --shadow-bar: 0 -2px 6px rgb(43 29 18 / 0.1);

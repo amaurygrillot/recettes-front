@@ -3,7 +3,6 @@ export const strings = {
 
   quit: 'Quitter',
   stepOf: (step: number, total: number) => `Étape ${step} sur ${total}`,
-  stamp: 'ÉTAPE',
   previous: 'Précédent',
   next: 'Suivant',
   finish: 'Terminer',

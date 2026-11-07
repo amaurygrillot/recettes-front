@@ -59,7 +59,7 @@ parsed `404` problem+json for an unknown recipe id. Not exercised live: the 401-
   [design-boards.md](design-boards.md#recipeeditorscreen-recettesnouvelle-and-recettesidmodifier). Shared pieces added: `AutocompleteField`,
   `SelectField`, `TextArea`, `ChoiceField`, `SearchPill`, `ProgressBar`, `DeleteRecipeDialog` and `DeletionFailureBanner` (shared with the recipe page),
   `TextField` `counter` and `compact`, `ErrorState` `icon`, `RichTextEditor` `locked` and the stitched tip frame, `useToasts` actions (« Annuler »),
-  `useDebouncedValue`, `plainText`, `formatWhen`, `uploadMedia` with an abort signal; dnd-kit is installed. Checked at 390, 768 and 1280 px.
+  `useDebouncedValue`, `plainText`, `formatWhen`, `uploadMedia` with an abort signal; dnd-kit was installed for it and removed by R7 (no dragging any more). Checked at 390, 768 and 1280 px.
 
 - **CookingScreen — done (2026-10-24).** `/recettes/:id/pas-a-pas`; decisions in
   [design-boards.md](design-boards.md#cookingscreen-recettesidpas-a-pas). Shared pieces added or promoted: `AdviceNote` and `RecipeProblem` / `recipeView` (to `app/`),

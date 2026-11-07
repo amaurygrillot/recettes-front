@@ -60,8 +60,38 @@ Pulled `main`, ran the four checks (green). Walked the app at 390, 768 and 1280 
 
 - Decide whether the tablet header should be sticky (without the tab, searching needs a scroll back to the top).
 - Move the focus to the results' heading after a validated search.
-- Ingredient filter: needs an `ingredient` criterion on `GET /recipes` in the back end.
+- ~~Ingredient filter: needs an `ingredient` criterion on `GET /recipes` in the back end.~~ Done in the second round below.
 - Log `AbortError` below error level.
+
+## Second round: R5 extended, R6, R7, R8 and the ingredient filter
+
+The canvas changed after the first round (new boards R5.2 to R5.4, R6, R7.1 to R7.4 and R8), and the ingredient search the R1 boards draw was still
+missing. It is recettes-front PR 20 together with recettes-back PR 10. Decisions are in
+[design-boards.md](design-boards.md) (R5, [the ingredient filter](design-boards.md#the-ingredient-filter-retouche-1-follow-up), R6, R7, R8).
+
+- **R5, extended**: the « ÉTAPE n » stamp is gone **on every screen**, not only on a phone (`StepContent` lost `showStamp`, `StepNumber` its `word`
+  variant, the strings their `stamp`). The reading column, the panel and the footer are unchanged.
+- **R6**: the `list-number` icon is the board's new drawing (taller digits at a thinner stroke).
+- **R7**: no drag handle in the editor, on the photos, the steps and the ingredient lines. `SortableList`, `GripButton` and the drag strings are deleted,
+  **dnd-kit is removed from `package.json`**, the lists are a plain `ItemList` / `Item`; the arrows' buttons, announcements and focus-following stay.
+- **R8**: a card with several photos is a small slider (dots, counter « 1 / 3 », a drag that follows the finger, arrows and ← → on a desktop). A tap anywhere
+  still opens the recipe.
+- **Ingredient filter**: the « Ingrédients » block of the search (field with suggestions asked of the back end, chips, « Recettes avec tous ces
+  ingrédients. », pill with its count), in the overlay and in the desktop column, `&ingredient=<id>` in the address (repeated).
+- **The back end (`recettes-back`) was changed, which the first round had ruled out**, because both the filter and the slider need data the API did not
+  give: `GET /recipes` takes `ingredientIds` (every one required, twenty at most, one row per recipe) and the summary lists `coverMediaIds`. Changed there:
+  `RecipeSearchRequest`, `RecipesRepository.searchIds`, `RecipeService`, `RecipeMapper`, `RecipeSummaryResponse`, `RecipeMcpTools`, `openapi.yaml`,
+  `docs/recipes-domain-model.md`, `recipes.http`, and the tests (`RecipesRepositoryTest`, `RecipeServiceTest`, `RecipeMapperTest`,
+  `RecipesIntegrationTest`). The tests that were run against the development database pass (the new ones and the contract tests). Restart the back end from
+  the IDE to use them: until then the front falls back to the first photo of a card and the filter has no effect on the list.
+- **Checked**: lint, format and the 1936 front tests; in the browser against the modified back end (on another port, since stopped) the cards with two photos
+  show « 1 / 2 », a touch drag moves and settles, the search finds « Riz arborio » by typing, chooses it, validates to
+  `/rechercher?ingredient=<id>` with its chip and the one recipe that uses it; the cooking step has no stamp at 768 px. **Not checked in the browser**: the
+  editor without handles (it needs a signed-in member), the card arrows on hover, and a real finger on a phone.
+- **À valider**: all the ingredients are required (AND), as the board's sentence says; the arrows of a card show on the card's hover, not only the photo's;
+  the `coverMediaId` field is kept next to `coverMediaIds` (redundant, but nothing that reads it breaks); the `grip` icon stays in the icon set unused.
+- **Out of scope, noticed**: `RecipesRepositoryTest.filtersByTitleFragment_caseInsensitively` failed on the development database (real recipes have « pommes »
+  in their title); it now searches a fragment of its own.
 
 ## Test account (to remove)
 
