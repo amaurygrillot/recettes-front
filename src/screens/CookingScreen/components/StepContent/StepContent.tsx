@@ -1,32 +1,27 @@
 import { RichTextView } from '../../../../components/RichTextView/RichTextView'
-import { StepNumber } from '../../../../components/StepNumber/StepNumber'
 import { classNames } from '../../../../lib/classNames'
 import type { StepView } from '../../../../app/recipeView'
 import { strings } from '../../strings'
 
 export interface StepContentProps {
   step: StepView
-  /** Whether to show the brick stamp of the step: a phone's bar already says the number, so the screen passes `false` there. */
-  showStamp: boolean
   /** A photo of the step was touched: the viewer opens on it. */
   onOpenPhoto: (position: number) => void
 }
 
 /**
- * What the cook reads: the stamp of the step (not on a phone), its instruction in the biggest text of the app (22/34),
- * then its photos. One photo is a 4:3 frame under the text, several are a row of thumbnails (they do not
- * scroll: sliding is how the step changes); a touch opens the photo at the size of the screen.
+ * What the cook reads: the step's instruction in the biggest text of the app (22/34), then its photos. There is
+ * no stamp with the number: the bar above already says « Étape 3 sur 8 » (R5). One photo is a 4:3 frame under the
+ * text, several are a row of thumbnails (they do not scroll: sliding is how the step changes); a touch opens
+ * the photo at the size of the screen.
  */
-export function StepContent({ step, showStamp, onOpenPhoto }: StepContentProps) {
+export function StepContent({ step, onOpenPhoto }: StepContentProps) {
   const { photos } = step
 
   return (
     <div className="flex flex-col gap-3.5 tablet:gap-7">
-      <div className="flex flex-col gap-3.5 tablet:flex-row tablet:items-start tablet:gap-6">
-        {showStamp && <StepNumber number={step.number} word={strings.stamp} />}
-        <div className="min-w-0 tablet:max-w-140 tablet:pt-1.5">
-          <RichTextView html={step.html} size="step" />
-        </div>
+      <div className="min-w-0 tablet:max-w-140">
+        <RichTextView html={step.html} size="step" />
       </div>
       {photos.length > 0 && (
         <div className="flex gap-2.5">

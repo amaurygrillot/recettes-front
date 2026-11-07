@@ -181,7 +181,7 @@ describe('CookingScreen', () => {
       expect(screen.getByRole('button', { name: 'Ingrédients' })).toBeVisible()
     })
 
-    it.each([390, 599])(
+    it.each([390, 599, 600, 768, 1280])(
       'has no stamp of the step at $width px: the bar says the number',
       async (width) => {
         installMatchMedia(width)
@@ -192,27 +192,6 @@ describe('CookingScreen', () => {
         expect(screen.getByText('Étape 1 sur 3')).toBeVisible()
       },
     )
-
-    it.each([600, 768, 1280])('keeps the stamp of the step at $width px', async (width) => {
-      installMatchMedia(width)
-      renderCooking()
-      await screen.findByText('Préchauffe le four à 200 °C.')
-
-      expect(screen.getByText('ÉTAPE')).toBeInTheDocument()
-    })
-
-    it('puts the stamp back, or takes it away, as the screen is turned across the tablet width', async () => {
-      const screenWidth = installMatchMedia(599)
-      renderCooking()
-      await screen.findByText('Préchauffe le four à 200 °C.')
-      expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
-
-      screenWidth.resizeTo(600)
-      expect(screen.getByText('ÉTAPE')).toBeInTheDocument()
-
-      screenWidth.resizeTo(599)
-      expect(screen.queryByText('ÉTAPE')).not.toBeInTheDocument()
-    })
 
     it('goes forward and back with the buttons, the first having no way back', async () => {
       const user = userEvent.setup()
