@@ -13,6 +13,18 @@ function nonEmpty(text: string | undefined): string | undefined {
   return text === '' ? undefined : text
 }
 
+/**
+ * The thumbnails of the cover pictures, in order. `coverMediaIds` lists them all; `coverMediaId` (the first) is what a back end
+ * that does not send the list yet still says, so the card keeps its photo meanwhile.
+ */
+function coverUrlsOf({
+  coverMediaIds = [],
+  coverMediaId,
+}: Schemas['RecipeSummaryResponse']): string[] {
+  const ids = coverMediaIds.length > 0 || !coverMediaId ? coverMediaIds : [coverMediaId]
+  return ids.map((id) => mediaUrl(id, 'thumbnail'))
+}
+
 function namesOf(items: readonly { name?: string }[] | undefined): string[] {
   return (items ?? []).flatMap((item) => (item.name ? [item.name] : []))
 }
@@ -32,7 +44,7 @@ export function toRecipeCard(
     id,
     path: paths.recipe(id),
     title,
-    coverUrl: summary.coverMediaId ? mediaUrl(summary.coverMediaId, 'thumbnail') : undefined,
+    coverUrls: coverUrlsOf(summary),
     categories: namesOf(summary.categories).slice(0, MAX_CATEGORIES),
     tags: tags.slice(0, MAX_TAGS),
     hiddenTagCount: Math.max(0, tags.length - MAX_TAGS),

@@ -9,7 +9,7 @@ const RECIPE: RecipeCardModel = {
   id: '42',
   path: '/recettes/42',
   title: 'Gratin dauphinois de Mamie',
-  coverUrl: 'http://localhost:8080/media/m-1?variant=thumbnail',
+  coverUrls: ['http://localhost:8080/media/m-1?variant=thumbnail'],
   categories: ['Plat'],
   tags: ['Four', 'Crème', 'Hiver'],
   hiddenTagCount: 2,
@@ -84,13 +84,13 @@ describe('RecipeCard', () => {
     const { container } = renderCard()
 
     const photo = container.querySelector('img')
-    expect(photo).toHaveAttribute('src', RECIPE.coverUrl)
+    expect(photo).toHaveAttribute('src', RECIPE.coverUrls[0])
     expect(photo).toHaveAttribute('alt', '')
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
   })
 
   it('shows the mascot and says so, not a gap, for a recipe without a photo', () => {
-    const { container } = renderCard({ ...RECIPE, coverUrl: undefined })
+    const { container } = renderCard({ ...RECIPE, coverUrls: [] })
 
     expect(container.querySelector('img')).not.toBeInTheDocument()
     expect(screen.getByText('Pas encore de photo')).toBeVisible()
@@ -160,7 +160,7 @@ describe('RecipeCard', () => {
     const { container } = renderCard()
     await expectNoAccessibilityViolations(container)
 
-    const withoutPhoto = renderCard({ ...RECIPE, coverUrl: undefined })
+    const withoutPhoto = renderCard({ ...RECIPE, coverUrls: [] })
     await expectNoAccessibilityViolations(withoutPhoto.container)
   })
 })

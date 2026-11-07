@@ -10,6 +10,7 @@ describe('toRecipeCard', () => {
       id: '42',
       title: 'Gratin dauphinois de Mamie',
       coverMediaId: 'm-1',
+      coverMediaIds: ['m-1'],
       categories: [{ id: 'c', name: 'Plat', categoryType: 'MAIN' }],
       tags: named('Four', 'Crème'),
       author: { id: 'u', username: 'Odile' },
@@ -20,13 +21,32 @@ describe('toRecipeCard', () => {
       id: '42',
       path: '/recettes/42',
       title: 'Gratin dauphinois de Mamie',
-      coverUrl: `${API_BASE_URL}/media/m-1?variant=thumbnail`,
+      coverUrls: [`${API_BASE_URL}/media/m-1?variant=thumbnail`],
       categories: ['Plat'],
       tags: ['Four', 'Crème'],
       hiddenTagCount: 0,
       author: 'Odile',
       createdAt: '2026-10-21T12:00:00Z',
     })
+  })
+
+  it('keeps every cover picture, in order, for the card to slide through', () => {
+    const card = toRecipeCard({
+      id: '1',
+      title: 'Tarte',
+      coverMediaId: 'm-1',
+      coverMediaIds: ['m-1', 'm-2', 'm-3'],
+    })
+
+    expect(card?.coverUrls).toEqual(
+      ['m-1', 'm-2', 'm-3'].map((id) => `${API_BASE_URL}/media/${id}?variant=thumbnail`),
+    )
+  })
+
+  it('keeps the first picture while the back end does not send the whole list yet', () => {
+    const card = toRecipeCard({ id: '1', title: 'Tarte', coverMediaId: 'm-1' })
+
+    expect(card?.coverUrls).toEqual([`${API_BASE_URL}/media/m-1?variant=thumbnail`])
   })
 
   it('shows three tags and counts the others', () => {
@@ -55,10 +75,16 @@ describe('toRecipeCard', () => {
   })
 
   it('has no cover, no author and no date when the API gave none', () => {
-    const card = toRecipeCard({ id: '1', title: 'Soupe', coverMediaId: null, author: { id: 'u' } })
+    const card = toRecipeCard({
+      id: '1',
+      title: 'Soupe',
+      coverMediaId: null,
+      coverMediaIds: [],
+      author: { id: 'u' },
+    })
 
     expect(card).toMatchObject({
-      coverUrl: undefined,
+      coverUrls: [],
       author: undefined,
       createdAt: undefined,
       categories: [],
