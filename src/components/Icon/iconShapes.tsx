@@ -5,7 +5,8 @@ import type { ReactElement } from 'react'
  * entry is the inside of the <svg>: stroke, caps and joins come from Icon. Elements that are
  * filled dots (grip, more, bullets) set their own fill.
  *
- * `heart`, `share`, `clock` and `users` exist in the set but their features do not exist yet.
+ * `heart`, `share`, `clock` and `users` exist in the set but their features do not exist yet, and `grip` since R7
+ * took the drag handles out of the editor.
  */
 const ICON_SHAPES = {
   home: (
@@ -283,14 +284,21 @@ const ICON_SHAPES = {
       <path d="M10 17.5 H20" />
     </>
   ),
+  // R6: the digits are taller (5 units) and drawn thinner than the rest, so that 1, 2 and 3 stay apart at 24 px.
   'list-number': (
     <>
-      <path d="M3.8 5.2 L5.2 4.2 V8.8" />
-      <path d="M3.8 11 a1.4 1.4 0 0 1 2.8 0.3 c0 1 -1.3 1.6 -2.8 2.9 H6.8" />
-      <path d="M3.8 16.3 H6.6 L5.1 18 a1.3 1.3 0 1 1 -1.3 1.9" />
-      <path d="M10 6.5 H20" />
-      <path d="M10 12 H20" />
-      <path d="M10 17.5 H20" />
+      <path d="M3.2 4.6 L5.3 2.8 V8 M3.7 8 H6.9" strokeWidth={1.4} />
+      <path
+        d="M3.3 11.2 C3.3 9.6 7.1 9.6 7.1 11.4 C7.1 12.8 4.8 13.6 3.3 15.2 H7.3"
+        strokeWidth={1.4}
+      />
+      <path
+        d="M3.3 18.6 C3.6 17.4 7.1 17.4 7.1 19 C7.1 20 5.8 20.2 5.2 20.2 C6.8 20.2 7.3 20.8 7.3 21.6 C7.3 22.8 3.7 22.8 3.3 21.6"
+        strokeWidth={1.4}
+      />
+      <path d="M11 5.4 H21" />
+      <path d="M11 12.6 H21" />
+      <path d="M11 19.8 H21" />
     </>
   ),
   undo: (
