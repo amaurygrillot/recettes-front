@@ -532,10 +532,15 @@ single `tagId` was replaced, not kept beside it) and keeps the recipes that carr
 - **The criterion holds ids**: `SearchCriteria.tagIds` (in the order they were chosen, each once, at most `MAX_TAG_FILTERS` = 20, whatever a hand-written
   address says), `&tag=<id>` repeated in the address (a link with a single `&tag=` still reads the same), `tagIds` in the request (`toRecipeFilters`).
   Each chosen tag is **one filter** for the « Filtres » count, for the badge of its pill and for « Rechercher » being enabled.
-- **Chips and field both add**: a chip (`TagChips`) chooses its tag or drops it, the chosen ones first; the search field of the section toggles in the
-  same way (`FiltersPanel.toggleTag`), so the two cannot disagree.
-- **On the results page** every chosen tag is a removable chip of its own (« Retirer le filtre Fruits »); the names come with the loaded tag list, so a tag
-  that no longer exists has no chip but still filters, like a category that does not exist.
+- **Chips and field both add**: a chip (`TagChips`) chooses its tag or drops it, the chosen ones first (decided: kept, as the board draws it, even
+  though a chip moves when touched); the search field of the section toggles in the same way, through one `toggle` in `TagFilter`, so the two cannot
+  disagree. `TagFilter` is to the tags what `IngredientFilter` is to the ingredients: field, chips, limit and sentence in one component.
+- **The sentence under the chips** says what the tags mean for the list, as the ingredients' does (not on the board, added so that an empty list is
+  never a mystery): « Aucun tag choisi : toutes les recettes sont retenues. », then « Recettes avec tous ces tags. ».
+- **On the results page** every chosen tag is a removable chip of its own (« Retirer le filtre Fruits »); the names come with the loaded tag list.
+- **A tag that no longer exists** (a link made before it was deleted) is **taken out of the address** once the tags are loaded
+  (`useDropUnknownTags`, in `useSearchPage`, with a log line), so no filter can narrow the list without a chip to show it. While the tags load, or if
+  they could not be loaded, the address is left as it is. (The category and the ingredient that no longer exist still filter without a chip.)
 - **Twenty at most**: the API refuses more, so at twenty the field is replaced by « 20 tags au maximum. », the tags not chosen are off, and the chosen
   ones still drop. Nobody is expected to get there: it is there so that a 21st touch can never become a `400`.
 - **À valider**: "all of them" (AND) is what is built, like the ingredients, since each tag narrows the list; "any of them" would be a different parameter.
