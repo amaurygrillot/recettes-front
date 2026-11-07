@@ -56,7 +56,7 @@ export function IngredientFilter({ ingredientIds, onChange, dense }: IngredientF
           noResultText={ingredients.noResult}
         />
       )}
-      {suggestions.failed && (
+      {suggestions.failed && !full && (
         <p role="alert" className="text-detail font-bold text-brick">
           {ingredients.searchFailed}
         </p>

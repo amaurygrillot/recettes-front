@@ -66,7 +66,7 @@ Pulled `main`, ran the four checks (green). Walked the app at 390, 768 and 1280 
 ## Second round: R5 extended, R6, R7, R8 and the ingredient filter
 
 The canvas changed after the first round (new boards R5.2 to R5.4, R6, R7.1 to R7.4 and R8), and the ingredient search the R1 boards draw was still
-missing. Nothing of this round is committed yet (see the branches offered at the end of the session). Decisions are in
+missing. It is recettes-front PR 20 together with recettes-back PR 10. Decisions are in
 [design-boards.md](design-boards.md) (R5, [the ingredient filter](design-boards.md#the-ingredient-filter-retouche-1-follow-up), R6, R7, R8).
 
 - **R5, extended**: the « ÉTAPE n » stamp is gone **on every screen**, not only on a phone (`StepContent` lost `showStamp`, `StepNumber` its `word`

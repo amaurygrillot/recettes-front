@@ -1,4 +1,5 @@
 import { useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
+import { logger } from '../../lib/logger'
 import { strings } from './strings'
 
 /** A finger has to go this far (or a fifth of the photo, if that is less) for the next photo to take over. */
@@ -88,8 +89,13 @@ export function useCoverSlider(count: number) {
             gesture.current = undefined
             return
           }
-          // The photos follow the finger even if it leaves the frame.
-          event.currentTarget.setPointerCapture(event.pointerId)
+          // The photos follow the finger even if it leaves the frame. A pointer that is already gone
+          // cannot be captured: the drag then simply ends with the events that still come.
+          try {
+            event.currentTarget.setPointerCapture(event.pointerId)
+          } catch {
+            logger.debug('The pointer of a card drag could not be captured')
+          }
         }
         dragged.current = true
         const pastTheEnd = (index === 0 && sideways > 0) || (index === last && sideways < 0)

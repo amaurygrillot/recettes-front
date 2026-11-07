@@ -13,9 +13,10 @@ function Arrow({ icon, label, onClick }: { icon: IconName; label: string; onClic
       type="button"
       aria-label={label}
       // The keys ← and → on the card are the keyboard's way; these are for the pointer, so they stay out of the tab order.
+      // They take no touch while hidden (a touch screen of 1024 px or more has no hover): a tap there opens the recipe.
       tabIndex={-1}
       onClick={onClick}
-      className="pointer-events-auto grid size-11 cursor-pointer place-items-center rounded-full border-2 border-ink-900 bg-paper-50 text-ink-900 opacity-0 shadow-stamp-xs transition-opacity group-focus-within/card:opacity-100 group-hover/card:opacity-100 focus-visible:opacity-100 active:bg-butter-200"
+      className="pointer-events-none grid size-11 cursor-pointer place-items-center rounded-full border-2 border-ink-900 bg-paper-50 text-ink-900 opacity-0 shadow-stamp-xs transition-opacity group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100 group-hover/card:pointer-events-auto group-hover/card:opacity-100 focus-visible:opacity-100 active:bg-butter-200"
     >
       <Icon name={icon} size={24} strokeWidth={2.8} />
     </button>

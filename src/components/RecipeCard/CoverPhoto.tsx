@@ -108,7 +108,7 @@ export function CoverPhoto({ urls, slider }: CoverPhotoProps) {
         style={{ transform: `translateX(calc(${-index * 100}% + ${pull ?? 0}px))` }}
       >
         {urls.map((url, position) => (
-          <div key={position} className="size-full shrink-0">
+          <div key={`${position}:${url}`} className="size-full shrink-0">
             <Picture url={url} />
           </div>
         ))}
