@@ -6,22 +6,37 @@ export interface SearchActionsProps {
   searchable: boolean
   onReset: () => void
   onSearch: () => void
-  /** « Rechercher » takes the width the reset button leaves (the sheet), else its own (the desktop panel). */
+  /** The two buttons share the width of the sheet (a phone), else each has its own (the desktop panel). */
   stretch: boolean
 }
 
 /** The two buttons that answer the search overlay: start over without closing, or search. */
 export function SearchActions({ searchable, onReset, onSearch, stretch }: SearchActionsProps) {
+  const reset = (
+    <Button variant="secondary" fullWidth={stretch} onClick={onReset}>
+      {strings.filters.reset}
+    </Button>
+  )
+  const search = (
+    <Button fullWidth={stretch} disabled={!searchable} onClick={onSearch}>
+      {strings.overlay.search}
+    </Button>
+  )
+
+  if (!stretch) {
+    return (
+      <>
+        {reset}
+        {search}
+      </>
+    )
+  }
+  // Side by side while both labels fit (they need 331 px), one under the other when they do not, so that
+  // no label is ever cut: « Rechercher », the answer, stays at the bottom, under the thumb.
   return (
-    <>
-      <Button variant="secondary" onClick={onReset}>
-        {strings.filters.reset}
-      </Button>
-      <div className={stretch ? 'min-w-0 flex-1' : undefined}>
-        <Button fullWidth={stretch} disabled={!searchable} onClick={onSearch}>
-          {strings.overlay.search}
-        </Button>
-      </div>
-    </>
+    <div className="flex w-full flex-wrap gap-3">
+      <div className="min-w-fit flex-1">{reset}</div>
+      <div className="min-w-fit flex-1">{search}</div>
+    </div>
   )
 }

@@ -95,7 +95,8 @@ export function IngredientLine({
       {choice.outcome !== undefined && (
         <IngredientNotice outcome={choice.outcome} onRetry={choice.retry} />
       )}
-      <div className="flex items-end gap-2.5">
+      {/* The note needs room to be written in: without 144 px left beside the quantity and the unit, it goes under them. */}
+      <div className="flex flex-wrap items-end gap-2.5">
         <div className="w-24 shrink-0">
           <TextField
             label={ingredients.quantity}
@@ -107,7 +108,7 @@ export function IngredientLine({
             {...register(`${base}.quantity`)}
           />
         </div>
-        <div className="w-28 shrink-0">
+        <div className="min-w-28 flex-1">
           <SelectField
             label={ingredients.unit}
             emptyLabel={ingredients.noUnit}
@@ -115,7 +116,7 @@ export function IngredientLine({
             {...register(`${base}.unitId`)}
           />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-36 flex-1">
           <TextField
             label={ingredients.note}
             compact

@@ -35,7 +35,7 @@ export function CookingFooter({
     <div className="flex-none">
       {above !== undefined && <div className="px-4 pt-2.5 pb-3">{above}</div>}
       <div className="border-t-2 border-ink-900 bg-paper-50 px-4 pt-3 pb-5.5 tablet:py-3.5">
-        <div className="mx-auto flex max-w-140 gap-3 desktop:max-w-170">
+        <div className="@container mx-auto flex max-w-140 gap-3 desktop:max-w-170">
           {total > 1 && (
             <div className="flex-1">
               <Button
@@ -45,7 +45,8 @@ export function CookingFooter({
                 disabled={step === 1}
                 onClick={onPrevious}
               >
-                {strings.previous}
+                {/* Both labels need 352 px; below that « Précédent » is only its arrow, and keeps its name for a screen reader. */}
+                <span className="sr-only @min-[22rem]:not-sr-only">{strings.previous}</span>
               </Button>
             </div>
           )}

@@ -27,13 +27,14 @@ export function EmptyPhotos({ pick, coverNote }: EmptyPhotosProps) {
         {photos.formats}
         {coverNote && ` ${photos.coverNote}`}
       </p>
-      <div className="mt-1.5 flex w-full gap-3">
-        <div className="flex-1">
+      {/* One under the other on a phone, where two labels and their icons do not fit side by side. */}
+      <div className="mt-1.5 flex w-full flex-col gap-3 tablet:flex-row">
+        <div className="tablet:min-w-0 tablet:flex-1">
           <Button icon="camera" size="medium" fullWidth onClick={pick.takePhoto}>
             {photos.takePhoto}
           </Button>
         </div>
-        <div className="flex-1">
+        <div className="tablet:min-w-0 tablet:flex-1">
           <Button
             variant="secondary"
             icon="image"

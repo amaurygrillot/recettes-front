@@ -620,3 +620,28 @@ A recipe with **several photos** shows them on its card as a small slider; with 
 - **Differences from the board**: the arrows show on the **card's** hover, not only the photo's; the counter's text is 15 px (the `caption` token)
   where the board has 14; the arrows' shadow is a new `stamp-xs` token (2 px). Until the back end that sends `coverMediaIds` runs, the card falls back
   to the first photo.
+
+## Narrow phones (320 px): nothing wider than the screen
+
+Found on a Galaxy with the display zoom raised (about 325 CSS px wide) and Firefox: one row 33 px too wide made the **whole page** wider than the
+screen, and everything fixed to the page (sheets, dialogs, the bars) was laid out against that wider page, so it was cut on the right and
+off-centre, and the bars slid under the browser's toolbar. The boards are drawn at 390 px; **320 px is the narrowest screen the app supports**,
+and a row that fits only from 375 px is a bug. What was changed, and why:
+
+- **The three round buttons of a group and of a step** (move up, down, remove) go **under** the title, together, when they do not fit beside it
+  (`flex-wrap`, the buttons in one `ml-auto` block so they never part). Same for the title button of a group.
+- **« Note » of an ingredient line** goes under the quantity and the unit unless 144 px are left for it (`flex-wrap`, `min-w-36`): a 40 px field
+  could not be written in.
+- **« Prendre une photo » and « Galerie »** are one under the other on a phone, side by side from a tablet (two labels with their icons need 360 px).
+- **A section title is one long word** (« Recommandations »): it breaks, with a hyphen where French allows it (`hyphens-auto`, `[overflow-wrap:anywhere]`),
+  as does the title of the full-screen writing mode (« Introduction » beside « Terminé »).
+- **The step-by-step footer**: « Précédent » is only its arrow (keeping its name for a screen reader) while the footer is narrower than 352 px
+  (a container query on the footer, not on the screen: it is the width of the two labels that decides), « Suivant » keeps its word. That is
+  every phone narrower than 384 px.
+- **The footer of the search sheet**: « Réinitialiser » and « Rechercher » side by side while both labels fit (331 px), one under the other
+  otherwise, « Rechercher » at the bottom under the thumb. No label is ever cut.
+- **How to check**: a probe that lists every element whose right edge is past the screen's, at 320, 360, 375 and 414 px, on the editor (with a
+  second group and a second step), the step-by-step mode and its sheets, and the search sheet. Run it in the browser pane after a change to a row.
+- **Not reproducible in the pane (Chromium)**: what Firefox for Android does with its dynamic toolbar and its keyboard. The bars and sheets that
+  were cut under the toolbar all belonged to pages that overflowed; the search sheet, on a page that did not, was never cut. To be checked again
+  on the phone after the overflow fix.

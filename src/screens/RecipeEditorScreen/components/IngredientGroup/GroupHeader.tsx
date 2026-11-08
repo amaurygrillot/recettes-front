@@ -58,7 +58,8 @@ export function GroupHeader({ index, total, lineCount, onMove, onRemove }: Group
           <span className="text-detail text-ink-700">{ingredients.count(lineCount)}</span>
         </div>
       )}
-      <div className="flex items-center gap-2">
+      {/* On a narrow screen (a phone of 320 px) the three round buttons go under the title button, together. */}
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={() => {
@@ -69,33 +70,35 @@ export function GroupHeader({ index, total, lineCount, onMove, onRemove }: Group
           <Icon name={renaming ? 'check' : 'edit'} size={22} strokeWidth={2.4} />
           {renaming ? ingredients.validateTitle : toggleLabel}
         </button>
-        <GestureButton
-          label={ingredients.moveGroupUp}
-          icon="chevron-up"
-          size="large"
-          data-move="back"
-          disabled={index === 0}
-          onClick={() => {
-            onMove(-1)
-          }}
-        />
-        <GestureButton
-          label={ingredients.moveGroupDown}
-          icon="chevron-down"
-          size="large"
-          data-move="forward"
-          disabled={index === total - 1}
-          onClick={() => {
-            onMove(1)
-          }}
-        />
-        <GestureButton
-          label={ingredients.removeGroup}
-          icon="trash"
-          size="large"
-          tone="brick"
-          onClick={onRemove}
-        />
+        <div className="ml-auto flex items-center gap-2">
+          <GestureButton
+            label={ingredients.moveGroupUp}
+            icon="chevron-up"
+            size="large"
+            data-move="back"
+            disabled={index === 0}
+            onClick={() => {
+              onMove(-1)
+            }}
+          />
+          <GestureButton
+            label={ingredients.moveGroupDown}
+            icon="chevron-down"
+            size="large"
+            data-move="forward"
+            disabled={index === total - 1}
+            onClick={() => {
+              onMove(1)
+            }}
+          />
+          <GestureButton
+            label={ingredients.removeGroup}
+            icon="trash"
+            size="large"
+            tone="brick"
+            onClick={onRemove}
+          />
+        </div>
       </div>
     </div>
   )
