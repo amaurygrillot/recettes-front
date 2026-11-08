@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -46,6 +46,34 @@ describe('AutocompleteField', () => {
     expect(list).toHaveAttribute('data-placement', 'above')
     // Ends 8 px over the field, 170 px high.
     expect(list).toHaveStyle({ maxHeight: '170px', top: '162px' })
+  })
+
+  it('takes back the place it gave its list over the field when the list closes', async () => {
+    installKeyboardScreen({ fieldTop: 340, fieldBottom: 396, visibleHeight: 400, listHeight: 170 })
+    const user = userEvent.setup()
+    render(<Harness />)
+
+    await user.type(field(), 'far')
+    const list = screen.getByRole('listbox', { name: 'Ingrédients existants' })
+    expect(list).toHaveAttribute('data-placement', 'above')
+    await user.keyboard('{Escape}')
+
+    expect(list).not.toBeVisible()
+    expect(list).not.toHaveAttribute('data-placement')
+    expect(list.style.top).toBe('')
+    expect(list.style.maxHeight).toBe('')
+  })
+
+  it('does not place its list again for a scroll inside the list itself', async () => {
+    installKeyboardScreen({ fieldTop: 340, fieldBottom: 396, visibleHeight: 400, listHeight: 170 })
+    render(<Harness />)
+    await userEvent.setup().type(field(), 'far')
+    const list = screen.getByRole('listbox', { name: 'Ingrédients existants' })
+    list.style.top = '5px'
+
+    fireEvent.scroll(list)
+
+    expect(list.style.top).toBe('5px')
   })
 
   it('keeps its list under the field when there is room there', async () => {

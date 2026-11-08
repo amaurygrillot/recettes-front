@@ -53,6 +53,8 @@ function roomAround(field: DOMRect, scroller: HTMLElement | null): ListRoom {
 }
 
 function putBelow(list: HTMLElement): void {
+  // Nothing was put over a field: nothing to take back (this runs after every render of every field).
+  if (list.dataset.placement === undefined) return
   delete list.dataset.placement
   for (const property of ['maxHeight', 'width', 'left', 'top'] as const) {
     list.style[property] = ''
@@ -115,16 +117,21 @@ export function useListPlacement(
     const replace = (): void => {
       place()
     }
+    // The list's own scrolling moves nothing: it is not a reason to measure again (it would work at every frame).
+    const replaceAfterScroll = (event: Event): void => {
+      if (event.target instanceof Node && list.current?.contains(event.target) === true) return
+      place()
+    }
     viewport?.addEventListener('resize', replace)
     viewport?.addEventListener('scroll', replace)
     window.addEventListener('resize', replace)
     // A scroll of the sheet that holds the field does not bubble: it is listened to on the way down.
-    document.addEventListener('scroll', replace, true)
+    document.addEventListener('scroll', replaceAfterScroll, true)
     return () => {
       viewport?.removeEventListener('resize', replace)
       viewport?.removeEventListener('scroll', replace)
       window.removeEventListener('resize', replace)
-      document.removeEventListener('scroll', replace, true)
+      document.removeEventListener('scroll', replaceAfterScroll, true)
     }
-  }, [open])
+  }, [open, list])
 }
