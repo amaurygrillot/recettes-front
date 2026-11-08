@@ -24,13 +24,12 @@ export function activeFiltersOf(
   if (criteria.categoryId !== undefined && options.status === 'ready') {
     const name = findCategory(options.categories, criteria.categoryId)?.node.name
     if (name !== undefined) {
-      const label = criteria.exactCategory ? active.exactCategory(name) : name
       chips.push({
         key: 'category',
-        label,
-        removeLabel: active.removeFilter(label),
+        label: name,
+        removeLabel: active.removeFilter(name),
         onRemove: () => {
-          change({ categoryId: undefined, exactCategory: false })
+          change({ categoryId: undefined })
         },
       })
     }

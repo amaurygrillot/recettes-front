@@ -53,6 +53,8 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
   // The sections are drawn again from the values the form was given when this changes.
   const [version, setVersion] = useState(0)
   const [attempted, setAttempted] = useState(false)
+  // The person put the summary away (its cross, or one of its links): it comes back at the next refusal.
+  const [summaryDismissed, setSummaryDismissed] = useState(false)
   const form = useForm<EditorValues>({
     resolver: zodResolver(editorSchema),
     defaultValues: beginning.values,
@@ -141,8 +143,14 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
     () => {
       logger.info('The recipe cannot be saved yet: something is missing')
       setAttempted(true)
+      setSummaryDismissed(false)
     },
   )
+
+  function dismissSummary(): void {
+    logger.debug('The summary of what is missing was put away')
+    setSummaryDismissed(true)
+  }
 
   return {
     form,
@@ -151,6 +159,9 @@ export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOption
     draftState: draft.state,
     /** What is missing, once « Enregistrer » found something, until it is all there. */
     problems: attempted ? missing : [],
+    /** The summary of those problems at the top was put away: the fields still say what is wrong. */
+    summaryDismissed,
+    dismissSummary,
     /** The same, counted for each section, for the index. */
     problemCounts: attempted ? countsBySection : {},
     submit,

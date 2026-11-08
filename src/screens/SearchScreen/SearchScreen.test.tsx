@@ -231,19 +231,17 @@ describe('SearchScreen on a phone', () => {
       expect(backend.lastIngredientIds()).toEqual(['i-disparu'])
     })
 
-    it('asks for the exact category only', async () => {
+    it('still takes the subcategories with a category, for an old link that asked for the exact one', async () => {
       const backend = serveBackend()
       renderSearch('/rechercher?categorie=desserts&exacte=1')
 
       expect(
-        await screen.findByRole('button', { name: 'Retirer le filtre Desserts seulement' }),
+        await screen.findByRole('button', { name: 'Retirer le filtre Desserts' }),
       ).toBeVisible()
       await waitFor(() => {
-        expect(backend.lastQuery()).toMatchObject({
-          categoryId: 'desserts',
-          includeSubcategories: 'false',
-        })
+        expect(backend.lastQuery()).toMatchObject({ categoryId: 'desserts' })
       })
+      expect(backend.lastQuery()).not.toHaveProperty('includeSubcategories')
     })
 
     it('drops one filter with a touch on its chip, and leaves the others', async () => {

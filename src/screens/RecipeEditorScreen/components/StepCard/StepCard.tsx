@@ -35,35 +35,38 @@ export function StepCard({ index, total, onMove, onRemove }: StepCardProps) {
       aria-label={steps.step(position)}
       className="flex flex-col gap-3.5 rounded-frame border-2 border-ink-900 bg-paper-50 px-3.5 pt-3 pb-3.5"
     >
-      <div className="flex items-center gap-1.5">
+      {/* The title keeps its width: on a phone of 320 px the three buttons go under it, together. */}
+      <div className="flex flex-wrap items-center gap-1.5">
         <NumberBadge number={position} />
-        <h3 className="ml-0.5 min-w-0 flex-1 font-title text-label font-bold whitespace-nowrap">
+        <h3 className="ml-0.5 font-title text-label font-bold whitespace-nowrap">
           {steps.step(position)}
         </h3>
-        <GestureButton
-          label={steps.moveUp(position)}
-          icon="chevron-up"
-          data-move="back"
-          disabled={index === 0}
-          onClick={() => {
-            onMove(-1)
-          }}
-        />
-        <GestureButton
-          label={steps.moveDown(position)}
-          icon="chevron-down"
-          data-move="forward"
-          disabled={index === total - 1}
-          onClick={() => {
-            onMove(1)
-          }}
-        />
-        <GestureButton
-          label={steps.remove(position)}
-          icon="trash"
-          tone="brick"
-          onClick={onRemove}
-        />
+        <div className="ml-auto flex items-center gap-1.5">
+          <GestureButton
+            label={steps.moveUp(position)}
+            icon="chevron-up"
+            data-move="back"
+            disabled={index === 0}
+            onClick={() => {
+              onMove(-1)
+            }}
+          />
+          <GestureButton
+            label={steps.moveDown(position)}
+            icon="chevron-down"
+            data-move="forward"
+            disabled={index === total - 1}
+            onClick={() => {
+              onMove(1)
+            }}
+          />
+          <GestureButton
+            label={steps.remove(position)}
+            icon="trash"
+            tone="brick"
+            onClick={onRemove}
+          />
+        </div>
       </div>
       <Controller
         control={control}

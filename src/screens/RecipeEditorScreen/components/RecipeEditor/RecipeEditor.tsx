@@ -1,3 +1,4 @@
+import { flushSync } from 'react-dom'
 import { FormProvider } from 'react-hook-form'
 import { Button } from '../../../../components/Button/Button'
 import { useActiveSection } from '../../../../lib/useActiveSection'
@@ -74,12 +75,19 @@ export function RecipeEditor({ recipeId, initial, references }: RecipeEditorProp
               onClose={editor.close}
               draft={editor.draftState}
               banner={
-                editor.problems.length > 0 && (
+                editor.problems.length > 0 &&
+                !editor.summaryDismissed && (
                   <ProblemSummary
                     problems={editor.problems}
                     onGoTo={({ anchor }) => {
+                      // The summary goes first: it covers the top of the page, where the field is about to be, and
+                      // the page is only scrolled once it has gone (or it would stop short by the summary's height).
+                      flushSync(() => {
+                        editor.dismissSummary()
+                      })
                       goToProblem(anchor)
                     }}
+                    onClose={editor.dismissSummary}
                   />
                 )
               }

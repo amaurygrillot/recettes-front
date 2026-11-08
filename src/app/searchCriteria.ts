@@ -20,9 +20,8 @@ export const MAX_TAG_FILTERS = 20
 export interface SearchCriteria {
   /** Matched against the titles. */
   query: string
+  /** A category takes the recipes filed beneath it with it. */
   categoryId: string | undefined
-  /** Only the recipes filed under the category itself, not beneath it. */
-  exactCategory: boolean
   /** The tags a recipe has to carry, all of them, in the order they were chosen. Ids: the names come with the tag list. */
   tagIds: readonly string[]
   /** The ingredients a recipe has to use, all of them, in the order they were chosen. Ids: the names are looked up. */
@@ -35,7 +34,6 @@ export interface SearchCriteria {
 export const EMPTY_CRITERIA: SearchCriteria = {
   query: '',
   categoryId: undefined,
-  exactCategory: false,
   tagIds: [],
   ingredientIds: [],
   author: '',
@@ -45,7 +43,6 @@ export const EMPTY_CRITERIA: SearchCriteria = {
 const PARAMETERS = {
   query: 'q',
   category: 'categorie',
-  exactCategory: 'exacte',
   tag: 'tag',
   ingredient: 'ingredient',
   author: 'auteur',
@@ -76,12 +73,9 @@ function idsFrom(params: URLSearchParams, name: string, max: number): string[] {
 
 /** The criteria a URL asks for. What it does not say, or says wrongly, is the default. */
 export function criteriaFromParams(params: URLSearchParams): SearchCriteria {
-  const categoryId = nonEmpty(params.get(PARAMETERS.category))
   return {
     query: (params.get(PARAMETERS.query) ?? '').slice(0, MAX_QUERY_LENGTH),
-    categoryId,
-    // « Only this category » means nothing without a category.
-    exactCategory: categoryId !== undefined && params.get(PARAMETERS.exactCategory) === '1',
+    categoryId: nonEmpty(params.get(PARAMETERS.category)),
     tagIds: idsFrom(params, PARAMETERS.tag, MAX_TAG_FILTERS),
     ingredientIds: idsFrom(params, PARAMETERS.ingredient, MAX_INGREDIENT_FILTERS),
     author: params.get(PARAMETERS.author) ?? '',
@@ -93,10 +87,7 @@ export function criteriaFromParams(params: URLSearchParams): SearchCriteria {
 export function criteriaToParams(criteria: SearchCriteria): URLSearchParams {
   const params = new URLSearchParams()
   if (criteria.query !== '') params.set(PARAMETERS.query, criteria.query)
-  if (criteria.categoryId !== undefined) {
-    params.set(PARAMETERS.category, criteria.categoryId)
-    if (criteria.exactCategory) params.set(PARAMETERS.exactCategory, '1')
-  }
+  if (criteria.categoryId !== undefined) params.set(PARAMETERS.category, criteria.categoryId)
   for (const id of criteria.tagIds) params.append(PARAMETERS.tag, id)
   for (const id of criteria.ingredientIds) params.append(PARAMETERS.ingredient, id)
   if (criteria.author !== '') params.set(PARAMETERS.author, criteria.author)

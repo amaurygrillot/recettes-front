@@ -153,7 +153,11 @@ A change is done when all of these hold:
 1. `npm run lint`, `npm run build` and `npm run test` are green, with no warnings left behind.
 2. New behaviour has tests, including failure statuses and each design state.
 3. No architecture rule above is broken, and no TODO is left without a written reason.
-4. The result was checked in the browser pane at 390, 768 and 1280 px against the design boards, including keyboard focus.
+4. The result was checked in the browser pane at 320, 390, 768 and 1280 px against the design boards, including keyboard focus. At 320 px
+   nothing is wider than the screen: a row that cannot shrink wraps (`flex-wrap`), a long single word breaks (`hyphens-auto`,
+   `[overflow-wrap:anywhere]`), and a `flex-1` item that holds a button or a field has `min-w-0` or enough room for its content (a flex item
+   never shrinks below its content). One element too wide makes the whole page wider on some browsers, and the sheets, dialogs and bars with
+   it ([why](design-boards.md#narrow-phones-320-px-nothing-wider-than-the-screen)).
 5. `strings.ts`, tokens and generated types are the only sources for text, design values and API shapes.
 6. A self-review pass (reuse, simplification, leftover dead code) was done on the diff, and anything non-obvious learned is
    written in `docs/`.

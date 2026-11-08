@@ -36,7 +36,8 @@ export function EditorSection({
         className="flex items-center gap-3 font-title text-section-title outline-none"
       >
         <NumberBadge number={number} />
-        {title}
+        {/* « Recommandations » is one word, wider than a phone of 320 px next to the badge: it breaks. */}
+        <span className="min-w-0 [overflow-wrap:anywhere] hyphens-auto">{title}</span>
       </h2>
       {children}
     </section>

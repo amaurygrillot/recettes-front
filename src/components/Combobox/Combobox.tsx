@@ -1,6 +1,7 @@
-import { useId } from 'react'
+import { useId, useRef } from 'react'
 import { classNames } from '../../lib/classNames'
 import { findWordStart } from '../../lib/normalizeText'
+import { LIST_ABOVE_FIELD, useListPlacement } from '../../lib/useListPlacement'
 import { Icon } from '../Icon/Icon'
 import { IconButton } from '../IconButton/IconButton'
 import { strings } from './strings'
@@ -50,6 +51,7 @@ function Highlighted({ text, typed }: { text: string; typed: string }) {
  * A search field that suggests what exists as one types, to choose from (nothing is created
  * here). Suggestions open from the first letter, on the start of any word, without regard to
  * accents or case. Arrows move, Enter chooses, Escape closes the list and then empties the field.
+ * The list opens under the field, or over it where the keyboard leaves no room under it (`useListPlacement`).
  */
 export function Combobox({
   label,
@@ -72,6 +74,9 @@ export function Combobox({
     onTyped,
     searching,
   })
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  useListPlacement(combobox.open, inputRef, listRef)
   const optionId = (index: number) => `${combobox.listboxId}-${index}`
   const activeId = combobox.activeIndex >= 0 ? optionId(combobox.activeIndex) : undefined
   const message = combobox.hasNoResult ? noResultText(combobox.typed.trim()) : combobox.announcement
@@ -86,6 +91,7 @@ export function Combobox({
           <Icon name="search" size={24} strokeWidth={2.4} />
         </span>
         <input
+          ref={inputRef}
           id={inputId}
           type="search"
           role="combobox"
@@ -115,11 +121,15 @@ export function Combobox({
         )}
       </div>
       <div
+        ref={listRef}
         id={combobox.listboxId}
         role="listbox"
         aria-label={suggestionsLabel}
         hidden={!combobox.open}
-        className="overflow-hidden rounded-m border-2 border-ink-900 bg-paper-50 shadow-paper"
+        className={classNames(
+          'overflow-hidden rounded-m border-2 border-ink-900 bg-paper-50 shadow-paper',
+          LIST_ABOVE_FIELD,
+        )}
       >
         {combobox.suggestions.map((option, index) => {
           const selected = selectedIds.includes(option.id)

@@ -48,7 +48,7 @@ for the current page, round « + » of 64 px 16 px above the bar and 16 px from 
   now.** The board's label has to follow (or the back end has to accept an e-mail) when the auth screens are built.
 - **The search page's URL contract** (`categoryResultsPath` and `resultsPath` in `app/paths.ts`): `/rechercher?categorie=<id>` opens with that category
   chosen (home tiles), `/rechercher?q=<text>` with that text in the title search (the bar's field). The search field no longer leads to a search page
-  (R1 below: it opens the search over the page; `/rechercher` with nothing to search for only invites to search). SearchScreen reads these (and `exacte`, `tag`, `auteur`, `tri`, see below).
+  (R1 below: it opens the search over the page; `/rechercher` with nothing to search for only invites to search). SearchScreen reads these (and `tag`, `auteur`, `tri`, see below).
 - **Full-screen screens** (no tab bar): login and the other public auth screens, cooking mode, the recipe editor.
 - The session-expired dialog text is the board's, minus « Ton brouillon est conservé »: no draft exists before the editor does.
 - The filter bottom sheet of `Bouton-flottant-feuille` belongs to SearchScreen, not to the shell.
@@ -81,7 +81,7 @@ Built from `Accueil-mobile`, `Accueil-etats`, `Carte-accueil`, `Accueil-tablette
 ## SearchScreen (`/rechercher` and `/mes-recettes`)
 
 Built from `Rechercher-entrees`, `-filtres`, `-etats`, `-mes-recettes`, `-tablette` and `-ordinateur`. **The URL is the state**:
-`?q=` (title text, 200 characters at most) `&categorie=<id>` `&exacte=1` (only that category) `&tag=<id>` (repeated, one per tag, twenty at most) `&ingredient=<id>` (repeated, one per ingredient, twenty at most) `&auteur=<text>`
+`?q=` (title text, 200 characters at most) `&categorie=<id>` `&tag=<id>` (repeated, one per tag, twenty at most) `&ingredient=<id>` (repeated, one per ingredient, twenty at most) `&auteur=<text>`
 `&tri=recentes|modifiees|titre-az|titre-za`; only what differs from the default is written (`app/searchCriteria.ts`). Changes replace
 the history entry, so « back » returns to where the reader came from. **Since R1 (below) the title text is typed in the search overlay,
 not in the page: the field of the page only shows it, and the overlay's `Rechercher` writes it into the address.**
@@ -90,9 +90,10 @@ not in the page: the field of the page only shows it, and the overlay's `Recherc
 
 - **The ingredient filter** was first left out (`GET /recipes` had no such criterion); the back end now takes `ingredientIds` and it is built, see [the ingredient filter](#the-ingredient-filter-retouche-1-follow-up) below.
 - **One category at a time** (the API takes a single `categoryId`): the category tree uses radio buttons
-  with « Toutes les catégories » to choose none. A category includes what is filed beneath it, which is the API's default;
-  « Uniquement cette catégorie » (a checkbox under the chosen parent) asks for `includeSubcategories=false`. The badge of the
-  category section is therefore 0 or 1. **What the back end would still need** for the boards as drawn: a list of category ids
+  with « Toutes les catégories » to choose none. A category includes what is filed beneath it, which is the API's default.
+  There was a checkbox « Uniquement cette catégorie » under the chosen parent (it asked for `includeSubcategories=false`, the
+  `exacte=1` of the address): **removed, it was of no use**; the front never sends `includeSubcategories`, and an old link that
+  still carries `exacte` is read as a category with its subcategories. The badge of the category section is 0 or 1. **What the back end would still need** for the boards as drawn: a list of category ids
   (with an AND/OR rule).
 - **As many tags as wanted**: tags are chips that are each pressed or not, and the search field adds to them. The API first took a single
   `tagId`, so only one could be chosen; it now takes `tagIds` (repeated, at most 20) and keeps the recipes that carry **every** one of them,
@@ -478,7 +479,7 @@ recettes »), 24 and 25 (the overlay is a centred panel on a tablet and a panel 
   which `app` may import). Every entry point asks it to open through `useSearchOverlay()` (outside the app, in a screen under test, that opener does
   nothing, like `useCreateButtonMode`), with what to focus (the text field, or, from « Filtres », the filters) and a first character to carry. The
   scope comes from the page: on `/mes-recettes` the search is the member's own. It works on a **draft** (`searchDraft.ts`: the text and the
-  filter choices) and writes it into the address only when validated, **with the same URL model as before** (`q`, `categorie`, `exacte`, `tag`,
+  filter choices) and writes it into the address only when validated, **with the same URL model as before** (`q`, `categorie`, `tag`,
   `auteur`, `tri`; `app/searchCriteria`; `resultsPath`). Opened from a results page it starts from that page's criteria (and keeps its sort); from
   anywhere else it is empty. Closing it unmounts it, so the next opening never finds a dropped draft.
 - **Entry points**: the home bar (phone and tablet); the « Rechercher » tab (**phone only**); the field of the top bar (desktop) and of the
@@ -620,3 +621,44 @@ A recipe with **several photos** shows them on its card as a small slider; with 
 - **Differences from the board**: the arrows show on the **card's** hover, not only the photo's; the counter's text is 15 px (the `caption` token)
   where the board has 14; the arrows' shadow is a new `stamp-xs` token (2 px). Until the back end that sends `coverMediaIds` runs, the card falls back
   to the first photo.
+
+## Narrow phones (320 px): nothing wider than the screen
+
+Found on a Galaxy with the display zoom raised (about 325 CSS px wide) and Firefox: one row 33 px too wide made the **whole page** wider than the
+screen, and everything fixed to the page (sheets, dialogs, the bars) was laid out against that wider page, so it was cut on the right and
+off-centre, and the bars slid under the browser's toolbar. The boards are drawn at 390 px; **320 px is the narrowest screen the app supports**,
+and a row that fits only from 375 px is a bug. What was changed, and why:
+
+- **The three round buttons of a group and of a step** (move up, down, remove) go **under** the title, together, when they do not fit beside it
+  (`flex-wrap`, the buttons in one `ml-auto` block so they never part). Same for the title button of a group.
+- **« Note » of an ingredient line** goes under the quantity and the unit unless 144 px are left for it (`flex-wrap`, `min-w-36`): a 40 px field
+  could not be written in.
+- **« Prendre une photo » and « Galerie »** are one under the other on a phone, side by side from a tablet (two labels with their icons need 360 px).
+- **A section title is one long word** (« Recommandations »): it breaks, with a hyphen where French allows it (`hyphens-auto`, `[overflow-wrap:anywhere]`),
+  as does the title of the full-screen writing mode (« Introduction » beside « Terminé »).
+- **The step-by-step footer**: « Précédent » is only its arrow (keeping its name for a screen reader) while the footer is narrower than 352 px
+  (a container query on the footer, not on the screen: it is the width of the two labels that decides), « Suivant » keeps its word. That is
+  every phone narrower than 384 px.
+- **The footer of the search sheet**: « Réinitialiser » and « Rechercher » side by side while both labels fit (331 px), one under the other
+  otherwise, « Rechercher » at the bottom under the thumb. No label is ever cut.
+- **How to check**: a probe that lists every element whose right edge is past the screen's, at 320, 360, 375 and 414 px, on the editor (with a
+  second group and a second step), the step-by-step mode and its sheets, and the search sheet. Run it in the browser pane after a change to a row.
+- **Not reproducible in the pane (Chromium)**: what Firefox for Android does with its dynamic toolbar and its keyboard. The bars and sheets that
+  were cut under the toolbar all belonged to pages that overflowed; the search sheet, on a page that did not, was never cut. To be checked again
+  on the phone after the overflow fix.
+
+## Editor summary and lists over the keyboard
+
+Found on the same phone, with the keyboard up (about 330 CSS px of page left, of which the fixed top bar and the bar at the foot take 200):
+
+- **The summary of what is missing** (`ProblemSummary`, under the top bar after a refused « Enregistrer ») is a box of **limited height that scrolls** inside
+  (112 px), with a **cross** at its top right. A link of it (« Aller aux ingrédients ») **puts it away before going to the field**, so that it does not
+  cover what is about to be written (the page is scrolled once it has gone, `flushSync`); the fields keep saying what is wrong under them. It comes back at
+  the next refused « Enregistrer ». Closed with the cross or by a link, `summaryDismissed` in `useRecipeEditor`, until then.
+- **The list of a field that suggests** (`Combobox`: tags, ingredients and categories of the search; `AutocompleteField`: the ingredient of a line) opens
+  under the field, as before, **unless the room under it is too short for the list and there is more over it** (`useListPlacement`): it is then **over the
+  field**, fixed to the screen, over the bars and the title of a sheet, no taller than the room and scrolling inside. The room is measured in the
+  **visual viewport** (the keyboard is not in it, whether the browser shrinks the page for it or not). It is the answer to « the keyboard takes half of the
+  screen and the list is not seen »; the other one, the field moved to the top of the screen, was not chosen (it would move the field the person is typing in).
+- **Not reproducible in the pane**: the keyboard itself. Tested by stating a visual viewport shorter than the page (`test/keyboardScreen`), and by hand with a
+  window 330 px high.

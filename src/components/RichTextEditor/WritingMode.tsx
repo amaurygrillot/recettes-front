@@ -84,7 +84,8 @@ export function WritingMode({
             )}
             <div className="min-w-0 flex-1 px-1">
               <div className="flex items-baseline gap-2">
-                <Dialog.Title className="line-clamp-2 font-title text-title-3 font-extrabold text-ink-900">
+                {/* « Introduction » is one word, wider than what is left of a 320 px strip beside « Terminé »: it breaks. */}
+                <Dialog.Title className="line-clamp-2 font-title text-title-3 font-extrabold [overflow-wrap:anywhere] hyphens-auto text-ink-900">
                   {title}
                 </Dialog.Title>
                 {note && (

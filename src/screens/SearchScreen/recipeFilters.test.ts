@@ -26,7 +26,6 @@ describe('toRecipeFilters', () => {
     const criteria: SearchCriteria = {
       query: '  tarte ',
       categoryId: 'c-1',
-      exactCategory: false,
       tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: ' Odile ',
@@ -67,18 +66,11 @@ describe('toRecipeFilters', () => {
     expect(filters).not.toHaveProperty('authorName')
   })
 
-  it('asks for the exact category only when told to, and only with a category', () => {
-    const inclusive = toRecipeFilters({ ...EMPTY_CRITERIA, categoryId: 'c-1' }, ALL)
-    expect(inclusive).not.toHaveProperty('includeSubcategories')
+  it('asks for a category with the recipes filed beneath it: it says nothing of the subcategories', () => {
+    const filters = toRecipeFilters({ ...EMPTY_CRITERIA, categoryId: 'c-1' }, ALL)
 
-    const exact = toRecipeFilters(
-      { ...EMPTY_CRITERIA, categoryId: 'c-1', exactCategory: true },
-      ALL,
-    )
-    expect(exact).toHaveProperty('includeSubcategories', false)
-
-    const orphan = toRecipeFilters({ ...EMPTY_CRITERIA, exactCategory: true }, ALL)
-    expect(orphan).not.toHaveProperty('includeSubcategories')
+    expect(filters).toHaveProperty('categoryId', 'c-1')
+    expect(filters).not.toHaveProperty('includeSubcategories')
   })
 
   describe('in « Mes recettes »', () => {

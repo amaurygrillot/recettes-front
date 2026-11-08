@@ -84,8 +84,40 @@ describe('RecipeEditorScreen: what is missing', () => {
 
     expect(screen.getByRole('button', { name: 'Choisir des catégories' })).toHaveFocus()
 
+    // The summary went away with the first link: another refusal brings it back.
+    await user.click(save())
     await user.click(screen.getByRole('button', { name: 'Aller aux ingrédients' }))
     expect(screen.getByRole('combobox', { name: 'Ingrédient' })).toHaveFocus()
+  })
+
+  it('puts the summary away once a link of it is followed, so that it does not cover the field', async () => {
+    useEditorBackend()
+    const user = userEvent.setup()
+    renderEditor('/recettes/nouvelle')
+    await findForm()
+    await user.click(save())
+
+    await user.click(screen.getByRole('button', { name: 'Aller aux ingrédients' }))
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    // What is wrong is still said under the field.
+    expect(screen.getByText('Choisis un ingrédient de la liste, ou crée-le.')).toBeVisible()
+  })
+
+  it('puts the summary away with its cross, and brings it back at the next refusal', async () => {
+    useEditorBackend()
+    const user = userEvent.setup()
+    renderEditor('/recettes/nouvelle')
+    await findForm()
+    await user.click(save())
+
+    await user.click(screen.getByRole('button', { name: 'Fermer le message' }))
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Titre')).toHaveAccessibleDescription('Le titre est obligatoire.')
+
+    await user.click(save())
+    expect(screen.getByRole('alert')).toHaveTextContent('Il reste 4 choses à corriger')
   })
 
   it('keeps the summary true as it is mended, and takes it away when all is there', async () => {

@@ -77,7 +77,7 @@ describe('CheckboxRow', () => {
     const [ticked, setTicked] = useState(false)
     return (
       <CheckboxRow
-        label="Uniquement cette catégorie"
+        label="Sans gluten"
         checked={ticked}
         onChange={(event) => {
           setTicked(event.target.checked)
@@ -89,9 +89,9 @@ describe('CheckboxRow', () => {
   it('is a checkbox ticked and unticked by touching its label or with the space bar', async () => {
     const user = userEvent.setup()
     render(<Ticked />)
-    const box = screen.getByRole('checkbox', { name: 'Uniquement cette catégorie' })
+    const box = screen.getByRole('checkbox', { name: 'Sans gluten' })
 
-    await user.click(screen.getByText('Uniquement cette catégorie'))
+    await user.click(screen.getByText('Sans gluten'))
     expect(box).toBeChecked()
 
     await user.keyboard(' ')

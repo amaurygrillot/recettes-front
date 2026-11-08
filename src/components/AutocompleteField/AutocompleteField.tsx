@@ -1,6 +1,7 @@
-import { useId, useState, type KeyboardEvent } from 'react'
+import { useId, useRef, useState, type KeyboardEvent } from 'react'
 import { classNames } from '../../lib/classNames'
 import { findWordStart } from '../../lib/normalizeText'
+import { LIST_ABOVE_FIELD, useListPlacement } from '../../lib/useListPlacement'
 import { Icon } from '../Icon/Icon'
 import { Spinner } from '../Spinner/Spinner'
 import { FieldLabel } from '../TextField/fieldParts'
@@ -54,7 +55,8 @@ const OPTION =
 /**
  * A text field that suggests what exists as one types, to choose from, and can offer to make what was
  * typed exist. The list opens under the field, in the flow of the page (it does not float over the
- * fields below). Arrows move through the list, Enter chooses what is lit, Escape closes it. Nothing is
+ * fields below), except where the keyboard leaves no room under the field: it is then over the field
+ * (`useListPlacement`). Arrows move through the list, Enter chooses what is lit, Escape closes it. Nothing is
  * ever chosen without being asked: leaving the field with some text typed chooses nothing.
  */
 export function AutocompleteField({
@@ -95,6 +97,9 @@ export function AutocompleteField({
   // What is being made is said in the list even though the field no longer has the focus (it is locked).
   const open = busy || (focused && !dismissed && typed !== '' && choices.length > 0)
   const optionId = (index: number) => `${listboxId}-${index}`
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  useListPlacement(open, inputRef, listRef)
 
   function choose(index: number): void {
     const choice = choices[index]
@@ -127,6 +132,7 @@ export function AutocompleteField({
     <div className="flex min-w-0 flex-col gap-1.5">
       <FieldLabel htmlFor={id} label={label} note={undefined} />
       <input
+        ref={inputRef}
         id={id}
         type="text"
         role="combobox"
@@ -162,11 +168,15 @@ export function AutocompleteField({
         )}
       />
       <div
+        ref={listRef}
         id={listboxId}
         role="listbox"
         aria-label={suggestionsLabel}
         hidden={!open}
-        className="mt-0.5 mb-1 rounded-l border-2 border-ink-900 bg-paper-50 p-1.5 shadow-card"
+        className={classNames(
+          'mt-0.5 mb-1 rounded-l border-2 border-ink-900 bg-paper-50 p-1.5 shadow-card',
+          LIST_ABOVE_FIELD,
+        )}
       >
         {busy ? (
           <div className={classNames(OPTION, 'border-transparent font-bold')}>
