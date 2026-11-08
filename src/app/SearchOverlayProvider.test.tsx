@@ -1,12 +1,15 @@
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
 import { afterEach, describe, expect, it } from 'vitest'
+import { API_BASE_URL } from '../api/apiConfig'
 import { sessionStore } from '../api/sessionStore'
 import { expectNoAccessibilityViolations } from '../test/expectNoAccessibilityViolations'
 import { fakeToken } from '../test/fakeToken'
 import { serveBackend } from '../test/fakeRecipeBackend'
 import { installMatchMedia, removeMatchMedia } from '../test/matchMedia'
 import { renderRoutes } from '../test/renderRoutes'
+import { server } from '../test/server'
 import { routes } from './router'
 
 const overlay = () => screen.findByRole('dialog', { name: 'Rechercher' })
@@ -184,6 +187,35 @@ describe('the search over the page', () => {
         'aria-pressed',
         'true',
       )
+    })
+
+    it('stays open, and without the tag that no longer exists, when the page takes that tag out of its address', async () => {
+      serveBackend()
+      let release: () => void = () => undefined
+      const tagsKnown = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      server.use(
+        http.get(`${API_BASE_URL}/tags`, async () => {
+          await tagsKnown
+          return HttpResponse.json([{ id: 't-four', name: 'Four' }])
+        }),
+      )
+      const user = userEvent.setup()
+      const { router } = renderRoutes(routes, '/rechercher?tag=t-four&tag=t-disparu')
+      await user.click(await screen.findByRole('button', { name: /^Chercher une recette/ }))
+      const sheet = await overlay()
+
+      release()
+
+      await waitFor(() => {
+        expect(location(router)).toBe('/rechercher?tag=t-four')
+      })
+      expect(router.state.historyAction).toBe('REPLACE')
+      expect(
+        await within(sheet).findByRole('button', { name: 'Tags, 1 choix actif' }),
+      ).toBeVisible()
+      expect(screen.getByRole('dialog', { name: 'Rechercher' })).toBeVisible()
     })
 
     it('opens from the invitation shown when nothing is left to search for', async () => {

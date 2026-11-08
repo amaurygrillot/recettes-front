@@ -304,6 +304,7 @@ describe('SearchScreen on a phone', () => {
       await waitFor(() => {
         expect(router.state.location.search).toBe('?tag=t-fruits')
       })
+      expect(router.state.historyAction).toBe('REPLACE')
       await waitFor(() => {
         expect(backend.lastTagIds()).toEqual(['t-fruits'])
       })

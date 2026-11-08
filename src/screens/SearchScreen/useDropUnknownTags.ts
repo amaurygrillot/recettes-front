@@ -7,7 +7,11 @@ import type { FilterOptions } from './useFilterOptions'
  * Takes out of the address the tags that no longer exist (a link made before one was deleted): once the tags
  * are known, a chosen id that is not among them would count as a filter and narrow the list with no chip to
  * see it or drop it. Nothing is done while the tags load or if they failed to load, so a good link is never
- * emptied because of a network error.
+ * emptied because of a network error. Used for the address of the results page and for the draft of the search
+ * overlay, which starts from that address.
+ *
+ * It looks again after every render (the ids, the options and `change` are new each time) and acts only when an
+ * id is unknown, so once it has changed something it finds nothing more to do.
  */
 export function useDropUnknownTags(
   tagIds: readonly string[],
