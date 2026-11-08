@@ -22,6 +22,24 @@ function location(router: { state: { location: { pathname: string; search: strin
   return router.state.location.pathname + router.state.location.search
 }
 
+type AppRouter = ReturnType<typeof renderRoutes>['router']
+
+/** Opens the search from the field of the results page behind. */
+async function openSearch() {
+  await userEvent
+    .setup()
+    .click(await screen.findByRole('button', { name: /^Chercher une recette/ }))
+  await overlay()
+}
+
+/** The app on a results page, with the search open over it. */
+async function openOverlayOn(url: string) {
+  serveBackend()
+  const rendered = renderRoutes(routes, url)
+  await openSearch()
+  return rendered
+}
+
 describe('the search over the page', () => {
   afterEach(removeMatchMedia)
 
@@ -216,6 +234,49 @@ describe('the search over the page', () => {
         await within(sheet).findByRole('button', { name: 'Tags, 1 choix actif' }),
       ).toBeVisible()
       expect(screen.getByRole('dialog', { name: 'Rechercher' })).toBeVisible()
+    })
+
+    describe('when the history moves under it, on the same page or not', () => {
+      it.each([
+        [
+          'a push to another search of the same page',
+          (router: AppRouter) => router.navigate('/rechercher?q=c'),
+        ],
+        [
+          'a replacement of the entry by another page',
+          (router: AppRouter) => router.navigate('/nulle-part', { replace: true }),
+        ],
+      ])('goes with it on %s', async (_what, move) => {
+        const { router } = await openOverlayOn('/rechercher?q=a')
+
+        await act(() => move(router))
+
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+
+      it('goes with it on « back » to another search of the same page, and does not come back', async () => {
+        serveBackend()
+        const { router } = renderRoutes(routes, '/rechercher?q=a')
+        await act(() => router.navigate('/rechercher?q=b'))
+        await openSearch()
+
+        await act(() => router.navigate(-1))
+
+        expect(location(router)).toBe('/rechercher?q=a')
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+        await act(() => router.navigate(1))
+        expect(location(router)).toBe('/rechercher?q=b')
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      })
+
+      it('stays when the entry is only replaced on the same page', async () => {
+        const { router } = await openOverlayOn('/rechercher?q=a')
+
+        await act(() => router.navigate('/rechercher?q=zzz', { replace: true }))
+
+        expect(location(router)).toBe('/rechercher?q=zzz')
+        expect(screen.getByRole('dialog', { name: 'Rechercher' })).toBeVisible()
+      })
     })
 
     it('opens from the invitation shown when nothing is left to search for', async () => {
