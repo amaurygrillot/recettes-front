@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { NavigationType, useLocation, useNavigate, useNavigationType } from 'react-router'
 import { SearchOverlay } from '../screens/SearchScreen/components/SearchOverlay/SearchOverlay'
 import { logger } from '../lib/logger'
 import { isSearchPage, paths, resultsPath } from './paths'
@@ -13,6 +13,7 @@ import { useSearchCriteria } from './useSearchCriteria'
 
 interface AskedSearch extends SearchOverlayRequest {
   locationKey: string
+  pathname: string
   opener: HTMLElement | null
 }
 
@@ -25,12 +26,18 @@ interface AskedSearch extends SearchOverlayRequest {
 export function SearchOverlayProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const { pathname, key: locationKey } = useLocation()
+  const navigationType = useNavigationType()
   const { criteria: addressed } = useSearchCriteria()
   // The page it was asked for on: the overlay belongs to it, and goes when the history moves to another.
   const [request, setRequest] = useState<AskedSearch | undefined>()
 
-  // The history moved to another entry: the request is over for good (going forward again must not bring it back).
-  if (request !== undefined && request.locationKey !== locationKey) setRequest(undefined)
+  if (request !== undefined && request.locationKey !== locationKey) {
+    // The entry was replaced in place, still on the same page (the page tidying its own address, as when a tag
+    // that no longer exists is taken out): nothing moved, so the overlay and its draft stay. Any other change of
+    // entry ends the request for good (going forward again must not bring it back).
+    const tidied = navigationType === NavigationType.Replace && request.pathname === pathname
+    setRequest(tidied ? { ...request, locationKey } : undefined)
+  }
 
   const onSearchPage = isSearchPage(pathname)
   const mine = pathname === paths.myRecipes
@@ -44,7 +51,7 @@ export function SearchOverlayProvider({ children }: { children: ReactNode }) {
     const { activeElement } = document
     const opener =
       activeElement instanceof HTMLElement && activeElement !== document.body ? activeElement : null
-    setRequest({ ...asked, locationKey, opener })
+    setRequest({ ...asked, locationKey, pathname, opener })
   }
 
   function search(criteria: SearchCriteria): void {

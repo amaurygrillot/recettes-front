@@ -42,6 +42,16 @@ function renderOverlay(props: Partial<SearchOverlayProps> = {}) {
   return { onSearch, onClose, backend, ...view }
 }
 
+/** One tag more than the limit, so that twenty can be chosen among tags that exist (an id that does not is dropped). */
+const MANY_TAGS = Array.from({ length: MAX_TAG_FILTERS + 1 }, (_, index) => ({
+  id: `t-${index}`,
+  name: `Tag ${index}`,
+}))
+const tagsUpToTheLimit = () => MANY_TAGS.slice(0, MAX_TAG_FILTERS).map(({ id }) => id)
+const serveManyTags = () => {
+  server.use(http.get(`${API_BASE_URL}/tags`, () => HttpResponse.json(MANY_TAGS)))
+}
+
 const dialog = () => screen.findByRole('dialog', { name: 'Rechercher' })
 const field = () => screen.getByRole('searchbox', { name: 'Chercher une recette' })
 const searchButton = () => screen.getByRole('button', { name: 'Rechercher' })
@@ -311,6 +321,21 @@ describe('SearchOverlay', () => {
       })
     })
 
+    it('starts without a tag that does not exist, once the tags are known', async () => {
+      const { onSearch } = renderOverlay({
+        initial: { ...EMPTY_CRITERIA, tagIds: ['t-four', 't-disparu'] },
+      })
+      const user = userEvent.setup()
+      const sheet = await dialog()
+
+      expect(
+        await within(sheet).findByRole('button', { name: 'Tags, 1 choix actif' }),
+      ).toBeVisible()
+      await user.click(searchButton())
+
+      expect(onSearch).toHaveBeenCalledExactlyOnceWith({ ...EMPTY_CRITERIA, tagIds: ['t-four'] })
+    })
+
     it('says what the tags mean for the list: none chosen keeps every recipe, chosen ones are all required', async () => {
       const user = userEvent.setup()
       renderOverlay()
@@ -344,21 +369,20 @@ describe('SearchOverlay', () => {
 
     it('takes no more tags than the API does: at the limit the other tags are off and the field gives way, until one is dropped', async () => {
       const user = userEvent.setup()
-      const others = Array.from({ length: MAX_TAG_FILTERS - 1 }, (_, index) => `t-chosen-${index}`)
-      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: [...others, 't-rapide'] } })
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: tagsUpToTheLimit() } })
+      serveManyTags()
       const sheet = await dialog()
 
       expect(await within(sheet).findByText('20 tags au maximum.')).toBeInTheDocument()
       expect(within(sheet).queryByRole('combobox', { name: 'Chercher un tag' })).toBeNull()
-      expect(within(sheet).getByRole('button', { name: 'Four' })).toBeDisabled()
-      expect(within(sheet).getByRole('button', { name: 'Fruits' })).toBeDisabled()
-      expect(within(sheet).getByRole('button', { name: 'Rapide' })).toBeEnabled()
+      expect(within(sheet).getByRole('button', { name: 'Tag 20' })).toBeDisabled()
+      expect(within(sheet).getByRole('button', { name: 'Tag 0' })).toBeEnabled()
 
-      await user.click(within(sheet).getByRole('button', { name: 'Rapide' }))
+      await user.click(within(sheet).getByRole('button', { name: 'Tag 0' }))
 
       expect(within(sheet).queryByText('20 tags au maximum.')).toBeNull()
       expect(within(sheet).getByRole('combobox', { name: 'Chercher un tag' })).toBeVisible()
-      expect(within(sheet).getByRole('button', { name: 'Four' })).toBeEnabled()
+      expect(within(sheet).getByRole('button', { name: 'Tag 20' })).toBeEnabled()
     })
 
     it('has no accessibility violation with several tags chosen', async () => {
@@ -370,8 +394,8 @@ describe('SearchOverlay', () => {
     })
 
     it('has no accessibility violation at the limit of tags, with the other chips off', async () => {
-      const others = Array.from({ length: MAX_TAG_FILTERS - 2 }, (_, index) => `t-chosen-${index}`)
-      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: [...others, 't-rapide', 't-four'] } })
+      renderOverlay({ initial: { ...EMPTY_CRITERIA, tagIds: tagsUpToTheLimit() } })
+      serveManyTags()
       const sheet = await dialog()
       await within(sheet).findByText('20 tags au maximum.')
 

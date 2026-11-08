@@ -5,9 +5,10 @@ import { TopPanel } from '../../../../components/TopPanel/TopPanel'
 import { DESKTOP_QUERY } from '../../../../lib/breakpoints'
 import { logger } from '../../../../lib/logger'
 import { useMediaQuery } from '../../../../lib/useMediaQuery'
-import { filterSectionsOf } from '../../filterChoices'
+import { filterSectionsOf, type FilterChoices } from '../../filterChoices'
 import { canSearch, criteriaOf, draftOf, EMPTY_DRAFT, type SearchDraft } from '../../searchDraft'
 import { strings } from '../../strings'
+import { useDropUnknownTags } from '../../useDropUnknownTags'
 import { useFilterOptions } from '../../useFilterOptions'
 import { FiltersPanel } from '../FiltersPanel/FiltersPanel'
 import { SectionPills } from '../FiltersPanel/SectionPills'
@@ -53,6 +54,11 @@ export function SearchOverlay({
   const desktop = useMediaQuery(DESKTOP_QUERY)
   const options = useFilterOptions()
   const [draft, setDraft] = useState(() => initialDraft(initial, typed))
+  const changeDraft = (changes: Partial<FilterChoices>): void => {
+    setDraft((current) => ({ ...current, ...changes }))
+  }
+  // The draft starts from the address, which may name a tag that was deleted: it goes from the draft as it goes from the address.
+  useDropUnknownTags(draft.tagIds, options, changeDraft)
   const textRef = useRef<HTMLInputElement>(null)
   // The pills jump to sections that exist: the category and tags only once the filters are there.
   const sections = filterSectionsOf(draft, !mine).filter(
@@ -80,9 +86,7 @@ export function SearchOverlay({
   const filters = (
     <FiltersPanel
       choices={draft}
-      onChange={(changes) => {
-        setDraft((current) => ({ ...current, ...changes }))
-      }}
+      onChange={changeDraft}
       options={options}
       showAuthor={!mine}
       authorDebounceMs={0}

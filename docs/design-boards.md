@@ -541,6 +541,9 @@ single `tagId` was replaced, not kept beside it) and keeps the recipes that carr
 - **A tag that no longer exists** (a link made before it was deleted) is **taken out of the address** once the tags are loaded
   (`useDropUnknownTags`, in `useSearchPage`, with a log line), so no filter can narrow the list without a chip to show it. While the tags load, or if
   they could not be loaded, the address is left as it is. (The category and the ingredient that no longer exist still filter without a chip.)
+  **The search overlay copes with it**: its draft starts from the address, so the same hook takes the unknown tag out of the draft, and
+  `SearchOverlayProvider` keeps the overlay open when the page only **replaces** its own entry (same path, `REPLACE`): nothing moved, so the
+  draft is not lost. Any other change of entry (back, forward, a push) still ends the request.
 - **Twenty at most**: the API refuses more, so at twenty the field is replaced by « 20 tags au maximum. », the tags not chosen are off, and the chosen
   ones still drop. Nobody is expected to get there: it is there so that a 21st touch can never become a `400`.
 - **À valider**: "all of them" (AND) is what is built, like the ingredients, since each tag narrows the list; "any of them" would be a different parameter.
