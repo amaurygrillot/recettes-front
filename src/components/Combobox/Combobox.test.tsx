@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilityViolations'
+import { installKeyboardScreen, removeKeyboardScreen } from '../../test/keyboardScreen'
 import { Combobox, type ComboboxOption } from './Combobox'
 
 const OPTIONS: readonly ComboboxOption[] = [
@@ -43,6 +44,30 @@ function Harness({ initial = [] }: { initial?: readonly string[] }) {
 const field = () => screen.getByRole('combobox', { name: 'Chercher une catégorie' })
 
 describe('Combobox', () => {
+  afterEach(removeKeyboardScreen)
+
+  it('puts its list over the field, no taller than the room there is, when the keyboard leaves none under it', async () => {
+    installKeyboardScreen({ fieldTop: 340, fieldBottom: 396, visibleHeight: 400, listHeight: 170 })
+    render(<Harness />)
+
+    await userEvent.setup().type(field(), 'ta')
+
+    const list = screen.getByRole('listbox', { name: 'Suggestions' })
+    expect(list).toHaveAttribute('data-placement', 'above')
+    expect(list).toHaveStyle({ maxHeight: '170px', top: '162px' })
+  })
+
+  it('keeps its list under the field when there is room there', async () => {
+    installKeyboardScreen({ fieldTop: 100, fieldBottom: 156, visibleHeight: 700, listHeight: 170 })
+    render(<Harness />)
+
+    await userEvent.setup().type(field(), 'ta')
+
+    expect(screen.getByRole('listbox', { name: 'Suggestions' })).not.toHaveAttribute(
+      'data-placement',
+    )
+  })
+
   it('is a named combobox whose list is closed until something is typed', () => {
     render(<Harness />)
 

@@ -53,7 +53,6 @@ export const strings = {
       suggestions: 'Suggestions de catégories',
       noResult: (typed: string) => `Aucune catégorie pour « ${typed} »`,
       all: 'Toutes les catégories',
-      onlyThisOne: 'Uniquement cette catégorie',
       expand: (name: string) => `Déplier ${name}`,
       collapse: (name: string) => `Replier ${name}`,
     },
@@ -94,7 +93,6 @@ export const strings = {
   active: {
     removeFilter: (label: string) => `Retirer le filtre ${label}`,
     byAuthor: (name: string) => `Par ${name}`,
-    exactCategory: (name: string) => `${name} seulement`,
     clearAll: 'Tout effacer',
     mine: 'Mes recettes',
     locked: 'verrouillé',

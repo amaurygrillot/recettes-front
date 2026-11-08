@@ -74,7 +74,7 @@ export function FiltersPanel({
   }
 
   function chooseCategory(categoryId: string | undefined): void {
-    onChange({ categoryId, exactCategory: false })
+    onChange({ categoryId })
     if (options.status === 'ready') expand(pathTo(options.categories, categoryId))
   }
 
@@ -102,12 +102,8 @@ export function FiltersPanel({
       <CategoryTree
         categories={options.categories}
         categoryId={choices.categoryId}
-        exactCategory={choices.exactCategory}
         expandedIds={expandedIds}
         onChoose={chooseCategory}
-        onToggleExact={(exactCategory) => {
-          onChange({ exactCategory })
-        }}
         onToggleExpanded={toggleExpanded}
       />
     </Section>

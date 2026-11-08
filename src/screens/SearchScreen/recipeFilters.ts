@@ -21,10 +21,8 @@ export function toRecipeFilters(criteria: SearchCriteria, scope: SearchScope): R
   return {
     ...SORTS[criteria.sort],
     ...(title !== '' && { title }),
+    // Without `includeSubcategories` the API takes the recipes filed beneath the category too.
     ...(criteria.categoryId !== undefined && { categoryId: criteria.categoryId }),
-    // Absent means « with the subcategories »: only the exact reading has to be asked for.
-    ...(criteria.categoryId !== undefined &&
-      criteria.exactCategory && { includeSubcategories: false }),
     // The API keeps the recipes that carry every one of the tags and use every one of the ingredients.
     ...(criteria.tagIds.length > 0 && { tagIds: [...criteria.tagIds] }),
     ...(criteria.ingredientIds.length > 0 && { ingredientIds: [...criteria.ingredientIds] }),

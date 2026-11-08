@@ -21,12 +21,11 @@ describe('criteriaFromParams', () => {
   it('reads every criterion', () => {
     expect(
       from(
-        'q=tarte&categorie=c-1&exacte=1&tag=t-1&tag=t-2&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-az',
+        'q=tarte&categorie=c-1&tag=t-1&tag=t-2&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-az',
       ),
     ).toEqual({
       query: 'tarte',
       categoryId: 'c-1',
-      exactCategory: true,
       tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',
@@ -50,8 +49,8 @@ describe('criteriaFromParams', () => {
     },
   )
 
-  it('ignores « only this category » when there is no category', () => {
-    expect(from('exacte=1').exactCategory).toBe(false)
+  it('ignores « exacte », which an old link may carry: a category always takes what is beneath it', () => {
+    expect(from('categorie=c-1&exacte=1')).toEqual({ ...EMPTY_CRITERIA, categoryId: 'c-1' })
   })
 
   it('treats an empty category or tag as none', () => {
@@ -98,7 +97,6 @@ describe('criteriaToParams', () => {
     const criteria: SearchCriteria = {
       query: 'tarte & crème',
       categoryId: 'c-1',
-      exactCategory: true,
       tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',
@@ -106,19 +104,14 @@ describe('criteriaToParams', () => {
     }
 
     expect(criteriaToParams(criteria).toString()).toBe(
-      'q=tarte+%26+cr%C3%A8me&categorie=c-1&exacte=1&tag=t-1&tag=t-2&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-za',
+      'q=tarte+%26+cr%C3%A8me&categorie=c-1&tag=t-1&tag=t-2&ingredient=i-1&ingredient=i-2&auteur=Odile&tri=titre-za',
     )
-  })
-
-  it('does not write « only this category » without a category', () => {
-    expect(criteriaToParams({ ...EMPTY_CRITERIA, exactCategory: true }).toString()).toBe('')
   })
 
   it('reads back what it wrote', () => {
     const criteria: SearchCriteria = {
       query: 'crème brûlée',
       categoryId: 'c-1',
-      exactCategory: false,
       tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',

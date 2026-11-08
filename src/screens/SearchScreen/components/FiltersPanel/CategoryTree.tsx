@@ -1,4 +1,3 @@
-import { CheckboxRow } from '../../../../components/CheckboxRow/CheckboxRow'
 import { IconButton } from '../../../../components/IconButton/IconButton'
 import { RadioRow } from '../../../../components/RadioRow/RadioRow'
 import type { CategoryNode } from '../../../../app/categoryNodes'
@@ -9,26 +8,22 @@ const { category } = strings.filters
 export interface CategoryTreeProps {
   categories: readonly CategoryNode[]
   categoryId: string | undefined
-  exactCategory: boolean
   expandedIds: ReadonlySet<string>
   onChoose: (categoryId: string | undefined) => void
-  onToggleExact: (exact: boolean) => void
   onToggleExpanded: (categoryId: string) => void
 }
 
 /**
  * The categories as a two-level tree with one choice: touching a category chooses it, with
- * everything filed beneath it unless « Uniquement cette catégorie » is ticked. The chevron opens a
- * category without choosing it; the radio and its label choose without opening. The API takes one
- * category, so these are radio buttons, with « Toutes » to choose none.
+ * everything filed beneath it. The chevron opens a category without choosing it; the radio and its
+ * label choose without opening. The API takes one category, so these are radio buttons, with
+ * « Toutes » to choose none.
  */
 export function CategoryTree({
   categories,
   categoryId,
-  exactCategory,
   expandedIds,
   onChoose,
-  onToggleExact,
   onToggleExpanded,
 }: CategoryTreeProps) {
   return (
@@ -47,10 +42,8 @@ export function CategoryTree({
           key={node.id}
           node={node}
           categoryId={categoryId}
-          exactCategory={exactCategory}
           expandedIds={expandedIds}
           onChoose={onChoose}
-          onToggleExact={onToggleExact}
           onToggleExpanded={onToggleExpanded}
         />
       ))}
@@ -65,10 +58,8 @@ interface CategoryBranchProps extends Omit<CategoryTreeProps, 'categories'> {
 function CategoryBranch({
   node,
   categoryId,
-  exactCategory,
   expandedIds,
   onChoose,
-  onToggleExact,
   onToggleExpanded,
 }: CategoryBranchProps) {
   const hasChildren = node.children.length > 0
@@ -102,23 +93,13 @@ function CategoryBranch({
       </div>
       {hasChildren && expanded && (
         <div className="ml-6 border-l-2 border-dotted border-ink-500 pl-3">
-          <CheckboxRow
-            label={category.onlyThisOne}
-            checked={exactCategory && categoryId === node.id}
-            disabled={categoryId !== node.id}
-            onChange={(event) => {
-              onToggleExact(event.target.checked)
-            }}
-          />
           {node.children.map((child) => (
             <CategoryBranch
               key={child.id}
               node={child}
               categoryId={categoryId}
-              exactCategory={exactCategory}
               expandedIds={expandedIds}
               onChoose={onChoose}
-              onToggleExact={onToggleExact}
               onToggleExpanded={onToggleExpanded}
             />
           ))}

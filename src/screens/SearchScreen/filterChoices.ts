@@ -4,12 +4,11 @@ import { strings } from './strings'
 /** The part of a search that the « Filtres » choose: not the title text, not the order. */
 export type FilterChoices = Pick<
   SearchCriteria,
-  'categoryId' | 'exactCategory' | 'tagIds' | 'ingredientIds' | 'author'
+  'categoryId' | 'tagIds' | 'ingredientIds' | 'author'
 >
 
 export const NO_FILTERS: FilterChoices = {
   categoryId: undefined,
-  exactCategory: false,
   tagIds: [],
   ingredientIds: [],
   author: '',
@@ -17,12 +16,11 @@ export const NO_FILTERS: FilterChoices = {
 
 export function filterChoicesOf({
   categoryId,
-  exactCategory,
   tagIds,
   ingredientIds,
   author,
 }: SearchCriteria): FilterChoices {
-  return { categoryId, exactCategory, tagIds, ingredientIds, author }
+  return { categoryId, tagIds, ingredientIds, author }
 }
 
 export type SectionKey = 'category' | 'tags' | 'ingredients' | 'author'

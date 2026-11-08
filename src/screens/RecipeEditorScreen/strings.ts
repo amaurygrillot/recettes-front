@@ -229,6 +229,7 @@ export const strings = {
     ingredientToFix: 'un ingrédient à compléter',
     stepToWrite: 'une étape à écrire',
     fieldToFix: 'un champ à corriger',
+    close: 'Fermer le message',
     goTo: {
       title: 'Aller au titre',
       categories: 'Aller aux catégories',

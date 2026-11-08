@@ -246,14 +246,13 @@ describe('SearchOverlay', () => {
   })
 
   describe('the filters', () => {
-    it('chooses a category among its subcategories, or only that category, and a tag, and an author', async () => {
+    it('chooses a category among its subcategories, and a tag, and an author', async () => {
       const user = userEvent.setup()
       const { onSearch } = renderOverlay()
       const sheet = await dialog()
 
       await user.click(await within(sheet).findByRole('button', { name: 'Déplier Desserts' }))
       await user.click(within(sheet).getByRole('radio', { name: 'Desserts' }))
-      await user.click(within(sheet).getByRole('checkbox', { name: 'Uniquement cette catégorie' }))
       await user.click(within(sheet).getByRole('button', { name: 'Fruits' }))
       await user.type(within(sheet).getByLabelText("Nom de l'auteur"), 'Odile')
       await user.click(searchButton())
@@ -261,21 +260,19 @@ describe('SearchOverlay', () => {
       expect(onSearch).toHaveBeenCalledExactlyOnceWith({
         ...EMPTY_CRITERIA,
         categoryId: 'desserts',
-        exactCategory: true,
         tagIds: ['t-fruits'],
         author: 'Odile',
       })
     })
 
-    it('only offers « Uniquement cette catégorie » for the chosen one', async () => {
+    it('offers no way to leave out the subcategories of the chosen category', async () => {
       const user = userEvent.setup()
       renderOverlay()
       const sheet = await dialog()
       await user.click(await within(sheet).findByRole('button', { name: 'Déplier Desserts' }))
+      await user.click(within(sheet).getByRole('radio', { name: 'Desserts' }))
 
-      expect(
-        within(sheet).getByRole('checkbox', { name: 'Uniquement cette catégorie' }),
-      ).toBeDisabled()
+      expect(within(sheet).queryByRole('checkbox')).not.toBeInTheDocument()
     })
 
     it('shows a tag already chosen first, and drops it with a touch', async () => {

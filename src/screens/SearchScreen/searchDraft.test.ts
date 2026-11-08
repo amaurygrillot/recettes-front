@@ -5,7 +5,6 @@ import { canSearch, criteriaOf, draftOf, EMPTY_DRAFT } from './searchDraft'
 const SEARCHED: SearchCriteria = {
   query: 'tarte',
   categoryId: 'c-1',
-  exactCategory: true,
   tagIds: ['t-1', 't-2'],
   ingredientIds: ['i-1', 'i-2'],
   author: 'Odile',
@@ -17,7 +16,6 @@ describe('searchDraft', () => {
     expect(draftOf(SEARCHED)).toEqual({
       query: 'tarte',
       categoryId: 'c-1',
-      exactCategory: true,
       tagIds: ['t-1', 't-2'],
       ingredientIds: ['i-1', 'i-2'],
       author: 'Odile',
@@ -49,7 +47,6 @@ describe('searchDraft', () => {
     ['an ingredient', true, { ...EMPTY_DRAFT, ingredientIds: ['i-1'] }, false],
     ['an author', true, { ...EMPTY_DRAFT, author: 'Odile' }, false],
     ['spaces as an author', false, { ...EMPTY_DRAFT, author: '  ' }, false],
-    ['only « this category only »', false, { ...EMPTY_DRAFT, exactCategory: true }, false],
     ['nothing, in « Mes recettes »', true, EMPTY_DRAFT, true],
   ])('with %s, can search: %s', (_what, expected, draft, mine) => {
     expect(canSearch(draft, mine)).toBe(expected)
