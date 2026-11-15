@@ -29,7 +29,9 @@ export function failureMessage(failure: ApiFailure): string {
       return failures.unavailable(failure.retryAfterSeconds)
     case 'server-error':
       return failures.serverError
+    // An abort is the caller's own doing and is never shown; the sentence only keeps the switch whole.
     case 'unexpected':
+    case 'aborted':
       return failures.unexpected
   }
 }

@@ -7,14 +7,28 @@ interface ProblemInfo {
   readonly detail: string | undefined
 }
 
+/**
+ * Why a `409` was answered, for the conflicts the back types by their problem `type` (the recipe
+ * lists). Screens branch on this and never read `detail`, which is an English sentence for the logs.
+ */
+export type ConflictReason = 'recipe-list-name-taken' | 'too-many-recipe-lists' | 'recipe-list-full'
+
+const CONFLICT_REASONS: Readonly<Record<string, ConflictReason>> = {
+  'urn:recettes:problem:recipe-list-name-taken': 'recipe-list-name-taken',
+  'urn:recettes:problem:too-many-recipe-lists': 'too-many-recipe-lists',
+  'urn:recettes:problem:recipe-list-full': 'recipe-list-full',
+}
+
 /** Seconds to wait before asking again; absent when the back did not say. */
 interface RetryHint {
   readonly retryAfterSeconds: number | undefined
 }
 
 export type ApiFailure =
-  /** No answer at all: offline, server down, or a request the browser blocked (CORS). */
+  /** No answer at all: offline, server down, a request the browser blocked (CORS), or a `408` (the server gave up waiting for a client gone quiet). */
   | { readonly kind: 'network' }
+  /** The caller cancelled the request (an upload given up): not a failure, so nothing is said about it. */
+  | { readonly kind: 'aborted' }
   /** 400: the input is wrong; `detail` names the field. */
   | (ProblemInfo & { readonly kind: 'invalid-request' })
   /** 401: no token, a broken or expired token, or (on login) wrong credentials. */
@@ -23,8 +37,8 @@ export type ApiFailure =
   | (ProblemInfo & { readonly kind: 'forbidden' })
   /** 404: the resource in the path does not exist. */
   | (ProblemInfo & { readonly kind: 'not-found' })
-  /** 409: duplicate username, e-mail or name; a row still in use. */
-  | (ProblemInfo & { readonly kind: 'conflict' })
+  /** 409: duplicate username, e-mail or name; a row still in use; a limit of the recipe lists (`reason`). */
+  | (ProblemInfo & { readonly kind: 'conflict'; readonly reason: ConflictReason | undefined })
   /** 413: the upload is over the size limit. */
   | (ProblemInfo & { readonly kind: 'payload-too-large' })
   /** 429: too many uploads from this caller. */
@@ -69,6 +83,11 @@ function readDetail(body: unknown): string | undefined {
   return typeof body.detail === 'string' && body.detail !== '' ? body.detail : undefined
 }
 
+function readConflictReason(body: unknown): ConflictReason | undefined {
+  if (typeof body !== 'object' || body === null || !('type' in body)) return undefined
+  return typeof body.type === 'string' ? CONFLICT_REASONS[body.type] : undefined
+}
+
 /** `Retry-After` is whole seconds on this back end; an HTTP date or garbage reads as « not said ». */
 function readRetryAfter(response: Response): number | undefined {
   const raw = response.headers.get('Retry-After')
@@ -92,8 +111,12 @@ export function failureFromResponse(response: Response, body: unknown): ApiFailu
       return { kind: 'forbidden', ...info }
     case 404:
       return { kind: 'not-found', ...info }
+    case 408:
+      // Tomcat's own answer to a client that stopped sending (a plain JSON body, not a problem): to
+      // the person it is a connection that failed, and an upload is re-read as after any network error.
+      return { kind: 'network' }
     case 409:
-      return { kind: 'conflict', ...info }
+      return { kind: 'conflict', ...info, reason: readConflictReason(body) }
     case 413:
       return { kind: 'payload-too-large', ...info }
     case 429:

@@ -6,6 +6,7 @@ const conflict = (detail: string | undefined): ApiFailure => ({
   kind: 'conflict',
   status: 409,
   detail,
+  reason: undefined,
 })
 
 describe('conflictedField', () => {

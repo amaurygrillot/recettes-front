@@ -18,6 +18,16 @@ function isCredentialEndpoint(method: string, schemaPath: string): boolean {
   return method === 'PUT' && schemaPath === '/users/reinit-password'
 }
 
+/**
+ * The reads that belong to the signed-in member (their lists, a list's photo, the recipes of a
+ * list). Unlike the rest of the library they are not public, so a refused token must not be dropped
+ * and the request replayed: the second answer could only be a second `401`.
+ */
+function isPrivateRead(request: Request, schemaPath: string): boolean {
+  if (schemaPath === '/lists' || schemaPath.startsWith('/lists/')) return true
+  return schemaPath === '/recipes' && new URL(request.url).searchParams.has('listId')
+}
+
 function describe(request: Request): { method: string; path: string } {
   return { method: request.method, path: new URL(request.url).pathname }
 }
@@ -32,14 +42,15 @@ function createAuthMiddleware(session: SessionTokens): Middleware {
       return request
     },
 
-    async onResponse({ request, response, options }) {
+    async onResponse({ request, response, options, schemaPath }) {
       const sentToken = request.headers.get('Authorization')?.replace(BEARER_PREFIX, '')
       if (response.status !== 401 || sentToken === undefined) return undefined
 
       session.expire(sentToken)
-      // Every read is public, so a refused token must not break one: the app tells the member their
-      // session is over, and the page they asked for still loads, as for a visitor.
-      if (request.method !== 'GET') return undefined
+      // Most reads are public, so a refused token must not break one: the app tells the member their
+      // session is over, and the page they asked for still loads, as for a visitor. A private read
+      // has nothing to show a visitor: its 401 is the answer.
+      if (request.method !== 'GET' || isPrivateRead(request, schemaPath)) return undefined
       const headers = new Headers(request.headers)
       headers.delete('Authorization')
       return await options.fetch(new Request(request, { headers }))

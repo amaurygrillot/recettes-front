@@ -8,14 +8,24 @@ interface Settled<TData> {
   response: Response
 }
 
+function isAbort(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError'
+}
+
 async function settle<TData>(call: Promise<Settled<TData>>): Promise<Settled<TData>> {
   let settled: Settled<TData>
   try {
     settled = await call
   } catch (error) {
-    // `fetch` rejects with a TypeError when nothing answers; anything else (a body that is not the
-    // JSON it claims to be, an abort, a bug) is not a connectivity problem.
+    // `fetch` rejects with a TypeError when nothing answers; a caller that gave a request up
+    // rejects it with an AbortError, which is its own outcome (the person did it: no message, no
+    // alarm in the logs); anything else (a body that is not the JSON it claims to be, a bug) is not
+    // a connectivity problem.
     if (error instanceof TypeError) throw new ApiRequestError({ kind: 'network' })
+    if (isAbort(error)) {
+      logger.info('An API call was cancelled by the caller')
+      throw new ApiRequestError({ kind: 'aborted' })
+    }
     logger.error('An API call failed for a reason other than the network', {
       reason: error instanceof Error ? error.name : 'unknown',
     })

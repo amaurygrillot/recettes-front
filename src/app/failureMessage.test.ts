@@ -10,7 +10,7 @@ const KINDS: readonly ApiFailure[] = [
   { kind: 'unauthorized', ...problem },
   { kind: 'forbidden', ...problem },
   { kind: 'not-found', ...problem },
-  { kind: 'conflict', ...problem },
+  { kind: 'conflict', ...problem, reason: undefined },
   { kind: 'payload-too-large', ...problem },
   { kind: 'rate-limited', ...problem, retryAfterSeconds: 30 },
   { kind: 'unavailable', ...problem, retryAfterSeconds: 30 },
@@ -24,6 +24,10 @@ describe('failureMessage', () => {
 
     expect(messages.every((message) => message.length > 0)).toBe(true)
     expect(new Set(messages).size).toBe(KINDS.length)
+  })
+
+  it('has a sentence even for an abort, which no screen shows', () => {
+    expect(failureMessage({ kind: 'aborted' })).not.toBe('')
   })
 
   it.each([
