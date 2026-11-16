@@ -1,5 +1,5 @@
 import { EmojiPicker as Picker, type EmojiData } from 'frimousse'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { countEmojisFound } from '../../lib/emoji/emojiSearch'
 import { useDebouncedValue } from '../../lib/useDebouncedValue'
 import { Button } from '../Button/Button'
@@ -37,6 +37,7 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
   const resolveEmojiData = useCallback(() => data, [data])
   const word = useDebouncedValue(search.trim(), 400)
   const searching = search.trim() !== ''
+  const pills = useMemo(() => pillsOf(data), [data])
 
   return (
     <Picker.Root
@@ -65,7 +66,7 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
           }}
         />
       )}
-      {!searching && <CategoryPills categories={pillsOf(data)} active={active} onGo={goTo} />}
+      {!searching && <CategoryPills categories={pills} active={active} onGo={goTo} />}
       <p role="status" className="sr-only">
         {word === '' ? '' : strings.results(countEmojisFound(data.emojis, word), word)}
       </p>

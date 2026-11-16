@@ -17,8 +17,19 @@ function isPrivateQuery(queryKey: readonly unknown[]): boolean {
  * Empties them and tells whoever is showing one (a page still mounted): a query that is merely
  * removed from the cache would stay on screen, with its data, until its component renders again.
  */
-export function clearPrivateQueries(queryClient: QueryClient): void {
-  void queryClient.resetQueries({ predicate: (query) => isPrivateQuery(query.queryKey) })
+export function clearPrivateQueries(queryClient: QueryClient, refetch: boolean): void {
+  const predicate = (query: { queryKey: readonly unknown[] }) => isPrivateQuery(query.queryKey)
+  if (refetch) {
+    void queryClient.resetQueries({ predicate })
+    return
+  }
+  // Nobody is signed in: a mounted page is emptied, and asks for nothing it could not be given.
+  queryClient
+    .getQueryCache()
+    .findAll({ predicate })
+    .forEach((query) => {
+      query.reset()
+    })
 }
 
 /** Only the photos: what the lists say can stay on screen under the session dialog, the photos cannot. */
@@ -55,10 +66,10 @@ export function bindPrivateData(queryClient: QueryClient, session: SessionSource
       clearListPhotos(queryClient)
       logger.info('The photos of the lists were dropped: the session is over')
     } else if (next.status === 'visitor' && before.status !== 'visitor') {
-      clearPrivateQueries(queryClient)
+      clearPrivateQueries(queryClient, false)
       logger.info('The private data was dropped: the session ended')
     } else if (next.status === 'member' && !isSameMember(before, next)) {
-      clearPrivateQueries(queryClient)
+      clearPrivateQueries(queryClient, true)
       const forgotten = forgetOtherMembers(next.userId)
       logger.info('The private data was dropped: someone signed in', { draftsForgotten: forgotten })
     }
