@@ -27,6 +27,13 @@ if (typeof Range !== 'undefined') {
   }
 }
 
+// ...nor object URLs: pictures fetched with the token are shown from one (tests spy on these two).
+if (typeof URL !== 'undefined' && typeof URL.createObjectURL !== 'function') {
+  let made = 0
+  URL.createObjectURL = () => `blob:test/${(made += 1).toString()}`
+  URL.revokeObjectURL = () => undefined
+}
+
 beforeAll(() => {
   // MSW 3 calls it a « frame »: an unanswered request fails loudly instead of reaching the network.
   server.listen({ onUnhandledFrame: 'error' })

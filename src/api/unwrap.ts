@@ -9,7 +9,9 @@ interface Settled<TData> {
 }
 
 function isAbort(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError'
+  return (
+    typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError'
+  )
 }
 
 async function settle<TData>(call: Promise<Settled<TData>>): Promise<Settled<TData>> {

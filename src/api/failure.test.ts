@@ -40,26 +40,24 @@ describe('failureFromResponse', () => {
     })
   })
 
-  it.each([
-    ['recipe-list-name-taken'],
-    ['too-many-recipe-lists'],
-    ['recipe-list-full'],
-  ] as const)('tells a 409 of type « %s » by its problem type', (reason) => {
-    const body = { ...problem, type: `${PROBLEM_TYPE}${reason}` }
+  it.each([['recipe-list-name-taken'], ['too-many-recipe-lists'], ['recipe-list-full']] as const)(
+    'tells a 409 of type « %s » by its problem type',
+    (reason) => {
+      const body = { ...problem, type: `${PROBLEM_TYPE}${reason}` }
 
-    expect(failureFromResponse(answer(409), body)).toMatchObject({ kind: 'conflict', reason })
-  })
+      expect(failureFromResponse(answer(409), body)).toMatchObject({ kind: 'conflict', reason })
+    },
+  )
 
-  it.each([
-    ['about:blank'],
-    [`${PROBLEM_TYPE}something-new`],
-    [''],
-  ])('gives no reason to a 409 of type « %s »', (type) => {
-    expect(failureFromResponse(answer(409), { ...problem, type })).toMatchObject({
-      kind: 'conflict',
-      reason: undefined,
-    })
-  })
+  it.each([['about:blank'], [`${PROBLEM_TYPE}something-new`], ['']])(
+    'gives no reason to a 409 of type « %s »',
+    (type) => {
+      expect(failureFromResponse(answer(409), { ...problem, type })).toMatchObject({
+        kind: 'conflict',
+        reason: undefined,
+      })
+    },
+  )
 
   it('never reads the detail to tell conflicts apart', () => {
     const body = { ...problem, detail: 'Recipe list name is already taken' }

@@ -112,7 +112,9 @@ describe('unwrap', () => {
     const error = vi.spyOn(logger, 'error')
 
     const call = failureOf(
-      unwrap(api.GET('/recipes/{id}', { params: { path: { id: '42' } }, signal: controller.signal })),
+      unwrap(
+        api.GET('/recipes/{id}', { params: { path: { id: '42' } }, signal: controller.signal }),
+      ),
     )
     controller.abort()
 
