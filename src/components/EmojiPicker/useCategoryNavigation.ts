@@ -52,5 +52,11 @@ export function useCategoryNavigation(
     [positions, viewportRef, instant],
   )
 
-  return { active, onScroll, goTo }
+  /** A new search (or none any more) shows its list from the top: the pill is the first category's again. */
+  const resetToTop = useCallback(() => {
+    viewportRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+    setActive(positions[0]?.index)
+  }, [positions, viewportRef])
+
+  return { active, onScroll, goTo, resetToTop }
 }

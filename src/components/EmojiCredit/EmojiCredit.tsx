@@ -6,7 +6,7 @@ import { strings } from './strings'
  */
 export function EmojiCredit() {
   return (
-    <p className="mt-1.5 text-center text-detail text-ink-700">
+    <p className="mt-1.5 text-center text-detail leading-6 text-ink-700">
       {strings.before}
       <b className="text-ink-900">{strings.name}</b>
       {strings.after}

@@ -8,19 +8,21 @@ import { expectNoAccessibilityViolations } from '../../test/expectNoAccessibilit
 import { server } from '../../test/server'
 import { EmojiPicker } from './EmojiPicker'
 
-let restoreLayout: () => void
 const scrollTo = vi.fn<(options: ScrollToOptions) => void>()
+let restoreLayout: () => void
+
+// jsdom has no scrollTo. The picker also scrolls from timers that can run after a test has ended, so it stays
+// defined for the whole file instead of being put back after each test.
+Object.defineProperty(Element.prototype, 'scrollTo', { configurable: true, value: scrollTo })
 
 beforeEach(() => {
   serveEmojibase()
   restoreLayout = stubPickerLayout()
   scrollTo.mockClear()
-  Object.defineProperty(Element.prototype, 'scrollTo', { configurable: true, value: scrollTo })
 })
 
 afterEach(() => {
   restoreLayout()
-  Reflect.deleteProperty(Element.prototype, 'scrollTo')
 })
 
 async function renderPicker(selected?: string) {
@@ -71,6 +73,46 @@ describe('EmojiPicker', () => {
     await user.type(screen.getByRole('searchbox'), 'gateau')
 
     expect(await screen.findByRole('gridcell', { name: 'Gâteau d’anniversaire' })).toBeVisible()
+  })
+
+  it('marks the emoji already chosen in the list, and shows how many a search found as a line', async () => {
+    const { user } = await renderPicker('🎄')
+
+    await user.type(screen.getByRole('searchbox'), 'sapin')
+
+    expect(await screen.findByRole('gridcell', { name: 'Sapin de Noël' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toBeVisible()
+    })
+  })
+
+  it('says there is no result, rather than "0 résultats", for a word that matches nothing', async () => {
+    const { user } = await renderPicker()
+
+    await user.type(screen.getByRole('searchbox'), 'xqzw')
+
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent('Aucun résultat pour « xqzw »')
+    })
+  })
+
+  it('puts the first category back as the one being read when the search is cleared', async () => {
+    const { user } = await renderPicker('🍕')
+    expect(screen.getByRole('button', { name: 'Aller à Cuisine' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+
+    await user.type(screen.getByRole('searchbox'), 'sapin')
+    await user.click(screen.getByRole('button', { name: 'Effacer la recherche' }))
+
+    expect(await screen.findByRole('button', { name: 'Aller à Visages' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
   })
 
   it('says when nothing matches, and gets the list back when the search is cleared', async () => {

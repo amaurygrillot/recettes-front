@@ -33,7 +33,12 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const columns = useColumns(rootRef)
-  const { active, onScroll, goTo } = useCategoryNavigation(data, columns, viewportRef, selected)
+  const { active, onScroll, goTo, resetToTop } = useCategoryNavigation(
+    data,
+    columns,
+    viewportRef,
+    selected,
+  )
   // The data is already here: the picker is given it as it is, and loads nothing itself.
   const resolveEmojiData = useCallback(() => data, [data])
   const word = useDebouncedValue(search.trim(), 400)
@@ -52,7 +57,13 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
       className="flex min-h-0 flex-1 flex-col gap-3"
     >
       <div className="flex items-start gap-2.5">
-        <SearchField value={search} onChange={setSearch} />
+        <SearchField
+          value={search}
+          onChange={(text) => {
+            setSearch(text)
+            resetToTop()
+          }}
+        />
         <SkinToneButton
           buttonRef={toneButtonRef}
           open={tonesOpen}
@@ -69,16 +80,21 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
           }}
         />
       )}
-      {!searching && <CategoryPills categories={pills} active={active} onGo={goTo} />}
-      <p role="status" className="sr-only">
-        {word === '' ? '' : strings.results(countEmojisFound(data.emojis, word), word)}
-      </p>
+      {searching ? (
+        <p role="status" className="px-1 text-body font-bold text-ink-900">
+          {word === '' ? '' : strings.results(countEmojisFound(data.emojis, word), word)}
+        </p>
+      ) : (
+        <CategoryPills categories={pills} active={active} onGo={goTo} />
+      )}
       <Picker.Viewport
         ref={viewportRef}
         onScroll={(event) => {
           onScroll(event.currentTarget)
         }}
-        className="min-h-0 flex-1 focus-visible:outline-3 focus-visible:outline-ink-900"
+        // The list needs neither a bar nor the gutter that keeps room for one: the board draws none.
+        style={{ scrollbarGutter: 'auto' }}
+        className="scrollbar-hidden min-h-0 flex-1 focus-visible:outline-3 focus-visible:outline-ink-900"
       >
         <Picker.Loading>
           <span className="flex justify-center py-8 text-ink-800">
@@ -95,7 +111,7 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
             />
           )}
         </Picker.Empty>
-        <EmojiGrid columns={columns} />
+        <EmojiGrid columns={columns} chosen={selected} />
       </Picker.Viewport>
     </Picker.Root>
   )

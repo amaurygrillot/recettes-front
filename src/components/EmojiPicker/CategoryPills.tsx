@@ -48,7 +48,7 @@ export function CategoryPills({ categories, active, onGo }: CategoryPillsProps) 
 
   return (
     <nav aria-label={strings.categories.navigation} className="relative -mx-4">
-      <ul ref={rowRef} className="scrollbar-hidden flex gap-2.5 overflow-x-auto px-4 pt-1 pb-2">
+      <ul ref={rowRef} className="scrollbar-hidden flex gap-2.5 overflow-x-auto px-4 pt-1.5 pb-2">
         {categories.map((category) => {
           const current = category.index === active
           return (

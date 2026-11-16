@@ -33,10 +33,11 @@ export const strings = {
       flags: 'Drapeaux',
     },
   },
-  results: (count: number, search: string) =>
-    count === 1
-      ? `1 résultat pour « ${search} »`
-      : `${count.toString()} résultats pour « ${search} »`,
+  results: (count: number, search: string) => {
+    if (count === 0) return `Aucun résultat pour « ${search} »`
+    if (count === 1) return `1 résultat pour « ${search} »`
+    return `${count.toString()} résultats pour « ${search} »`
+  },
   empty: {
     title: (search: string) => `Aucun émoji pour « ${search} »`,
     description: 'Essaie un autre mot : gâteau, sapin, pizza…',

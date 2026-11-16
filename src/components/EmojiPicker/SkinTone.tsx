@@ -30,7 +30,10 @@ export function SkinToneButton({ open, onToggle, buttonRef }: SkinToneButtonProp
       aria-expanded={open}
       aria-label={strings.skinTone.change(toneName(tone))}
       onClick={onToggle}
-      className="flex size-14 shrink-0 cursor-pointer items-center justify-center rounded-l border-2 border-ink-900 bg-paper-50 enabled:active:bg-butter-200"
+      className={classNames(
+        'flex size-14 shrink-0 cursor-pointer items-center justify-center rounded-l border-2 border-ink-900',
+        open ? 'bg-butter-300 shadow-stamp-sm' : 'bg-paper-50 enabled:active:bg-butter-200',
+      )}
     >
       <Emoji emoji={current} size="name" />
     </button>
@@ -55,12 +58,12 @@ export function SkinToneChoice({ onChosen }: SkinToneChoiceProps) {
     <div
       role="radiogroup"
       aria-label={strings.skinTone.group}
-      className="flex flex-wrap justify-between gap-2"
+      className="flex gap-1 rounded-l border-2 border-ink-900 bg-paper-50 p-2 shadow-card"
     >
       {variations.map((variation) => (
         <label
           key={variation.skinTone}
-          className="cursor-pointer"
+          className="min-w-0 flex-1 cursor-pointer"
           onPointerDown={() => {
             byPointer.current = true
           }}
@@ -83,8 +86,8 @@ export function SkinToneChoice({ onChosen }: SkinToneChoiceProps) {
           />
           <span
             className={classNames(
-              'flex size-14 items-center justify-center rounded-l border-2 border-ink-500 bg-paper-50',
-              'peer-checked:border-ink-900 peer-checked:bg-butter-300 peer-checked:shadow-stamp-xs',
+              'flex h-14 items-center justify-center rounded-m border-2 border-transparent',
+              'peer-checked:border-ink-900 peer-checked:bg-butter-300',
               'peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink-900',
             )}
           >

@@ -1,13 +1,14 @@
 import { useEffect, useState, type RefObject } from 'react'
 
 const CELL_PX = 56
-const MIN_COLUMNS = 5
+const MIN_COLUMNS = 4
 const MAX_COLUMNS = 7
 const DEFAULT_COLUMNS = 6
 
 /**
- * How many 56 px cells fit across what the picker is given: five on the narrowest phone (320 px),
- * six on a phone, seven from a tablet. Six until it is measured, which is the phone's.
+ * How many 56 px cells fit across what the picker is given: five on the narrowest phone (320 px, a
+ * sheet 280 px wide), six on a phone, seven from a tablet, and four rather than a cut column where even
+ * five do not fit. Six until it is measured, which is the phone's.
  */
 export function useColumns(ref: RefObject<HTMLElement | null>): number {
   const [columns, setColumns] = useState(DEFAULT_COLUMNS)
