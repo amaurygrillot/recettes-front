@@ -92,7 +92,7 @@ Things the generated client does not hide:
 - `POST /auth/login` returns the JWT as a **raw `text/plain` body**, not JSON. Wrap it once, in the auth module.
 - Errors are `application/problem+json` (`ProblemDetail`). Map them in one place; screens never parse error bodies.
 - `GET /recipes` and `GET /ingredients` are hand-written on the back (paged responses). Their schemas are still in the
-  YAML; the page shape is Spring Data's `PageImpl`. `GET /recipes` takes one `categoryId` but any number of
+  YAML; the page shape is Spring Data's `PageImpl`. `GET /recipes` takes one `categoryId` (and one `listId`) but any number of
   `tagIds` and of `ingredientIds` (each repeated, twenty at most), and keeps the recipes that carry **all** of the tags and use
   **all** of the ingredients. A recipe summary lists all its
   cover pictures in `coverMediaIds` (`coverMediaId` is the first): the cards show them as a small slider.
@@ -105,6 +105,12 @@ Things the generated client does not hide:
   ingredient groups (optional title; quantity, unit and note are optional per line) and steps (with optional pictures).
   **There is no prep time, servings, difficulty, rating, favorites, shopping list, sharing, account deletion or profile
   photo.** Do not invent UI or placeholder data for them.
+- **Recipe lists** (`/lists`, the « Listes » boards) exist, **private to their member** (a list that is not yours is a `404`, an administrator included): a list has a name (100
+  characters), an emoji (one, at most 32 UTF-16 units: the picker is capped at Emoji 15.0), its recipes (200 at most, 50 lists per member) and **an optional photo of its own**
+  (`/lists/{id}/cover`, JPEG or PNG under 8 387 584 bytes, read only with the token: fetched as a blob, `coverVersion` in the address). `GET /recipes` takes a `listId` (a token needed)
+  and the sort `ADDED_AT`: the content of a list is a recipe search, not a second listing. The three typed `409`s (`recipe-list-name-taken`, `too-many-recipe-lists`, `recipe-list-full`)
+  are told apart by `ApiFailure.reason`, never by `detail`. Lists, what they hold and their photos are **never shown to another member** on a shared device:
+  [docs/api-layer.md](docs/api-layer.md#private-data-lists-and-their-photos).
 
 ## Authentication
 
