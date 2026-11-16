@@ -4,8 +4,8 @@ import { activeCategory, categoryPositions } from '../../lib/emoji/categoryPosit
 import { useMediaQuery } from '../../lib/useMediaQuery'
 
 /** The height of a row of emojis (the 56 px cell) and of a category's title (`h-10`): fixed, so a category's place is arithmetic. */
-export const ROW_PX = 56
-export const TITLE_PX = 40
+const ROW_PX = 56
+const TITLE_PX = 40
 
 /**
  * What the pills of the categories need: which category is being read as the list scrolls, and how

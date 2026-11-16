@@ -110,6 +110,7 @@ describe('unwrap', () => {
     )
     const info = vi.spyOn(logger, 'info')
     const error = vi.spyOn(logger, 'error')
+    const warn = vi.spyOn(logger, 'warn')
 
     const call = failureOf(
       unwrap(
@@ -120,6 +121,7 @@ describe('unwrap', () => {
 
     expect(await call).toEqual({ kind: 'aborted' })
     expect(error).not.toHaveBeenCalled()
+    expect(warn).not.toHaveBeenCalled()
     expect(info).toHaveBeenCalledOnce()
   })
 

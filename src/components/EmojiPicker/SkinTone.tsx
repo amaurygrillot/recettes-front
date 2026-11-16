@@ -24,7 +24,6 @@ export function SkinToneButton({ open, onToggle }: SkinToneButtonProps) {
   return (
     <button
       type="button"
-      aria-haspopup="true"
       aria-expanded={open}
       aria-label={strings.skinTone.change(toneName(tone))}
       onClick={onToggle}
@@ -60,7 +59,11 @@ export function SkinToneChoice({ onChosen }: SkinToneChoiceProps) {
             aria-label={strings.skinTone.option(toneName(variation.skinTone))}
             onChange={() => {
               setTone(variation.skinTone)
-              onChosen()
+            }}
+            // A touch or a click closes the row; the arrows of the keyboard (which also click, with no
+            // pointer) move from tone to tone and leave it open.
+            onClick={(event) => {
+              if (event.detail > 0) onChosen()
             }}
             className="peer sr-only"
           />

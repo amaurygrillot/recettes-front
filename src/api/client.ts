@@ -66,7 +66,9 @@ const loggingMiddleware: Middleware = {
     return undefined
   },
 
-  onError({ request }) {
+  onError({ request, error }) {
+    // A request the caller gave up is not a server that does not answer: unwrap reports it (at info).
+    if (error instanceof Error && error.name === 'AbortError') return undefined
     logger.warn('API unreachable', describe(request))
     return undefined
   },

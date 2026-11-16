@@ -76,7 +76,7 @@ function searchTerms(emoji: RawEmoji): string[] {
   return [...new Set([...(emoji.tags ?? []), ...words.map(normalizeText)])]
 }
 
-function capitalize(text: string): string {
+export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 

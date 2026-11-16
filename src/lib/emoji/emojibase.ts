@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { logger } from '../logger'
-import { EMOJIBASE_URL, readEmojibase, type RawEmoji, type RawEmojibase } from './emojiData'
+import {
+  capitalize,
+  EMOJIBASE_URL,
+  readEmojibase,
+  type RawEmoji,
+  type RawEmojibase,
+} from './emojiData'
 
 let loading: Promise<RawEmojibase> | undefined
 
@@ -39,10 +45,6 @@ function nameKey(emoji: string): string {
   return emoji.replace(/[\u{FE0E}\u{FE0F}]/gu, '')
 }
 
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1)
-}
-
 /** The French name of every emoji of the data, each skin tone included (« Pouce vers le haut : peau claire »). */
 export function emojiNamesOf(emojis: readonly RawEmoji[]): ReadonlyMap<string, string> {
   const result = new Map<string, string>()
@@ -56,7 +58,12 @@ export function emojiNamesOf(emojis: readonly RawEmoji[]): ReadonlyMap<string, s
 let names: Promise<ReadonlyMap<string, string>> | undefined
 
 function loadNames(): Promise<ReadonlyMap<string, string>> {
-  names ??= loadEmojibase().then(({ emojis }) => emojiNamesOf(emojis))
+  names ??= loadEmojibase()
+    .then(({ emojis }) => emojiNamesOf(emojis))
+    .catch((error: unknown) => {
+      names = undefined
+      throw error
+    })
   return names
 }
 

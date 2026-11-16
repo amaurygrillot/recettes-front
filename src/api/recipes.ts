@@ -52,7 +52,7 @@ export function useRecipePages(queryKey: QueryKey, filters: RecipeSearchFilters,
 }
 
 /** The feed and the search results. */
-export function useRecipeSearch(filters: RecipeSearchFilters, enabled = true) {
+export function useRecipeSearch(filters: Omit<RecipeSearchFilters, 'listId'>, enabled = true) {
   return useRecipePages(recipeKeys.search(filters), filters, enabled)
 }
 

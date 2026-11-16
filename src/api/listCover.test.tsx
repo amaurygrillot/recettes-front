@@ -200,16 +200,15 @@ describe('useListCover', () => {
       )
 
       await waitFor(() => {
-        expect(warn).toHaveBeenCalled()
+        expect(
+          client.getQueryCache().findAll({ queryKey: ['list-covers'] })[0]?.state.data,
+        ).toBeNull()
       })
 
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('current version'))
       expect(result.current).toBeUndefined()
       expect(requests).toHaveLength(1)
       expect(reads).toBe(1)
-      // Settled as « no photo »: a re-render does not ask again.
-      expect(
-        client.getQueryCache().findAll({ queryKey: ['list-covers'] })[0]?.state.data,
-      ).toBeNull()
     })
   })
 })

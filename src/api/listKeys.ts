@@ -12,7 +12,6 @@ export type ListContentFilters = Omit<RecipeSearchFilters, 'listId'>
 export const listKeys = {
   all: ['lists'] as const,
   mine: ['lists', 'mine'] as const,
-  containingAny: ['lists', 'containing'] as const,
   containing: (recipeId: string) => ['lists', 'containing', recipeId] as const,
   detail: (id: string) => ['lists', 'detail', id] as const,
   contentOf: (id: string) => ['lists', 'content', id] as const,

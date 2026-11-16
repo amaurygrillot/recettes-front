@@ -34,7 +34,13 @@ export function clearPrivateQueries(queryClient: QueryClient, refetch: boolean):
 
 /** Only the photos: what the lists say can stay on screen under the session dialog, the photos cannot. */
 export function clearListPhotos(queryClient: QueryClient): void {
-  void queryClient.resetQueries({ queryKey: listCoverKeys.all })
+  // The token is already gone: asking for them again could only earn a 401 each.
+  queryClient
+    .getQueryCache()
+    .findAll({ queryKey: listCoverKeys.all })
+    .forEach((query) => {
+      query.reset()
+    })
 }
 
 /** A rename keeps the same member (and their private data); a sign-in after an expiry does not count as the same. */

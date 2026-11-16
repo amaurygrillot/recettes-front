@@ -79,7 +79,6 @@ export const strings = {
     title: 'Émojis',
     sampleName: 'Noël',
     sampleTitle: 'Recettes de mamie',
-    sizes: 'Les quatre tailles, dessinées par Twemoji',
     name: 'À côté d’un nom (32 px)',
     badge: 'Pastille (28 px)',
     pageTitle: 'À côté d’un titre (40 · 52 · 60 px)',

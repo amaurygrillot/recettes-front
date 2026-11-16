@@ -99,6 +99,19 @@ describe('EmojiPicker', () => {
       expect(within(group).getByRole('radio', { name: 'Ton de peau : par défaut' })).toBeChecked()
     })
 
+    it('moves from tone to tone with the arrows, and leaves the row open for the keyboard', async () => {
+      const { user } = await renderPicker()
+      await user.click(screen.getByRole('button', { name: 'Ton de peau : par défaut, changer' }))
+      screen.getByRole('radio', { name: 'Ton de peau : par défaut' }).focus()
+
+      await user.keyboard('{ArrowRight}')
+
+      await waitFor(() => {
+        expect(screen.getByRole('radio', { name: 'Ton de peau : clair' })).toBeChecked()
+      })
+      expect(screen.getByRole('radiogroup', { name: 'Ton de peau' })).toBeVisible()
+    })
+
     it('puts the tone chosen on the emojis that have one, and on the button', async () => {
       const { user } = await renderPicker()
       await user.click(screen.getByRole('button', { name: 'Ton de peau : par défaut, changer' }))
