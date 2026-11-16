@@ -106,6 +106,14 @@ describe('AccountScreen', () => {
       )
     })
 
+    it('credits the drawings of the emojis at the foot of the page', () => {
+      renderAccount()
+
+      expect(screen.getByText(/Dessins des émojis/)).toHaveTextContent(
+        'Dessins des émojis : Twemoji, licence CC-BY 4.0.',
+      )
+    })
+
     it('shows the address of the account once it is known, under the username', () => {
       renderAccount({ known: KNOWN })
 

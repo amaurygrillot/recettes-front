@@ -92,7 +92,7 @@ describe('private data on a shared device', () => {
     sessionStore.signIn(tokenOf.anne)
     const { router } = renderPage()
     await screen.findByTestId('photo')
-    const annesPhoto = (screen.getByTestId('photo') as HTMLImageElement).src
+    const annesPhoto = screen.getByTestId('photo').getAttribute('src') ?? ''
     const revoke = vi.spyOn(URL, 'revokeObjectURL')
     // The first member leaves the page, then signs out; the next one signs in and opens the same page.
     await act(() => router.navigate('/ailleurs'))
@@ -146,7 +146,7 @@ describe('private data on a shared device', () => {
     sessionStore.signIn(tokenOf.anne)
     renderPage()
     await screen.findByTestId('photo')
-    const annesPhoto = (screen.getByTestId('photo') as HTMLImageElement).src
+    const annesPhoto = screen.getByTestId('photo').getAttribute('src') ?? ''
     const revoke = vi.spyOn(URL, 'revokeObjectURL')
 
     act(() => {

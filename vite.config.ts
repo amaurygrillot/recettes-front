@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 import { defineConfig } from 'vitest/config'
 
 // The browser only talks to the front's own origin; `/api/...` is forwarded to the back end with the
@@ -13,7 +14,26 @@ const apiProxy = {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    // The emoji drawings and the French emoji data are served by the app itself, copied from their
+    // packages when it is built (and served from them by the dev server): nothing is committed by
+    // hand, and nothing is asked of another host. They are fetched when an emoji is shown.
+    viteStaticCopy({
+      targets: [
+        { src: 'node_modules/@twemoji/svg/*.svg', dest: 'twemoji', rename: { stripBase: true } },
+        {
+          src: [
+            'node_modules/emojibase-data/fr/data.json',
+            'node_modules/emojibase-data/fr/messages.json',
+          ],
+          dest: 'emojibase/fr',
+          rename: { stripBase: true },
+        },
+      ],
+    }),
+  ],
   server: {
     // The back end's CORS origin and the password-reset e-mail link are both fixed to this port:
     // fail loudly instead of silently moving to 5174.

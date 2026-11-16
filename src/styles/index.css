@@ -146,6 +146,18 @@
   --text-annotation-lg: 1.875rem;
   --text-annotation-lg--line-height: 2.0625rem;
 
+  /* The emoji of a list (the « Listes » boards, L25 n° 17). Four sizes, named for what they sit next to: a
+     name (32), a badge (28), a page title (40 on a phone, 52 on a tablet, 60 on a desktop: it grows with
+     the title) and a tile with no photo (64, 72, 88). */
+  --spacing-emoji-name: 2rem;
+  --spacing-emoji-badge: 1.75rem;
+  --spacing-emoji-title: 2.5rem;
+  --spacing-emoji-title-tablet: 3.25rem;
+  --spacing-emoji-title-desktop: 3.75rem;
+  --spacing-emoji-tile: 4rem;
+  --spacing-emoji-tile-tablet: 4.5rem;
+  --spacing-emoji-tile-desktop: 5.5rem;
+
   /* Radii: the bigger the object, the rounder its corners. */
   --radius-s: 0.5rem;
   --radius-m: 0.75rem;

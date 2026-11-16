@@ -1,5 +1,6 @@
 import { AvatarsSection } from './components/AvatarsSection'
 import { ButtonsSection } from './components/ButtonsSection'
+import { EmojisSection } from './components/EmojisSection'
 import { FieldsSection } from './components/FieldsSection'
 import { RichTextSection } from './components/RichTextSection'
 import { IconsSection } from './components/IconsSection'
@@ -24,6 +25,7 @@ export function StyleguideScreen() {
       <ButtonsSection />
       <TagsSection />
       <FieldsSection />
+      <EmojisSection />
       <RichTextSection />
       <LoadingSection />
       <StatesSection />
