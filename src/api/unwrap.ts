@@ -8,7 +8,8 @@ interface Settled<TData> {
   response: Response
 }
 
-function isAbort(error: unknown): boolean {
+/** Whether a rejection is a request the caller gave up (an `AbortError`, whatever realm it comes from). */
+export function isAbort(error: unknown): boolean {
   return (
     typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError'
   )

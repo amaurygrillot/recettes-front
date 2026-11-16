@@ -99,6 +99,22 @@ describe('EmojiPicker', () => {
       expect(within(group).getByRole('radio', { name: 'Ton de peau : par défaut' })).toBeChecked()
     })
 
+    it('closes the row when a tone is touched on its picture, as a finger does, and gives the focus back', async () => {
+      const { user } = await renderPicker()
+      await user.click(screen.getByRole('button', { name: 'Ton de peau : par défaut, changer' }))
+      const label = screen.getByRole('radio', { name: 'Ton de peau : clair' }).closest('label')
+      if (label === null) throw new Error('The tone has no label')
+
+      await user.click(label)
+
+      await waitFor(() => {
+        expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument()
+      })
+      expect(
+        await screen.findByRole('button', { name: 'Ton de peau : clair, changer' }),
+      ).toHaveFocus()
+    })
+
     it('moves from tone to tone with the arrows, and leaves the row open for the keyboard', async () => {
       const { user } = await renderPicker()
       await user.click(screen.getByRole('button', { name: 'Ton de peau : par défaut, changer' }))

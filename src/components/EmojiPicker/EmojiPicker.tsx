@@ -29,6 +29,7 @@ interface LoadedPickerProps extends EmojiPickerProps {
 function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
   const [search, setSearch] = useState('')
   const [tonesOpen, setTonesOpen] = useState(false)
+  const toneButtonRef = useRef<HTMLButtonElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const viewportRef = useRef<HTMLDivElement>(null)
   const columns = useColumns(rootRef)
@@ -53,6 +54,7 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
       <div className="flex items-start gap-2.5">
         <SearchField value={search} onChange={setSearch} />
         <SkinToneButton
+          buttonRef={toneButtonRef}
           open={tonesOpen}
           onToggle={() => {
             setTonesOpen((open) => !open)
@@ -63,6 +65,7 @@ function LoadedPicker({ data, selected, onSelect }: LoadedPickerProps) {
         <SkinToneChoice
           onChosen={() => {
             setTonesOpen(false)
+            toneButtonRef.current?.focus()
           }}
         />
       )}

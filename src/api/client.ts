@@ -3,6 +3,7 @@ import { logger } from '../lib/logger'
 import { API_BASE_URL } from './apiConfig'
 import type { paths } from './schema'
 import { sessionStore, type SessionStore } from './sessionStore'
+import { isAbort } from './unwrap'
 
 type SessionTokens = Pick<SessionStore, 'getToken' | 'expire'>
 
@@ -68,7 +69,7 @@ const loggingMiddleware: Middleware = {
 
   onError({ request, error }) {
     // A request the caller gave up is not a server that does not answer: unwrap reports it (at info).
-    if (error instanceof Error && error.name === 'AbortError') return undefined
+    if (isAbort(error)) return undefined
     logger.warn('API unreachable', describe(request))
     return undefined
   },

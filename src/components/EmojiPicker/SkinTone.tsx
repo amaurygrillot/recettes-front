@@ -1,5 +1,5 @@
 import { useSkinTone, type SkinTone } from 'frimousse'
-import { useId } from 'react'
+import { useId, useRef, type RefObject } from 'react'
 import { classNames } from '../../lib/classNames'
 import { Emoji } from '../Emoji/Emoji'
 import { strings } from './strings'
@@ -14,15 +14,18 @@ function toneName(tone: SkinTone): string {
 export interface SkinToneButtonProps {
   open: boolean
   onToggle: () => void
+  /** For whoever puts the focus back on the button once a tone is chosen. */
+  buttonRef: RefObject<HTMLButtonElement | null>
 }
 
 /** The 56 px button that shows the hand in the tone in force and opens the six tones. */
-export function SkinToneButton({ open, onToggle }: SkinToneButtonProps) {
+export function SkinToneButton({ open, onToggle, buttonRef }: SkinToneButtonProps) {
   const [tone, , variations] = useSkinTone(HAND)
   const current = variations.find((variation) => variation.skinTone === tone)?.emoji ?? HAND
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-expanded={open}
       aria-label={strings.skinTone.change(toneName(tone))}
@@ -43,6 +46,10 @@ export interface SkinToneChoiceProps {
 export function SkinToneChoice({ onChosen }: SkinToneChoiceProps) {
   const [tone, setTone, variations] = useSkinTone(HAND)
   const name = useId()
+  // A touch or a click closes the row, the arrows of a keyboard (which change the tone too) do not. The
+  // « click » a browser makes on the radio is the same for both (its `detail` is 0 in WebKit), so the
+  // pointer is what tells them apart.
+  const byPointer = useRef(false)
 
   return (
     <div
@@ -51,7 +58,13 @@ export function SkinToneChoice({ onChosen }: SkinToneChoiceProps) {
       className="flex flex-wrap justify-between gap-2"
     >
       {variations.map((variation) => (
-        <label key={variation.skinTone} className="cursor-pointer">
+        <label
+          key={variation.skinTone}
+          className="cursor-pointer"
+          onPointerDown={() => {
+            byPointer.current = true
+          }}
+        >
           <input
             type="radio"
             name={name}
@@ -59,11 +72,12 @@ export function SkinToneChoice({ onChosen }: SkinToneChoiceProps) {
             aria-label={strings.skinTone.option(toneName(variation.skinTone))}
             onChange={() => {
               setTone(variation.skinTone)
+              if (!byPointer.current) return
+              byPointer.current = false
+              onChosen()
             }}
-            // A touch or a click closes the row; the arrows of the keyboard (which also click, with no
-            // pointer) move from tone to tone and leave it open.
-            onClick={(event) => {
-              if (event.detail > 0) onChosen()
+            onKeyDown={() => {
+              byPointer.current = false
             }}
             className="peer sr-only"
           />
