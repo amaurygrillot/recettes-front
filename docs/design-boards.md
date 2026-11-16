@@ -15,6 +15,7 @@ values are in [design-tokens.md](design-tokens.md); the canvas remains the sourc
 | RecipeEditorScreen | `Editeur-cadre` · `Editeur-texte-riche` · `Editeur-categories-tags` · `Editeur-photos` · `Editeur-ingredients` · `Editeur-etapes-conseil` · `Editeur-validation` · `Editeur-session-droits` · `Editeur-grands-ecrans` |
 | Auth screens | `Marque-ecrans` (sign-in) · `Compte-inscription` · `Compte-mot-de-passe-oublie` · `Compte-nouveau-mot-de-passe` · `Compte-public-grands-ecrans` |
 | AccountScreen | `Compte-page` · `Compte-etats` · `Compte-grands-ecrans` |
+| Listes (the canvas page « Listes », 25 boards, see [Listes](#listes-recipe-lists)) | `Listes-carnet` · `-mes-listes` · `-tuile` · `-nom-long` · `-ouverte` · `-recherche` · `-gerer` · `-ouverte-etats` · `-formulaire` · `-formulaire-erreurs` · `-emojis` · `-emojis-rendu` · `-ajouter` · `-ajouter-etats` · `-carte-bouton` · `-carte-ecrans` · `-tablette` · `-ordinateur` · `-session` · `-photo-cadrage` · `-photo-entete` · `-photo-formulaire` · `-photo-erreurs` · `-textes` · `-a-valider` |
 | Retouches (the canvas page « Retouches ») | R1 `Retouche-1-principe` · `Retouche-1-mobile` · `Retouche-1-grands-ecrans` · `Retouche-1-resultats`; R2 `Retouche-2-cocotte`; R3 `Retouche-3-texte-riche-mobile` · `Retouche-3-texte-riche-grands-ecrans`; R4 `Retouche-4-mascotte` · `Retouche-4-situations` · `Retouche-4-logo-en-situation`; R5 `Retouche-5-etape-sans-badge` · `Retouche-5-fin-sans-badge` · `Retouche-5-etats-sans-badge` · `Retouche-5-grands-ecrans-sans-badge`; R6 `Retouche-6-icone-liste`; R7 `Retouche-7-photos` · `Retouche-7-ingredients` · `Retouche-7-etapes` · `Retouche-7-grands-ecrans`; R8 `Retouche-8-miniatures-slider` |
 
 The **Retouches** boards are design changes applied on top of the screens above; where they name an older board (« ce qui change »),
@@ -662,3 +663,41 @@ Found on the same phone, with the keyboard up (about 330 CSS px of page left, of
   screen and the list is not seen »; the other one, the field moved to the top of the screen, was not chosen (it would move the field the person is typing in).
 - **Not reproducible in the pane**: the keyboard itself. Tested by stating a visual viewport shorter than the page (`test/keyboardScreen`), and by hand with a
   window 330 px high.
+
+## Listes (recipe lists)
+
+The canvas page « Listes »: 25 boards, all validated. **`Listes-a-valider` (L25, « Les décisions »)** holds the 31 decisions, built as written and not reopened; **`Listes-textes` (L24)**
+holds every text, word for word (they go into `strings.ts` files). The API contract wins over any board, and the newest board over an older one. The back end's notes are `recettes-back/docs/recipe-lists.md`
+and `recipe-list-cover.md`. It is built in five parts, one PR each: **1** the foundations (this section's first block), **2** the carnet and the list's frame, **3** the content of an open list,
+**4** « Ajouter à une liste », **5** the photo of a list. Each part adds its block below.
+
+| Part | Boards |
+|---|---|
+| The carnet, « Mes listes », the tile | L1 `Listes-carnet`, L2 `-mes-listes`, L3 `-tuile`, L4 `-nom-long` |
+| An open list | L5 `-ouverte`, L6 `-recherche`, L7 `-gerer`, L8 `-ouverte-etats` |
+| The form and the emoji picker | L9 `-formulaire`, L10 `-formulaire-erreurs`, L11 `-emojis`, L12 `-emojis-rendu` |
+| « Ajouter à une liste » | L13 `-ajouter`, L14 `-ajouter-etats`, L22 `-carte-bouton`, L23 `-carte-ecrans` |
+| Large screens, session, visitor | L15 `-tablette`, L16 `-ordinateur`, L17 `-session` |
+| The photo of a list | L18 `-photo-cadrage`, L19 `-photo-entete`, L20 `-photo-formulaire`, L21 `-photo-erreurs` |
+| Everything | L24 `-textes`, L25 `-a-valider` |
+
+### Part 1: the foundations (no list screen yet)
+
+Boards: L11 (the picker), L12 (Twemoji or native), L25 n° 11 and n° 17, and the credit drawn at the foot of L1 (Compte). What is built:
+
+- **The API layer and the privacy rules**, in [api-layer.md](api-layer.md#private-data-lists-and-their-photos): the hooks of the lists, entries, content and photo; private reads not replayed on a `401`; the typed `409`; a `408` as a failed connection; an abort as its own outcome;
+  the private data emptied when the person changes; the photo fetched with the token and shown from an object URL; the drafts keyed by member (the recipe editor's too).
+- **Twemoji and Frimousse** (L25 n° 11, « Recommandé »), self-hosted, capped at Emoji 15.0: [frontend-stack.md](frontend-stack.md#installed-with-the-lists-2026-11-16). `Emoji` (`src/components/Emoji`) draws one in the four sizes of n° 17 (tokens `size-emoji-name`, `-badge`, `-title`,
+  `-tile`: [design-tokens.md](design-tokens.md#emoji-sizes-the-listes-boards-l25-n-17)); it is decorative (`alt=""`), as the board asks: the name of the list says everything.
+- **`EmojiPicker`** (`src/components/EmojiPicker`) is the content of the picker sheet of L11, without the sheet (its title « Choisir un émoji », the way back and the cross are the form's, in part 2): a search field in French (56 px pill, « Effacer la recherche »), the skin-tone button (56 px, the
+  hand in the tone in force, « Ton de peau : moyen, changer ») that opens six radio buttons, nine category pills that scroll the one long list to a title and follow its scrolling (`aria-current="true"`, not `aria-pressed`: they are shortcuts, not toggles; the
+  row scrolls sideways with a fade where there is more; a category's place is arithmetic from the fixed row (56 px) and title (40 px) heights, `lib/emoji/categoryPositions`), columns of 56 px cells (5, 6 or 7 according to the width it is given),
+  « Mijotine, perdue » when nothing matches, and the count of results in a polite live region once the typing pauses. It opens on the category of the emoji already chosen. Frimousse does the list, the arrows, Home / End, Enter and the search;
+  the cells are named in French by the data (« Gâteau d'anniversaire »). It fills the height it is given and scrolls inside; **the sheet (part 2) lazy-loads it** so that Frimousse stays out of the pages everybody opens.
+- **What the board does not say, and was decided**: the picker says it is loading (« Chargement des émojis… ») and, when the files cannot be fetched, says so with « Réessayer » (L24 has neither text: they are the most conservative ones, a sentence and the system's `ErrorBanner`); the singular of the count is « 1 résultat pour « x » »;
+  « Émoji choisi : … » is announced by the form that holds the picker, since the picker is gone when it is chosen; an unknown group would keep the data's own key as its title.
+- **The credit** (`EmojiCredit`): « Dessins des émojis : **Twemoji**, licence CC-BY 4.0. » at the foot of the Compte page, 16/24 in ink 700, centred, under « Se déconnecter » (or under the last row from a tablet). Nothing else: no « À propos » page.
+- **Everything is shown on `/styleguide`** (« Émojis »): the four sizes, the credit and the picker, in a frame 480 px high.
+- **Differences from L11, and why** (the visual review, boards read value by value): the grid is a **centred block of 56 px cells** (4 to 7 columns, never a cut column: four where even five do not fit) instead of cells spread across the whole width with a 4 px row gap, so that a partly filled last row keeps its columns and a category's place stays arithmetic (a 56 px row); the category row has a fade on its right edge only, no left fade and no chevrons (`useCanScrollMore` knows the right edge only); a category title is 22/28 in Fraunces 800 without the pinned shadow; the skin-tone panel uses the system's `shadow-card` and a 32 px hand (the board: its own shadow, 30 px); the pills are 52 px high as drawn (under the 56 px rule, like the other pill rows of the app); the list has no scrollbar and no gutter, as the board draws none; typing, or clearing, starts the list from its top. The cells's selected state (yellow, ink border, `aria-selected`) and the keyboard's ring (3 px ink outline) follow the board.
+- **Decided here for later parts**: « Prendre une photo » is shown according to **the pointer** (`(pointer: coarse)`), not the width, which overrides the width wording of L25 n° 22 (« sur ordinateur, Galerie seul »): a touch tablet or laptop keeps it,
+  and a desktop with a mouse shows « Galerie » only. The recipe editor follows the same rule once its picker is shared (part 5).

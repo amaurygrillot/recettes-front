@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { logger } from '../lib/logger'
 import { API_BASE_URL } from './apiConfig'
 import { api } from './client'
+import { multipartFileRequest } from './multipartFile'
 import { unwrap } from './unwrap'
 
 export type MediaVariant = 'full' | 'thumbnail'
@@ -18,13 +19,7 @@ export function uploadMedia(file: File, signal?: AbortSignal) {
   return unwrap(
     api.POST('/media', {
       ...(signal === undefined ? {} : { signal }),
-      // The generated type calls the file a string; the real body is multipart, built here.
-      body: { file: '' },
-      bodySerializer: () => {
-        const form = new FormData()
-        form.append('file', file)
-        return form
-      },
+      ...multipartFileRequest(file),
     }),
   )
 }

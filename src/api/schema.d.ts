@@ -115,6 +115,8 @@ export interface paths {
          *     A category filter reaches the category's subcategories too, at any depth, unless `includeSubcategories=false`. `categoryId` and `categoryName` are two spellings of one filter: supplying both unions their matches.
          *
          *     `tagIds` keeps the recipes that carry **all** of the given tags, and `ingredientIds` the recipes that use **all** of the given ingredients, in any of their groups.
+         *
+         *     `listId` keeps the recipes of one of the caller's recipe lists, and is how the content of a list is read. It is the one criterion that needs a login: the operation stays public, but a request with `listId` and no token is a 401, and a list that is not the caller's (or does not exist) is a 404. With `listId` and no `sortBy`, the recipes come most recently added first (`ADDED_AT`).
          */
         get: operations["searchRecipes"];
         put?: never;
@@ -154,6 +156,139 @@ export interface paths {
          * @description Cascades to the introduction, steps, ingredient groups and picture links; merely dereferences ingredients, tags, categories and media. Only the author or an admin may delete.
          */
         delete: operations["deleteRecipe"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The caller's recipe lists
+         * @description Every list of the caller, sorted by name (normalised, so accents and case do not matter, then as typed). **Not paged**: a member has at most 50. Each item carries its `recipeCount`, up to 4 `recipeCoverMediaIds` (the first cover picture of the most recently added recipes of the list that have one, newest first, for the photo mosaic of a tile) and its `coverVersion`, which is `null` unless the list has a photo of its own. A photo of its own takes the place of the mosaic on the tile; `recipeCoverMediaIds` is computed either way, and the client decides which to show.
+         *
+         *     With `containing`, each item also carries `containsRecipe`, which says whether that recipe is in the list. The property is **only present when `containing` is given**, and absent otherwise. It is what the « Ajouter à une liste » sheet needs to show which lists already hold a recipe.
+         */
+        get: operations["listRecipeLists"];
+        put?: never;
+        /**
+         * Create a recipe list
+         * @description The new list belongs to the caller and is empty. A member has at most 50 lists, and two of a member's lists cannot share a name once accents, case and spacing are ignored.
+         */
+        post: operations["createRecipeList"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lists/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Get one recipe list
+         * @description The same shape as an item of `GET /lists`, without `containsRecipe`.
+         */
+        get: operations["getRecipeList"];
+        /**
+         * Rename a recipe list or change its emoji
+         * @description Both fields are required: this replaces the list's name and emoji, it does not patch them. `updatedAt` changes only if one of them does, or when the list's photo is set, replaced or removed; adding or removing a recipe never touches it. **Never touches the list's photo**, which has its own routes.
+         */
+        put: operations["updateRecipeList"];
+        post?: never;
+        /**
+         * Delete a recipe list
+         * @description Deletes the list and its entries, never the recipes in it, and the list's own photo, row and files, if it has one.
+         */
+        delete: operations["deleteRecipeList"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lists/{id}/cover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Download a list's own photo
+         * @description The photo's bytes, for its **owner only**: a list that is missing or not the caller's, and a list with no photo, answer `404`. It is the only way to read the photo: `GET /media/{id}` answers `404` for it, whoever asks. Fetch it with `fetch` and an `Authorization` header and show it from a blob; an `<img src>` cannot carry the token.
+         *
+         *     Every header of `GET /media/{id}` is sent here too (`Content-Type`, `Content-Disposition` with a generated name, `ETag`, `X-Content-Type-Options: nosniff`) and `If-None-Match` answers `304`. **The caching differs**: `Cache-Control` is `private`, never `public`, and **a replaced photo must never come back from a cache**, so each version has its own URL (`v`):
+         *
+         *     - without `v`: `private, no-cache`, with its `ETag`, so the browser revalidates;
+         *     - with the list's current `coverVersion`: `private, max-age=31536000, immutable`;
+         *     - with any other `v`: `404`. That version no longer exists, so the client reloads the list. A stale version is never served.
+         *
+         *     Visibility is checked before `If-None-Match` is evaluated, so another member who sends a matching `ETag` gets `404`, never `304`. A `304` repeats the `Cache-Control` of the `200`. Leave the revalidation to the browser's HTTP cache: do not set `If-None-Match` from a script.
+         */
+        get: operations["downloadRecipeListCover"];
+        /**
+         * Give a list a photo of its own, or replace it
+         * @description The list's own photo, which takes the place of the recipe mosaic on its tile and is shown on the open list. **Private**, like the list: only its owner can set, replace, remove or read it, an administrator included. Answers the **updated list**, whose `coverVersion` is the new version of the photo. `updatedAt` changes.
+         *
+         *     Takes the bytes of an image, **never a media id**. Creating or renaming a list does not touch its photo; this is the only way to set one. The pipeline is the one of `POST /media` (JPEG or PNG only, judged by magic bytes; re-encoded; a full size and a thumbnail), and so is the per-account rate limit, **shared** with it: a list photo counts as one upload, and admins are not limited. Cropping is the client's job (`object-fit: cover`).
+         *
+         *     The gates run in this order, and the first that applies answers: `401`; `413` (the container, before any code runs); `415` (not `multipart/form-data`) and `400` for a missing `file` part, which are answered while the arguments are bound, so **before** the `404`; `404` (the list is missing or is not the caller's, which is not counted against the rate limit); `429`; `400` for an empty file or a format that is not JPEG or PNG; `503` (the decode pool is saturated); and last the `400` of the pixels (too many, undecodable, cut short), which the decoder reads under the pool's permit, so a too-large image sent while the pool is saturated answers `503`, as on `POST /media`. Two overlapping writes to the same list's photo are serialised: both answer `200`, the last to commit wins, and every photo that is not the final one is deleted, row and files.
+         *
+         *     A `500`, a network error or a timeout can come after the photo was committed: read the list again.
+         *
+         *     Unlike `POST /media` there is no `403`: the route needs a login and nothing more, like every list route.
+         */
+        put: operations["setRecipeListCover"];
+        post?: never;
+        /**
+         * Remove a list's own photo
+         * @description Deletes the photo, row and files, and answers the **updated list** (`coverVersion` is then `null`, and the tile goes back to the mosaic). **Idempotent**: removing a photo the list does not have is a success that changes nothing, `updatedAt` included.
+         */
+        delete: operations["removeRecipeListCover"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lists/{id}/recipes/{recipeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+                /** @description The identifier of a recipe. */
+                recipeId: components["parameters"]["RecipeId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Put a recipe in a list
+         * @description **Idempotent**: a recipe that is already in the list is a success that changes nothing, even if the list is full. A list holds at most 200 recipes. The list is checked before the recipe, so a request about someone else's list never reveals whether the recipe exists.
+         */
+        put: operations["addRecipeToList"];
+        post?: never;
+        /**
+         * Take a recipe out of a list
+         * @description **Idempotent**: removing a recipe that is not in the list is a success. The recipe itself is never deleted, and its existence is not checked, so a recipe deleted in the meantime can still be taken out of the list the client shows.
+         */
+        delete: operations["removeRecipeFromList"];
         options?: never;
         head?: never;
         patch?: never;
@@ -461,7 +596,9 @@ export interface paths {
         };
         /**
          * Download an image
-         * @description Public, since recipes are public. Content never changes behind an id (editing a picture means uploading a new one), which is what makes the year-long `immutable` cache header honest; the `ETag` answers a conditional request with `If-None-Match` by a 304 and no body.
+         * @description Public, since recipes are public. Content never changes behind an id (editing a picture means uploading a new one), which is what makes the year-long `immutable` cache header honest; the `ETag` answers a conditional request with `If-None-Match` by a 304 and no body, which repeats the `Cache-Control` of the 200.
+         *
+         *     **Never serves the photo of a recipe list**, whoever asks, its owner and an administrator included: that answers 404, exactly like an id that does not exist. A list's photo is read only through its list, `GET /lists/{id}/cover`.
          */
         get: operations["downloadMedia"];
         put?: never;
@@ -684,6 +821,36 @@ export interface components {
             /** Format: date-time */
             createdAt?: string;
         };
+        RecipeListRequest: {
+            /** @description Trimmed. Unique among the caller's lists once accents, case and spacing are ignored. Must contain at least one visible character: a name made only of spaces, zero-width characters, blank-looking letters (the Hangul fillers, the blank Braille pattern) or accents is a 400, and so is a name with a control character or a line break anywhere in it. The 100 characters are counted as UTF-16 units, as Java counts them, so a name of 51 emojis is a 400. */
+            name: string;
+            /** @description Exactly one emoji, as typed by an emoji picker: a single grapheme cluster that is a fully-qualified emoji sequence (`🎂`, `❤️` with its variation selector, `👩‍🍳`, `👍🏽`, `🇫🇷`, `1️⃣`), at most 32 UTF-16 characters. A letter, a bare digit, an arrow, a text-style `❤` without its variation selector, two emojis side by side or an emoji followed by text is a 400. */
+            emoji: string;
+        };
+        /** @description One list, on every route that answers with a list. Everything but `containsRecipe` is **always sent**, and `coverVersion` is sent as an explicit `null` when the list has no photo, never left out. */
+        RecipeListResponse: {
+            id: string;
+            name: string;
+            emoji: string;
+            /**
+             * Format: int64
+             * @description Every recipe of the list, with or without a picture.
+             */
+            recipeCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Changes when the list is renamed, when its emoji changes, or when its own photo is set, replaced or removed, and only then. Removing a photo the list does not have changes nothing.
+             */
+            updatedAt: string;
+            /** @description `null` when the list has no photo of its own. Otherwise an opaque string that **changes whenever the photo does**, and that is the `v` of `GET /lists/{id}/cover`: each version has its own URL, so that a replaced photo never comes back from a cache. */
+            coverVersion: string | null;
+            /** @description Up to 4 media ids for the photo mosaic of the tile: the first cover picture of the most recently added recipes of the list that have one, newest first. Empty when no recipe of the list has a picture. Fetch each as `/media/{id}?variant=thumbnail`. Computed whether or not the list has a photo of its own (`coverVersion`), and the client decides which to show. Called `coverMediaIds` before lists could have a photo of their own. */
+            recipeCoverMediaIds: string[];
+            /** @description Whether the recipe named by `containing` is in this list. **Present only on `GET /lists?containing=`**; omitted everywhere else. */
+            containsRecipe?: boolean;
+        };
         SortObject: {
             empty?: boolean;
             sorted?: boolean;
@@ -783,8 +950,24 @@ export interface components {
                 "application/problem+json": components["schemas"]["ProblemDetail"];
             };
         };
+        /** @description The client stopped sending the body of the upload and the server's read timeout gave up on it (`server.tomcat.connection-timeout`). Answered by the container, with Spring Boot's JSON error body rather than a problem; nobody reads it, the client having gone. Nothing is stored or counted. */
+        RequestTimeout: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
         /** @description The upload is over the size limit. */
         PayloadTooLarge: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["ProblemDetail"];
+            };
+        };
+        /** @description The request is not `multipart/form-data`. The file goes in a part named `file`. */
+        UnsupportedMediaType: {
             headers: {
                 [name: string]: unknown;
             };
@@ -816,6 +999,8 @@ export interface components {
     parameters: {
         /** @description The identifier of the resource. */
         ResourceId: string;
+        /** @description The identifier of a recipe. */
+        RecipeId: string;
         /** @description Zero-based page index. */
         Page: number;
         /** @description Page size. A value above 100 is capped to 100, not rejected. */
@@ -825,7 +1010,7 @@ export interface components {
     headers: {
         /** @description The URI of the resource that was created. */
         Location: string;
-        /** @description Whole seconds to wait before trying again. Never less than 1. */
+        /** @description Whole seconds to wait before trying again, rounded up, never less than 1. On a 429 it is the wait until the account's oldest upload of the rolling window ages out, so at most the window (600 with the default 10 minutes). On a 503 it is the decode pool's processing timeout (10 with the defaults). */
         RetryAfter: number;
     };
     pathItems: never;
@@ -1013,8 +1198,10 @@ export interface operations {
                 tagName?: string;
                 /** @description Recipes that use **every** one of these ingredients. Repeat the parameter to give several (`ingredientIds=a&ingredientIds=b`). Blank values and duplicates are dropped, an id that matches no ingredient matches no recipe, and at most 20 are accepted. */
                 ingredientIds?: string[];
-                /** @description The column to order by, from a closed set. Defaults to `CREATED_AT`. Any other value is a 400. */
-                sortBy?: "CREATED_AT" | "UPDATED_AT" | "TITLE";
+                /** @description Recipes that are in this recipe list. Requires a token (401 without one); a list that is not the caller's, or that does not exist, is a 404. Combined with AND with every other criterion. */
+                listId?: string;
+                /** @description The column to order by, from a closed set. Defaults to `CREATED_AT`, or to `ADDED_AT` when `listId` is given. `ADDED_AT` (when the recipe was added to the list) is only valid with `listId`; without it, it is a 400. Any other value is a 400. */
+                sortBy?: "CREATED_AT" | "UPDATED_AT" | "TITLE" | "ADDED_AT";
                 /** @description Defaults to `DESC`. */
                 direction?: "ASC" | "DESC";
                 /** @description Zero-based page index. */
@@ -1038,6 +1225,24 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            /** @description `listId` was given without a valid token. Only that criterion needs one: every other search is public. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description `listId` names a recipe list that does not exist or belongs to someone else. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
         };
     };
     createRecipe: {
@@ -1161,6 +1366,374 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+        };
+    };
+    listRecipeLists: {
+        parameters: {
+            query?: {
+                /** @description A recipe id. Adds `containsRecipe` to every item. An id that names no recipe is a 404. A blank value is treated as absent. */
+                containing?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The caller's lists, possibly none. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeListResponse"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description `containing` names a recipe that does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    createRecipeList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecipeListRequest"];
+            };
+        };
+        responses: {
+            /** @description The stored list. */
+            201: {
+                headers: {
+                    Location: components["headers"]["Location"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            /** @description The request is valid and the existing state forbids it. Tell the two apart by the problem's `type`, never by its `detail`: `urn:recettes:problem:recipe-list-name-taken` (another list of the caller has this name) or `urn:recettes:problem:too-many-recipe-lists` (the caller already has 50 lists). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    getRecipeList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeListResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    updateRecipeList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecipeListRequest"];
+            };
+        };
+        responses: {
+            /** @description The stored list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeListResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            /** @description Another list of the caller has this name: the problem's `type` is `urn:recettes:problem:recipe-list-name-taken`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    deleteRecipeList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    downloadRecipeListCover: {
+        parameters: {
+            query?: {
+                /** @description The `coverVersion` of the list, as read from the list response. A blank value is treated as absent. Any value other than the current version is a 404. */
+                v?: string;
+                /** @description `full` (the default) or `thumbnail`. `thumb` is accepted as an alias of `thumbnail`, case-insensitively. Anything else is a 400. */
+                variant?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The image bytes. */
+            200: {
+                headers: {
+                    /** @description A strong validator built from the stored checksum and the variant. */
+                    ETag?: string;
+                    /** @description `private, no-cache` without `v`; `private, max-age=31536000, immutable` with the current `v`. Never `public`. */
+                    "Cache-Control"?: string;
+                    /** @description `inline`, with a file name we generated. */
+                    "Content-Disposition"?: string;
+                    /** @description Always `nosniff`. */
+                    "X-Content-Type-Options"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
+                    "image/png": string;
+                };
+            };
+            /** @description The caller's cached copy is still current. No body; the `Cache-Control` of the 200 is repeated. */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An unknown `variant`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description The list does not exist or belongs to someone else, it has no photo, or `v` is not its current version. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    setRecipeListCover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description The image. At most 8 MB.
+                     */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The updated list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeListResponse"];
+                };
+            };
+            /** @description No file, not a JPEG or PNG (HEIC included), undecodable or cut short, or too many pixels. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            408: components["responses"]["RequestTimeout"];
+            413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
+            429: components["responses"]["TooManyRequests"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    removeRecipeListCover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The updated list. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecipeListResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    addRecipeToList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+                /** @description The identifier of a recipe. */
+                recipeId: components["parameters"]["RecipeId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The recipe is in the list. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description The list does not exist or belongs to someone else, or the recipe does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description The list already holds 200 recipes and this one is not among them: the problem's `type` is `urn:recettes:problem:recipe-list-full`. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    removeRecipeFromList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The identifier of the resource. */
+                id: components["parameters"]["ResourceId"];
+                /** @description The identifier of a recipe. */
+                recipeId: components["parameters"]["RecipeId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The recipe is not in the list. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthorized"];
+            /** @description The list does not exist or belongs to someone else. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetail"];
+                };
+            };
         };
     };
     listCategories: {
@@ -1808,7 +2381,7 @@ export interface operations {
                     "application/json": components["schemas"]["MediaResponse"];
                 };
             };
-            /** @description No file, not a JPEG or PNG, undecodable, or too many pixels. */
+            /** @description No file, not a JPEG or PNG, undecodable or cut short, or too many pixels. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1819,7 +2392,9 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            408: components["responses"]["RequestTimeout"];
             413: components["responses"]["PayloadTooLarge"];
+            415: components["responses"]["UnsupportedMediaType"];
             429: components["responses"]["TooManyRequests"];
             503: components["responses"]["ServiceUnavailable"];
         };

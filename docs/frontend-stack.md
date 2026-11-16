@@ -16,6 +16,7 @@ the reasoning survives the conversation it came from.
 | Styling | Tailwind CSS with the design-system tokens as theme values | CSS Modules |
 | Accessible components | Radix UI primitives, unstyled | Writing focus management by hand |
 | Reordering | Move up / move down buttons only (no dragging: R7 took it out) | dnd-kit, native HTML5 drag and drop |
+| Emoji picker and drawings | Frimousse + Twemoji (`@twemoji/svg`), self-hosted | The device's own emoji font; a CDN |
 | Token storage | `sessionStorage` | `localStorage`, memory only, `HttpOnly` cookie |
 | Tests | Vitest, Testing Library, MSW, Playwright | — |
 | Lint / format | ESLint + Prettier | — |
@@ -100,6 +101,30 @@ came with the RecipeScreen, for `RichTextView`; Lexical 0.52.0 came with the Ric
 the patterns of our own ESLint configuration, never input from a user or from the network, so it is not exploitable. The
 suggested fix, `npm audit fix --force`, would downgrade the plugin to 1.1.1 and break the configuration: do not apply it.
 Re-check when a new version of `@boundaries/elements` is out.
+
+### Installed with the lists (2026-11-16)
+
+`npm view` re-run: each is the latest stable and the tree resolves with no `--force`. None overlaps something already chosen: nothing in the stack draws or picks emojis.
+
+| Package | Version | Why |
+|---|---|---|
+| `frimousse` | 0.4.0 | The emoji picker (the boards' « sélecteur d'émoji »): a virtualised grid with search, skin tones and keyboard navigation, unstyled and light. Peer: React 18 or 19. It takes its data through `resolveEmojiData`, so the app hands it its own. |
+| `@twemoji/svg` | 15.0.0 | The drawings (CC-BY 4.0, credited on the Compte page). It is the **maintained fork** (jdecked) of Twitter's abandoned `twemoji`; the original stopped at Emoji 14. 3 720 SVGs of 1 to 3 kB, Emoji 15.0. |
+| `emojibase-data` | 18.0.0 | The French names, tags and groups Frimousse's own data comes from; only `fr/data.json` (800 kB) and `fr/messages.json` are used. |
+| `vite-plugin-static-copy` | 4.1.1 (dev) | Copies the two above into the app's own origin: `twemoji/*.svg` and `emojibase/fr/*.json`, at build time (and served from the packages by the dev server). Nothing is committed by hand. Peer: Vite 6, 7 or 8. |
+
+- **Nothing from an outside host.** Frimousse loads its data from a CDN by default (jsDelivr): the app gives it `resolveEmojiData` instead (`lib/emoji/emojiData.ts`), so its
+  own loading, its `localStorage` / `sessionStorage` cache and its canvas test of the device's emoji support never run. That test would also have dropped the **flags** on
+  Windows, which has no flag emojis; the drawings are Twemoji's, so every device has them, and the back end accepts them.
+- **Loaded when needed.** The SVGs are `<img loading="lazy">` (the picker shows dozens at a time and the rest never load); the data is fetched when the picker opens or an emoji's name is needed.
+- **The cap: Emoji 15.0** (`EMOJI_VERSION_CAP`), which is what `@twemoji/svg` 15.0.0 draws. It is also well below the Unicode 16.0 of Java 25, which the back end's rule for an emoji relies on:
+  nothing offered can be refused for being too new. 15.1 (new sequences of existing emojis) and later are not offered.
+- **A file's name from its emoji** (`lib/emoji/twemojiFileName.ts`): the code points in lower-case hexadecimal joined by « - ». Twemoji drops U+FE0F from the name **except in a sequence joined by a zero width joiner**
+  (`2764.svg` for the heart, `1f3f3-fe0f-200d-1f308.svg` for the rainbow flag), and one file does not follow even that (the eye in a speech bubble, `1f441-200d-1f5e8`): the test that every emoji offered has its file found it.
+- **Two tests, over the data the picker is given** (`offeredEmojis.test.ts`, skin tones included): every emoji offered passes the back's rule for the emoji of a list (`test/backEmojiRule.ts`: one grapheme cluster by `Intl.Segmenter`,
+  the grammar of the back's document written with `\p{Emoji}`, `Emoji_Presentation`, `Emoji_Modifier_Base` and `Emoji_Modifier`, 32 UTF-16 units at most), and every one has its drawing.
+- **The names outside the picker** (« Émoji : Sapin de Noël, changer ») come from the same French data, loaded the first time they are needed (`useEmojiName`).
+- **Search without accents.** Frimousse's search is case-insensitive but accent-sensitive; each emoji's tags also carry its name and tags without accents, so « gateau » finds « Gâteau d'anniversaire ».
 
 ### Things the tooling does that are not obvious
 

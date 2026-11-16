@@ -6,6 +6,7 @@ import { useSession } from '../../api/session'
 import { JUST_PUBLISHED_STATE } from '../../app/justPublished'
 import { paths } from '../../app/paths'
 import { useGoBack } from '../../app/useGoBack'
+import { useMember } from '../../app/useMember'
 import { useToasts } from '../../app/useToasts'
 import { logger } from '../../lib/logger'
 import {
@@ -40,7 +41,8 @@ export interface RecipeEditorOptions {
  * taken up again, without asking, when the member is back.
  */
 export function useRecipeEditor({ recipeId, initial: given }: RecipeEditorOptions) {
-  const storageKey = draftKey(recipeId)
+  const member = useMember()
+  const storageKey = draftKey(member?.userId, recipeId)
   // What the recipe held when the editor opened: a copy refreshed behind the person's back must not become the reference.
   const [initial] = useState(given)
   const navigate = useNavigate()

@@ -32,6 +32,32 @@ function spyOn(method: 'get' | 'post' | 'put', path: string, respond: () => Resp
   return authorizations
 }
 
+type Api = ReturnType<typeof createApiClient>
+
+/** The reads that need a token: replaying one without it can only earn a second 401. */
+const PRIVATE_READS: readonly (readonly [
+  name: string,
+  path: string,
+  read: (api: Api) => Promise<{ response: Response }>,
+])[] = [
+  ['the lists of the member', '/lists', (api) => api.GET('/lists', {})],
+  ['one list', '/lists/9', (api) => api.GET('/lists/{id}', { params: { path: { id: '9' } } })],
+  [
+    'the photo of a list',
+    '/lists/9/cover',
+    (api) =>
+      api.GET('/lists/{id}/cover', {
+        params: { path: { id: '9' }, query: { v: '1', variant: 'thumbnail' } },
+        parseAs: 'blob',
+      }),
+  ],
+  [
+    'the recipes of a list',
+    '/recipes',
+    (api) => api.GET('/recipes', { params: { query: { listId: '9' } } }),
+  ],
+]
+
 const unauthorized = () =>
   HttpResponse.json({ status: 401, detail: 'Unauthorized' }, { status: 401 })
 
@@ -145,6 +171,20 @@ describe('a refused token (401)', () => {
     expect(response.status).toBe(401)
     expect(authorizations).toHaveLength(2)
   })
+
+  it.each(PRIVATE_READS)(
+    'does not replay a private read (%s): the 401 is the answer',
+    async (_name, path, read) => {
+      const { session, api } = signedInClient()
+      const authorizations = spyOn('get', path, unauthorized)
+
+      const { response } = await read(api)
+
+      expect(response.status).toBe(401)
+      expect(authorizations).toHaveLength(1)
+      expect(session.getSnapshot()).toEqual({ status: 'expired' })
+    },
+  )
 
   it('is not an expired session for a visitor: there was no token to refuse', async () => {
     const { session, api } = visitorClient()

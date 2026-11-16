@@ -8,6 +8,7 @@ import { paths } from '../../app/paths'
 import { useMember } from '../../app/useMember'
 import { Button } from '../../components/Button/Button'
 import { Icon } from '../../components/Icon/Icon'
+import { EmojiCredit } from '../../components/EmojiCredit/EmojiCredit'
 import { SectionIndex, type SectionIndexItem } from '../../components/SectionIndex/SectionIndex'
 import { SECTION_INDEX_ENTRY } from '../../components/SectionIndex/sectionIndexStyles'
 import { DESKTOP_QUERY, TABLET_QUERY } from '../../lib/breakpoints'
@@ -95,6 +96,7 @@ function AccountPage({ member }: { member: Member }) {
               {strings.logout.button}
             </Button>
           )}
+          <EmojiCredit />
         </div>
       </div>
       <LogoutDialog

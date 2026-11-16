@@ -225,3 +225,8 @@ the tokens for each tone (on a butter background the body is paper-50 and the li
 `apple-touch-icon.png` rasterized from it.
 
 - **Recipe editor** (`Editeur-*`): `text-editor-title` (26 / 32, 800) for the title of a phone's top bar (a desktop uses `text-auth-state-title`); the section headings use `text-section-title`; `animate-progress` is the bar of a wait whose length is not known (`ProgressBar` without a value; static under `prefers-reduced-motion`). A photo tile is 173 px wide on a phone (two columns, three from 600 px, four from 1024 px), its picture in the 4:3 frame; the editor's index entries are 52 px pills with a 32 px numbered badge and a brick count; `TextField` has a `compact` option (12 px sides, body size, still 56 px high) for the three fields of an ingredient line and the description of a photo.
+
+## Emoji sizes (the « Listes » boards, L25 n° 17)
+
+Four sizes, named for what they sit next to, as spacing tokens (`size-emoji-*`): **name** 32 px (`--emoji-nom`), **badge** 28 px (`--emoji-pastille`), **title** 40 · 52 · 60 px (`--emoji-titre`, phone · tablet · desktop:
+it grows with the title) and **tile** 64 · 72 · 88 px (`--emoji-tuile`, a list tile with no photo). Nothing else is new for the emojis: the tile's background is Beurre 100 (`butter-100`).

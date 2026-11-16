@@ -8,7 +8,7 @@ interface StyleguideSpecimenProps {
 /** One thing on display, with a caption under it. */
 export function StyleguideSpecimen({ label, children }: StyleguideSpecimenProps) {
   return (
-    <figure className="flex flex-col gap-2">
+    <figure className="flex min-w-0 flex-col gap-2">
       {children}
       <figcaption className="text-caption text-ink-700">{label}</figcaption>
     </figure>

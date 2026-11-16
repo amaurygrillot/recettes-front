@@ -5,8 +5,10 @@ import {
   useQuery,
   useQueryClient,
   type QueryClient,
+  type QueryKey,
 } from '@tanstack/react-query'
 import { api } from './client'
+import { listKeys } from './listKeys'
 import type { components, paths } from './schema'
 import { unwrap, unwrapEmpty } from './unwrap'
 
@@ -30,14 +32,16 @@ function searchRecipes(filters: RecipeSearchFilters, page: number, signal: Abort
 }
 
 /**
- * The feed and the search results, a page at a time (« Voir plus » calls `fetchNextPage`). When
+ * Recipes a page at a time (« Voir plus » calls `fetchNextPage`), cached under `queryKey`. When
  * the filters change, the previous answer stays in `data` (with `isPlaceholderData` true) until
  * the new one arrives, so a list being refined never blanks. A disabled search asks nothing.
+ * The public feed and the content of a member's list share it; they differ by their key, which is
+ * what tells a public answer from a private one (`listKeys`).
  */
-export function useRecipeSearch(filters: RecipeSearchFilters, enabled = true) {
+export function useRecipePages(queryKey: QueryKey, filters: RecipeSearchFilters, enabled = true) {
   return useInfiniteQuery({
     enabled,
-    queryKey: recipeKeys.search(filters),
+    queryKey,
     queryFn: ({ pageParam, signal }) => searchRecipes(filters, pageParam, signal),
     placeholderData: keepPreviousData,
     initialPageParam: 0,
@@ -47,6 +51,11 @@ export function useRecipeSearch(filters: RecipeSearchFilters, enabled = true) {
   })
 }
 
+/** The feed and the search results. */
+export function useRecipeSearch(filters: Omit<RecipeSearchFilters, 'listId'>, enabled = true) {
+  return useRecipePages(recipeKeys.search(filters), filters, enabled)
+}
+
 export function useRecipe(id: string) {
   return useQuery({
     queryKey: recipeKeys.detail(id),
@@ -54,10 +63,14 @@ export function useRecipe(id: string) {
   })
 }
 
-/** A saved recipe is the freshest copy of itself, and makes every list stale. */
+/**
+ * A saved recipe is the freshest copy of itself, and makes every list stale: the searches, and the
+ * member's own lists, whose cards and mosaics show it.
+ */
 function cacheSavedRecipe(queryClient: QueryClient, recipe: Schemas['RecipeResponse']): void {
   if (recipe.id !== undefined) queryClient.setQueryData(recipeKeys.detail(recipe.id), recipe)
   void queryClient.invalidateQueries({ queryKey: recipeKeys.searches })
+  void queryClient.invalidateQueries({ queryKey: listKeys.all })
 }
 
 export function useCreateRecipe() {
@@ -96,6 +109,8 @@ export function useDeleteRecipe() {
     onSuccess: (_nothing, id) => {
       queryClient.removeQueries({ queryKey: recipeKeys.detail(id) })
       void queryClient.invalidateQueries({ queryKey: recipeKeys.searches })
+      // The back end takes the recipe out of every list: counts and contents change.
+      void queryClient.invalidateQueries({ queryKey: listKeys.all })
     },
   })
 }

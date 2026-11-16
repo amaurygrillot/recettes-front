@@ -18,9 +18,14 @@ describe('the draft of a recipe', () => {
   })
 
   it('has one key per recipe being edited and one for the recipe being created', () => {
-    expect(draftKey(undefined)).toBe('recettes.draft.new')
-    expect(draftKey('r-1')).toBe('recettes.draft.r-1')
-    expect(draftKey('r-2')).not.toBe(draftKey('r-1'))
+    expect(draftKey('u-1', undefined)).toBe('recettes.member.u-1.draft.new')
+    expect(draftKey('u-1', 'r-1')).toBe('recettes.member.u-1.draft.r-1')
+    expect(draftKey('u-1', 'r-2')).not.toBe(draftKey('u-1', 'r-1'))
+  })
+
+  it('has its own keys for each member, so that a shared device never shows one the draft of another', () => {
+    expect(draftKey('u-2', 'r-1')).not.toBe(draftKey('u-1', 'r-1'))
+    expect(draftKey('u-2', undefined)).not.toBe(draftKey('u-1', undefined))
   })
 
   it('keeps the values and when they were kept, and gives them back as they were', () => {

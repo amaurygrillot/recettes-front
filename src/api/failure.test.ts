@@ -12,6 +12,7 @@ const KIND_BY_STATUS: readonly (readonly [status: number, kind: ApiFailureKind])
   [401, 'unauthorized'],
   [403, 'forbidden'],
   [404, 'not-found'],
+  [408, 'network'],
   [409, 'conflict'],
   [413, 'payload-too-large'],
   [429, 'rate-limited'],
@@ -23,9 +24,45 @@ const KIND_BY_STATUS: readonly (readonly [status: number, kind: ApiFailureKind])
   [302, 'unexpected'],
 ]
 
+const PROBLEM_TYPE = 'urn:recettes:problem:'
+
 describe('failureFromResponse', () => {
-  it.each(KIND_BY_STATUS)('reads a %i as « %s »', (status, kind) => {
-    expect(failureFromResponse(answer(status), problem)).toMatchObject({ kind, status })
+  it.each(KIND_BY_STATUS.filter(([status]) => status !== 408))(
+    'reads a %i as « %s »',
+    (status, kind) => {
+      expect(failureFromResponse(answer(status), problem)).toMatchObject({ kind, status })
+    },
+  )
+
+  it('reads a 408 as a connection that failed: the server gave up on a client gone quiet', () => {
+    expect(failureFromResponse(answer(408), { status: 408, error: 'Request Timeout' })).toEqual({
+      kind: 'network',
+    })
+  })
+
+  it.each([['recipe-list-name-taken'], ['too-many-recipe-lists'], ['recipe-list-full']] as const)(
+    'tells a 409 of type « %s » by its problem type',
+    (reason) => {
+      const body = { ...problem, type: `${PROBLEM_TYPE}${reason}` }
+
+      expect(failureFromResponse(answer(409), body)).toMatchObject({ kind: 'conflict', reason })
+    },
+  )
+
+  it.each([['about:blank'], [`${PROBLEM_TYPE}something-new`], ['']])(
+    'gives no reason to a 409 of type « %s »',
+    (type) => {
+      expect(failureFromResponse(answer(409), { ...problem, type })).toMatchObject({
+        kind: 'conflict',
+        reason: undefined,
+      })
+    },
+  )
+
+  it('never reads the detail to tell conflicts apart', () => {
+    const body = { ...problem, detail: 'Recipe list name is already taken' }
+
+    expect(failureFromResponse(answer(409), body)).toMatchObject({ reason: undefined })
   })
 
   it('carries the explanation of the problem+json body', () => {

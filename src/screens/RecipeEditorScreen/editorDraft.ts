@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { memberKey } from '../../lib/memberStorage'
 import { sameValues, type EditorValues } from './editorModel'
 import { draftValuesSchema } from './editorSchema'
 
@@ -7,12 +8,19 @@ import { draftValuesSchema } from './editorSchema'
  * « Enregistrer ». Storage can be blocked or full (private mode): then nothing is kept, and the
  * editor says so (`saveDraft` answers whether it worked) instead of failing.
  */
-const PREFIX = 'recettes.draft.'
-const INTERRUPTED_PREFIX = 'recettes.draft-interrupted.'
 
-/** One draft per recipe being edited, and one for the recipe being created. */
-export function draftKey(recipeId: string | undefined): string {
-  return `${PREFIX}${recipeId ?? 'new'}`
+/**
+ * One draft per recipe being edited, and one for the recipe being created, **for each member**: on a
+ * shared device a member never finds another's draft, and signing in as someone else forgets it
+ * (`memberStorage`). Nobody signed in has the key of nobody, which no member's id is.
+ */
+export function draftKey(userId: string | undefined, recipeId: string | undefined): string {
+  return memberKey(userId ?? 'visitor', `draft.${recipeId ?? 'new'}`)
+}
+
+/** The tab's note that the draft was left by a lost session: in the same member's namespace. */
+function interruptedKey(key: string): string {
+  return `${key}.interrupted`
 }
 
 export interface Draft {
@@ -48,7 +56,7 @@ export function saveDraft(key: string, values: EditorValues, savedAt = Date.now(
 export function clearDraft(key: string): void {
   try {
     window.localStorage.removeItem(key)
-    window.sessionStorage.removeItem(`${INTERRUPTED_PREFIX}${key}`)
+    window.sessionStorage.removeItem(interruptedKey(key))
   } catch {
     // Nothing was kept, so there is nothing to forget.
   }
@@ -60,7 +68,7 @@ export function clearDraft(key: string): void {
  */
 export function markInterrupted(key: string): void {
   try {
-    window.sessionStorage.setItem(`${INTERRUPTED_PREFIX}${key}`, '1')
+    window.sessionStorage.setItem(interruptedKey(key), '1')
   } catch {
     // Without it the draft is simply offered again, as any draft.
   }
@@ -69,7 +77,7 @@ export function markInterrupted(key: string): void {
 /** Whether the draft was left by a lost session. Reading changes nothing: it can be asked again by a render that runs twice. */
 export function wasInterrupted(key: string): boolean {
   try {
-    return window.sessionStorage.getItem(`${INTERRUPTED_PREFIX}${key}`) !== null
+    return window.sessionStorage.getItem(interruptedKey(key)) !== null
   } catch {
     return false
   }
@@ -78,7 +86,7 @@ export function wasInterrupted(key: string): boolean {
 /** Forgets that the draft was left by a lost session: it has been taken up. */
 export function forgetInterrupted(key: string): void {
   try {
-    window.sessionStorage.removeItem(`${INTERRUPTED_PREFIX}${key}`)
+    window.sessionStorage.removeItem(interruptedKey(key))
   } catch {
     // Nothing was kept, so there is nothing to forget.
   }

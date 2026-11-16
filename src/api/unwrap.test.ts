@@ -1,5 +1,6 @@
-import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
+import { delay, http, HttpResponse } from 'msw'
+import { describe, expect, it, vi } from 'vitest'
+import { logger } from '../lib/logger'
 import { server } from '../test/server'
 import { API_BASE_URL } from './apiConfig'
 import { createApiClient } from './client'
@@ -97,6 +98,31 @@ describe('unwrap', () => {
     server.use(http.get(recipeUrl, () => HttpResponse.error()))
 
     expect(await failureOf(readRecipe())).toEqual({ kind: 'network' })
+  })
+
+  it('reports a request the caller cancelled as « aborted », at info and not as an error', async () => {
+    const controller = new AbortController()
+    server.use(
+      http.get(recipeUrl, async () => {
+        await delay('infinite')
+        return HttpResponse.json({})
+      }),
+    )
+    const info = vi.spyOn(logger, 'info')
+    const error = vi.spyOn(logger, 'error')
+    const warn = vi.spyOn(logger, 'warn')
+
+    const call = failureOf(
+      unwrap(
+        api.GET('/recipes/{id}', { params: { path: { id: '42' } }, signal: controller.signal }),
+      ),
+    )
+    controller.abort()
+
+    expect(await call).toEqual({ kind: 'aborted' })
+    expect(error).not.toHaveBeenCalled()
+    expect(warn).not.toHaveBeenCalled()
+    expect(info).toHaveBeenCalledOnce()
   })
 
   it('refuses a success that carries no body where one was due', async () => {
