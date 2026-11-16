@@ -11,6 +11,7 @@ import {
   API,
   fillMinimalRecipe,
   findForm,
+  MEMBER,
   renderEditor,
   signInAsMember,
   useEditorBackend,
@@ -322,13 +323,13 @@ describe('RecipeEditorScreen: sending', () => {
     await findForm()
     await fillMinimalRecipe(user)
     await waitFor(() => {
-      expect(loadDraft(draftKey(undefined))).toBeDefined()
+      expect(loadDraft(draftKey(MEMBER.userId, undefined))).toBeDefined()
     })
 
     await user.click(save())
     await screen.findByText('Page de la recette')
 
-    expect(loadDraft(draftKey(undefined))).toBeUndefined()
+    expect(loadDraft(draftKey(MEMBER.userId, undefined))).toBeUndefined()
   })
 
   describe('when it fails', () => {
@@ -433,7 +434,9 @@ describe('RecipeEditorScreen: sending', () => {
         await screen.findByRole('heading', { level: 2, name: 'Cette recette n’existe plus.' }),
       ).toBeVisible()
       await waitFor(() => {
-        expect(loadDraft(draftKey('r-1'))?.values.title).toBe('Tarte fine aux pommes bis')
+        expect(loadDraft(draftKey(MEMBER.userId, 'r-1'))?.values.title).toBe(
+          'Tarte fine aux pommes bis',
+        )
       })
     })
 
@@ -446,7 +449,7 @@ describe('RecipeEditorScreen: sending', () => {
       await waitFor(() => {
         expect(sessionStore.getSnapshot().status).toBe('expired')
       })
-      expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte aux pommes')
+      expect(loadDraft(draftKey(MEMBER.userId, undefined))?.values.title).toBe('Tarte aux pommes')
       // The editor is still there behind it, nothing typed is lost, and nothing asks about leaving.
       expect(screen.getByLabelText('Titre')).toHaveValue('Tarte aux pommes')
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()

@@ -6,13 +6,13 @@ import { installMatchMedia, removeMatchMedia } from '../../test/matchMedia'
 import { draftKey, loadDraft, markInterrupted, saveDraft, wasInterrupted } from './editorDraft'
 import { validValues } from './editorFixtures'
 import { newRecipeValues } from './editorModel'
-import { findForm, renderEditor, signInAsMember, useEditorBackend } from './editor.testkit'
+import { findForm, MEMBER, renderEditor, signInAsMember, useEditorBackend } from './editor.testkit'
 
 const title = () => screen.getByLabelText('Titre')
 
 /** A draft someone left on this device: a recipe being written, with a title and nothing else. */
 function leaveADraft(recipeId: string | undefined, text = 'Tarte à moitié écrite') {
-  saveDraft(draftKey(recipeId), { ...newRecipeValues(), title: text })
+  saveDraft(draftKey(MEMBER.userId, recipeId), { ...newRecipeValues(), title: text })
 }
 
 describe('RecipeEditorScreen: the draft', () => {
@@ -37,7 +37,7 @@ describe('RecipeEditorScreen: the draft', () => {
       await user.type(title(), 'Tarte')
 
       expect(await screen.findByText('Brouillon enregistré sur cet appareil')).toBeVisible()
-      expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte')
+      expect(loadDraft(draftKey(MEMBER.userId, undefined))?.values.title).toBe('Tarte')
     })
 
     it('is not kept when everything is back to what the form started with', async () => {
@@ -48,12 +48,12 @@ describe('RecipeEditorScreen: the draft', () => {
 
       await user.type(title(), 'T')
       await waitFor(() => {
-        expect(loadDraft(draftKey(undefined))).toBeDefined()
+        expect(loadDraft(draftKey(MEMBER.userId, undefined))).toBeDefined()
       })
       await user.clear(title())
 
       await waitFor(() => {
-        expect(loadDraft(draftKey(undefined))).toBeUndefined()
+        expect(loadDraft(draftKey(MEMBER.userId, undefined))).toBeUndefined()
       })
     })
 
@@ -111,7 +111,10 @@ describe('RecipeEditorScreen: the draft', () => {
 
     it('is offered for a recipe being changed too, and replaces what it holds only when taken up', async () => {
       useEditorBackend()
-      saveDraft(draftKey('r-1'), { ...validValues(), title: 'Tarte tatin, version du brouillon' })
+      saveDraft(draftKey(MEMBER.userId, 'r-1'), {
+        ...validValues(),
+        title: 'Tarte tatin, version du brouillon',
+      })
       const user = userEvent.setup()
       renderEditor('/recettes/r-1/modifier')
       await findForm()
@@ -124,7 +127,7 @@ describe('RecipeEditorScreen: the draft', () => {
 
     it('is not offered when it holds what the recipe holds already', async () => {
       useEditorBackend()
-      saveDraft(draftKey('r-1'), {
+      saveDraft(draftKey(MEMBER.userId, 'r-1'), {
         title: 'Tarte fine aux pommes',
         introduction: '<p>La tarte de tous les dimanches.</p>',
         categories: [{ id: 'tartes', label: 'Desserts › Tartes' }],
@@ -181,7 +184,7 @@ describe('RecipeEditorScreen: the draft', () => {
 
       expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
       expect(screen.getByText('Reprendre ton brouillon ?')).toBeVisible()
-      expect(loadDraft(draftKey(undefined))).toBeDefined()
+      expect(loadDraft(draftKey(MEMBER.userId, undefined))).toBeDefined()
     })
 
     it('is erased when that is confirmed, and the form starts again from nothing', async () => {
@@ -194,7 +197,7 @@ describe('RecipeEditorScreen: the draft', () => {
       await user.click(screen.getByRole('button', { name: 'Recommencer' }))
       await user.click(screen.getByRole('button', { name: 'Effacer le brouillon' }))
 
-      expect(loadDraft(draftKey(undefined))).toBeUndefined()
+      expect(loadDraft(draftKey(MEMBER.userId, undefined))).toBeUndefined()
       expect(screen.queryByText('Reprendre ton brouillon ?')).not.toBeInTheDocument()
       expect(title()).toHaveValue('')
     })
@@ -209,7 +212,9 @@ describe('RecipeEditorScreen: the draft', () => {
       await user.type(title(), 'Autre chose')
       await new Promise((resolve) => setTimeout(resolve, 800))
 
-      expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte à moitié écrite')
+      expect(loadDraft(draftKey(MEMBER.userId, undefined))?.values.title).toBe(
+        'Tarte à moitié écrite',
+      )
     })
   })
 
@@ -224,30 +229,32 @@ describe('RecipeEditorScreen: the draft', () => {
         sessionStore.expire(sessionStore.getToken() ?? '')
       })
 
-      expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte à moitié écrite')
-      expect(wasInterrupted(draftKey(undefined))).toBe(false)
+      expect(loadDraft(draftKey(MEMBER.userId, undefined))?.values.title).toBe(
+        'Tarte à moitié écrite',
+      )
+      expect(wasInterrupted(draftKey(MEMBER.userId, undefined))).toBe(false)
     })
 
     it('is taken up again without asking, and says that nothing was lost', async () => {
       useEditorBackend()
       leaveADraft(undefined)
-      markInterrupted(draftKey(undefined))
+      markInterrupted(draftKey(MEMBER.userId, undefined))
       renderEditor('/recettes/nouvelle')
       await findForm()
 
       expect(title()).toHaveValue('Tarte à moitié écrite')
       expect(screen.queryByText('Reprendre ton brouillon ?')).not.toBeInTheDocument()
       expect(await screen.findByText('Te revoilà : ton brouillon est intact.')).toBeVisible()
-      expect(wasInterrupted(draftKey(undefined))).toBe(false)
+      expect(wasInterrupted(draftKey(MEMBER.userId, undefined))).toBe(false)
     })
 
     it('does not make the next draft taken up without asking: the note is only for one return', async () => {
       useEditorBackend()
-      markInterrupted(draftKey(undefined))
+      markInterrupted(draftKey(MEMBER.userId, undefined))
       renderEditor('/recettes/nouvelle')
       await findForm()
 
-      expect(wasInterrupted(draftKey(undefined))).toBe(false)
+      expect(wasInterrupted(draftKey(MEMBER.userId, undefined))).toBe(false)
       expect(screen.queryByText('Te revoilà : ton brouillon est intact.')).not.toBeInTheDocument()
     })
   })
@@ -335,7 +342,7 @@ describe('RecipeEditorScreen: leaving', () => {
     await user.click(screen.getByRole('button', { name: 'Quitter' }))
 
     expect(await screen.findByText('Page d’accueil')).toBeVisible()
-    expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte')
+    expect(loadDraft(draftKey(MEMBER.userId, undefined))?.values.title).toBe('Tarte')
   })
 
   it('asks the same with « Annuler »', async () => {
@@ -364,7 +371,7 @@ describe('RecipeEditorScreen: leaving', () => {
 
     expect(await screen.findByText('Page d’accueil')).toBeVisible()
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
-    expect(loadDraft(draftKey(undefined))?.values.title).toBe('Tarte')
+    expect(loadDraft(draftKey(MEMBER.userId, undefined))?.values.title).toBe('Tarte')
   })
 
   it('does not ask when what was changed was changed back', async () => {
